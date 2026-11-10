@@ -1,0 +1,150 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>星星宠物 Mac 编译与安装</title><style>body{max-width:900px;margin:40px auto;padding:24px;background:#f8f5fc;color:#342944;font:16px/1.8 system-ui}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit}</style><pre>星星宠物 · Mac 编译、打包与个人 iPhone 安装说明
+交付日期：2026-10-30
+
+一、先明确交付状态
+此包包含完整 iOS 原生源码、Xcode 工程、共用 Vue 前端源码、已构建网页、宠物与365张风景资源、测试、编译打包脚本、许可证与校验清单。直接编译原生工程无需先安装 Node.js，也不需要 Android 工程。首次解析 ZIPFoundation 依赖需要网络。
+Android 与 iOS 的应用内页面、布局、动画、业务规则来自相同源码及资源；操作系统权限弹窗、相册、文件选择器、键盘、生物识别、识别/朗读引擎由各自平台提供，不能承诺系统界面逐像素相同。
+2026-10-30 更新：1.1.1（2）已通过 Mac 真机架构 Release 与模拟器 Debug 编译；共享界面 51 项测试通过。iPhone 15 Pro/Pro Max 安全区域布局已做浏览器验证。用户已确认 SideStore 安装、启动与刷新成功；devicectl 已确认手机安装版本 1.1.1（2），标识 app.starpets.local.3YT2G4KWY6。
+
+二、目录说明
+StarPets.xcodeproj        Xcode 工程及共享 StarPets scheme
+StarPets/*.swift          原生存储、Keychain、相机/相册、文件、语音、云端与提醒
+StarPets/web              已构建前端；无需 npm 即可用于 Xcode 编译
+StarPets/Assets.xcassets  与 Android 同主题应用图标
+StarPetsTests             原生 XCTest
+../star-pets-android/ui              完整 Vue/TypeScript/JavaScript 源码及 public 素材
+../star-pets-android/tests           共用业务与按住录音交互测试
+scripts                   Mac 构建/打包/校验脚本
+licenses                  第三方授权说明
+SOURCE-SHA256.json        源码包文件完整性清单（由交付打包生成）
+Mac编译助手.command       可双击启动的操作菜单，也可在终端执行
+build/                    运行后生成日志、模拟器/设备产物，不随源码包提供
+dist/                     运行后生成 IPA；实际构建的IPA作为独立交付文件，不重复塞进源码包
+
+三、Mac 环境准备
+1. 从 Mac App Store 安装完整 Xcode；仅安装 xcode-select --install 不够。
+2. 首次打开 Xcode，由本人完成许可确认及必要组件安装；在 Xcode Settings 的平台组件页面安装 iOS SDK/所需 Simulator Runtime。
+3. Xcode 必须支持你的 iPhone 当前系统版本；无需盲目追最新测试版。
+4. 把源码 ZIP 解压到 ~/Documents，例如得到 ~/Documents/star-pets-ios。
+5. 终端进入工程：
+   cd ~/Documents/star-pets-ios
+   bash scripts/doctor.sh
+脚本优先使用 /Applications/Xcode.app/Contents/Developer，不会永久更改系统 xcode-select。如安装路径不同：
+   DEVELOPER_DIR=&#x27;/Applications/Xcode-beta.app/Contents/Developer&#x27; bash scripts/doctor.sh
+6. 若双击 .command 提示无执行权限，使用：
+   chmod +x Mac编译助手.command scripts/*.sh
+   bash Mac编译助手.command
+7. Python 3 用于校验资源。运行 python3 --version；若缺失，请安装 Python 3。Node.js 仅在修改前端并重新构建时需要。
+8. Swift Package Manager 自动拉取 ZIPFoundation 0.9.20。网络失败时修复 GitHub 连通性后重试，不通过关闭证书验证绕过。
+
+四、优先编译模拟器（不需要 Apple 账户）
+   bash scripts/build-simulator.sh
+成功产物：build/simulator/Build/Products/Debug-iphonesimulator/StarPets.app
+运行 Xcode，选择 StarPets scheme 和一个已安装的 iPhone Simulator，点击 Run。
+单元测试：
+   xcrun simctl list devices available
+   SIMULATOR_ID=&#x27;复制上一步的模拟器UUID&#x27; bash scripts/test-simulator.sh
+结果：build/tests-日期时间.xcresult；日志：build/logs/tests-日期时间.log。
+仅验证XCTest可编译（没有Simulator Runtime时也能运行）：
+   bash scripts/build-for-testing.sh
+注意：TEST BUILD SUCCEEDED 不等于测试执行通过。模拟器不能替代真实相机、Face ID、系统离线语音包的设备验收。
+
+五、普通 Apple 账户直接安装到个人 iPhone
+1. 打开 StarPets.xcodeproj。在 Xcode Settings → Accounts 添加自己的 Apple 账户；账户认证由本人完成，不要把密码或验证码写入脚本。
+2. 选 StarPets target → Signing &amp; Capabilities → Automatically manage signing，Team 选择 Personal Team。
+3. Bundle Identifier 改为唯一且长期固定的标识，例如 com.sucas.starpets。更新时不要反复改标识或签名账户，否则系统会作为其他应用或不同钥匙串访问域处理。
+4. 用 USB 连接 iPhone，解锁并信任 Mac；在 iPhone 设置 → 隐私与安全性开启开发者模式，按系统要求重启并确认。
+5. Xcode 顶部运行目标选择真实 iPhone，点击 Run。此流程适合免费账户；不要求先在 Organizer 导出分发 IPA。
+6. 可选命令行构建：
+   TEAM_ID=&#x27;你的Team ID&#x27; DEVICE_ID=&#x27;iPhone UDID&#x27; BUNDLE_ID=&#x27;com.sucas.starpets&#x27; bash scripts/build-device.sh
+   DEVICE_ID=&#x27;iPhone设备标识&#x27; bash scripts/install-device.sh
+install-device.sh 使用 Xcode 的 devicectl；旧版 Xcode 不提供该工具时直接用 Xcode Run 安装。脚本不会解锁登录钥匙串或代填 Apple 账户。
+7. 首次进入应用的密码为 Admin123。Face ID/Touch ID 要先在系统中配置，再在应用里使用。
+8. 免费 Personal Team 的开发配置文件有效期为7天，需要再次部署；不能据此使用 App Store/TestFlight 分发。
+
+六、生成供 SideStore 安装和续签的 IPA（推荐与你的个人使用方式配套）
+先完成完整 Xcode 环境及原生编译；SideStore不能编译源码。
+   BUNDLE_ID=&#x27;com.sucas.starpets&#x27; bash scripts/package-sidestore.sh
+脚本执行真实 iphoneos Release 编译，检查 arm64 架构，建立 Payload/StarPets.app 结构，并生成：
+   dist/StarPets-SideStore-unsigned.ipa
+   dist/StarPets-SideStore-unsigned.ipa.sha256
+这是未签名 IPA，不能直接点击安装、不能上传 App Store；交给 SideStore 使用自己的 Apple 账户重签。
+脚本的无签名构建路径不需要 TEAM_ID，不依赖免费账户能否执行 Organizer 分发导出。
+1. 按 SideStore 官方流程在 Mac 用 iloader 首次安装 SideStore，完成设备配对。
+2. iPhone 开启开发者模式；使用官方要求的 Wi-Fi 与 LocalDevVPN，登录你的签名账户。
+3. 通过 AirDrop 或文件传输把 IPA 送到 iPhone“文件”，在 SideStore My Apps 导入。
+4. 到期前刷新 SideStore 和星星宠物。免费账户仍是7天；SideStore本身占用3个名额中的一个。
+5. 后台自动刷新不作为保证。配对失效或SideStore本身过期时，需要用 Mac 修复。
+6. 后续版本使用相同 Bundle Identifier 与签名账户进行覆盖安装。操作前先在星星宠物设置中导出完整备份，保留原文件；不要先卸载应用。
+7. 从 Xcode 签名安装切换到 SideStore 的首次迁移，先做备份再核对数据和 Keychain 密钥，避免把“重签通常保留数据”当成迁移保证。
+
+七、开发者会员的归档与导出（可选，不是免费账户的必经路径）
+   TEAM_ID=&#x27;你的Team ID&#x27; BUNDLE_ID=&#x27;com.sucas.starpets&#x27; bash scripts/archive-device.sh
+产物是 build/StarPets-时间.xcarchive。用 Xcode Organizer 按账户实际支持的方式导出。
+如已从 Organizer 获得 ExportOptions.plist：
+   ARCHIVE_PATH=&#x27;/完整路径/StarPets.xcarchive&#x27; EXPORT_OPTIONS=&#x27;/完整路径/ExportOptions.plist&#x27; bash scripts/export-archive.sh
+脚本不伪造签名证书，也不承诺 Personal Team 支持付费分发功能。
+
+八、修改界面与保持 Android 同步
+直接编译不需要本步骤。要修改界面时，编辑 ../star-pets-android/ui/src，然后：
+   bash scripts/build-web.sh
+该脚本执行 npm ci、typecheck、共用测试、Vite构建，并更新 iOS 资源校验清单。
+若同时持有 Android 源码，应以 Android ui 为唯一主源完成修改、构建，然后把两个工程放在同一父目录：
+   python3 scripts/sync-web.py
+   python3 scripts/verify-delivery.py
+sync-web.py 只同步界面、素材、测试和启动校验资料，不覆盖 Swift 实现与 Mac 脚本。verify-delivery.py 会在发现 Android 相邻工程时比较源码与构建资源全部哈希；单独交付时仅校验包内清单，不把它称为重新验证 Android。
+应用内页面：412×891 基准、流式宽度、透明浮动按钮、共用习惯/回忆/宠物/设置页面、两按钮按住录音、同款日期和确认组件。
+
+九、真机逐项验收（每项记录 PASS / FAIL / NOT_RUN）
+1 登录：密码、错误密码、生物识别、后台锁定，取消系统授权后可继续使用。
+2 小窝：顶部进度、宠物圆圈、内嵌输入和底部导航；打开/关闭对话不改变宠物大小；实际键盘不遮住输入按钮。
+3 习惯：加/减分、自定义原因/时间、分值调节、每日完成禁用、常用条款超过12项分页；当月左滑撤销确认及回忆关联。
+4 宠物：预览等级不改变真实经验；领养、录音领养、改名、切换已领养宠物。
+5 双语对话：按住开始、松开转写、上滑取消、快速松手、权限弹窗后松手；不把录音上传云端；首次离线模型缺失应给出可恢复错误。
+6 朗读：中文/英文试听、取消朗读、开始下一轮不被上一轮回调打断，宠物嘴型与声音状态同步。
+7 模型：DeepSeek/Gemini、输入可查看、保存后不可查看、清空必须确认；真实API连接验证需自己的有效Key。
+8 留影：相机/选图、宠物缩放与姿态、回忆保存和系统相册保存；拒绝相册权限后应用内回忆仍可访问。
+9 回忆：图片、语音、文字按年月日排序、每页6条、筛选、备注、试听和文件导出、删除探索回忆。
+10 探索：出发时记录绝对时间和随机时长；关闭应用再打开后结算；途中切换小朋友后照片归属正确；回程合照保存与删除。
+11 备份：完整导出、导入前确认、冲突不覆盖、恢复检查点；重新安装前在外部保留备份。
+12 重签：SideStore覆盖安装/刷新后积分、习惯、回忆、API密钥仍可用。
+没有真实iPhone结果时，上述条目都不得仅凭编译成功写成PASS。
+
+十、平台边界与已知待验证项
+• 页面、资源、业务规则同源已能哈希核对；原生API实现不同，需要真机验收。
+• Android内置SenseVoice；当前iOS使用系统Speech设备端识别，强制 requiresOnDeviceRecognition，不支持时不上传录音并提示文字输入。系统支持/离线模型可用性存在设备差异；这是明确的平台差异，尚未交付iOS内置SenseVoice。
+• Android嘴型基于PCM音量；iOS嘴型按系统朗读片段事件驱动，动画图形同源但音量精度不同。
+• iOS系统声音下载提供操作路径指导，不能承诺一键直达下载页面。
+• 提醒预排未来7天、最多60条；页面加载与保存时重新排程，不是永久后台常驻服务。
+• 探索关闭期间依靠持久化出发时间和时长，重新打开结算；符合无需后台常驻计时的需求。
+• WKWebView 自定义资源协议、WebGL纹理、录音媒体播放和安全区布局列为真实设备重点验证项。
+
+十一、常见故障
+xcodebuild requires Xcode：完整Xcode未安装或选中CLT；设置本次命令DEVELOPER_DIR，不需要删CLT。
+找不到iOS SDK/模拟器：Xcode内安装iOS平台组件；用xcodebuild -showsdks检查。
+No profiles / Team错误：在Xcode登录账户，选择Team及唯一Bundle ID，设备解锁且已信任；免费账户优先Run。
+SideStore IPA无法直接安装：这是预期的未签名产物，必须经SideStore重签。
+相册保存失败：检查系统照片“添加照片”权限；不要因此删除应用里的原图。
+离线声音缺失：在设置 → 语音包管理检测并试听；系统显示“语言”不等于该语言的设备端识别模型和TTS声音都已可用。
+7天到期打不开：通过SideStore或Xcode重新部署；不要先卸载导致本地数据删除。
+重复Bundle ID/钥匙串变化：固定账户与标识，迁移前导出备份，重新配置API Key。
+编译失败：提供 build/logs 最新日志；不要把密码、Keychain内容、真实API密钥混入日志。
+
+十二、官方参考
+Apple 免费个人账户及限制：https://developer.apple.com/help/account/basics/about-your-developer-account
+Xcode 系统要求：https://developer.apple.com/xcode/system-requirements
+开发者模式：https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device
+命令行构建：https://developer.apple.com/library/archive/technotes/tn2339/_index.html
+SideStore：https://docs.sidestore.io/docs/installation/install
+SideStore 环境要求：https://docs.sidestore.io/docs/installation/prerequisites
+
+【置信度：高（源码完整性、Xcode编译打包）；真机功能一致性待验证】
+【潜在反例：Xcode/SDK类型检查失败、系统Speech能力不足、自定义协议媒体限制、重签改变访问域；未穷尽】
+
+
+最新版本与白屏排查
+1.1.1（2）修复本地 URL 归一化及加载失败反馈；WebView 使用 UIKit 安全区域，网页不再重复添加顶部和底部间距。
+Mac 主工程：/Users/sucas/Documents/StarPets-20261029/star-pets-ios/StarPets.xcodeproj。final-delivery 副本也已同步修复。请打开主工程，确认版本 1.1.1、Build 2 后运行。
+SideStore：bash scripts/package-sidestore.sh 生成 dist/StarPets-SideStore-unsigned.ipa。脚本将注册名称设为 StarPets，中文图标名称通过 zh-Hans.lproj 本地化保留，兼容非 ASCII appIdName 问题。手机最新文件为 StarPets-1.1.1-SideStore.ipa，不使用旧 build2 文件。
+在 SideStore → My Apps → + → 我的 iPhone → SideStore 选择新包安装；打开应用验证，再点击该应用右侧剩余天数刷新。仅拷贝 IPA 不代表安装或续期成功。开发者模式保持开启。
+</pre></html>

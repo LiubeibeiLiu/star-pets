@@ -1,0 +1,74 @@
+[
+  {
+    "width": 320,
+    "page": "home",
+    "client": 313,
+    "scroll": 313,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 320,
+    "page": "habits",
+    "client": 299,
+    "scroll": 299,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 320,
+    "page": "profile",
+    "client": 299,
+    "scroll": 299,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 390,
+    "page": "home",
+    "client": 382,
+    "scroll": 382,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 390,
+    "page": "habits",
+    "client": 367,
+    "scroll": 367,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 390,
+    "page": "profile",
+    "client": 367,
+    "scroll": 367,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 430,
+    "page": "home",
+    "client": 421,
+    "scroll": 421,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 430,
+    "page": "habits",
+    "client": 407,
+    "scroll": 407,
+    "contentOK": true,
+    "pass": true
+  },
+  {
+    "width": 430,
+    "page": "profile",
+    "client": 407,
+    "scroll": 407,
+    "contentOK": true,
+    "pass": true
+  }
+]

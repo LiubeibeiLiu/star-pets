@@ -1,0 +1,7 @@
+回忆与首页内嵌区（2026-10-29）
+首页操作区水平居中，占用名称区，顶部进度及底部导航不被遮挡；动作气泡和宠物使用独立布局区域。
+拍照记录更名回忆；照片详情支持编辑500字备注；保留图片文件与积分数据独立。
+Android10+合照保存写入私有回忆文件并通过MediaStore写入Pictures/StarPets相册；相册失败返回明确状态，回忆仍可查看并重试。Android9相册按钮使用系统导出选择器。浏览器无法验证系统相册。
+取消成长版本迁移逻辑，新APP直接采用当前成长曲线；未清空开发预览数据。
+验证：typecheck/build:web PASS；test 33项 PASS。浏览器备注保存与面板布局边界 PASS。系统相册真机验证 NOT_RUN。
+关键文件：App.vue、controls.css、model.js、MainActivity.java、tests/growth.test.mjs。

@@ -1,0 +1,5 @@
+中轴居中与透明浮动按钮（2026-10-29）
+宠物展示区及底部名称/等级按页面中轴居中；等级字号18px加粗；浮动按钮组透明底，无背景模糊及阴影，使用轻边框、分组线和半透明选中反馈。
+正式预览 http://127.0.0.1:3187/ 已显示并保留，不关闭。
+浏览器核验：pageCenter627.5，petCenter/nameCenter627.45；levelFont18px；railBackground rgba(0,0,0,0)。typecheck/build:web PASS。真机 NOT_RUN。
+关键文件：ui/src/controls.css。

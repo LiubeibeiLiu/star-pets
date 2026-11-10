@@ -1,0 +1,1615 @@
+{
+  "apk": "星星宠物-Android-v1.1.0.apk",
+  "bytes": 311595365,
+  "sha256": "390eaee85af42ada4054199b5664641fe13358733d742821304089c1385e3fa5",
+  "matchedAssets": 400,
+  "allMatch": true,
+  "nativeABIs": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86",
+    "x86_64"
+  ],
+  "checks": [
+    {
+      "entry": "assets/web/index.html",
+      "match": true
+    },
+    {
+      "entry": "assets/web/assets/index-BdX4rvez.css",
+      "match": true
+    },
+    {
+      "entry": "assets/web/assets/index-DwI9RX62.js",
+      "match": true
+    },
+    {
+      "entry": "assets/web/demo/greeting.wav",
+      "match": true
+    },
+    {
+      "entry": "assets/web/demo/memory.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/demo/memory.svg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/baihu.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/cat.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/deer.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/dog.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/dragon.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/fish.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/fox.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/frog.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/hamster.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/panda.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/phoenix.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/pixiu.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/qilin.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/qinglong.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/rabbit.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/turtle.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/wolf.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/pets/zhuque.png",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/001.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/002.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/003.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/004.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/005.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/006.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/007.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/008.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/009.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/010.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/011.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/012.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/013.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/014.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/015.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/016.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/017.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/018.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/019.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/020.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/021.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/022.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/023.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/024.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/025.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/026.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/027.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/028.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/029.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/030.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/031.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/032.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/033.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/034.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/035.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/036.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/037.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/038.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/039.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/040.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/041.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/042.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/043.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/044.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/045.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/046.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/047.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/048.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/049.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/050.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/051.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/052.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/053.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/054.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/055.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/056.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/057.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/058.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/059.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/060.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/061.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/062.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/063.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/064.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/065.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/066.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/067.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/068.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/069.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/070.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/071.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/072.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/073.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/074.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/075.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/076.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/077.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/078.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/079.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/080.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/081.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/082.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/083.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/084.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/085.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/086.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/087.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/088.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/089.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/090.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/091.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/092.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/093.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/094.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/095.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/096.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/097.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/098.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/099.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/100.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/101.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/102.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/103.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/104.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/105.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/106.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/107.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/108.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/109.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/110.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/111.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/112.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/113.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/114.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/115.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/116.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/117.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/118.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/119.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/120.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/121.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/122.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/123.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/124.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/125.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/126.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/127.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/128.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/129.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/130.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/131.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/132.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/133.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/134.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/135.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/136.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/137.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/138.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/139.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/140.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/141.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/142.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/143.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/144.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/145.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/146.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/147.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/148.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/149.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/150.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/151.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/152.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/153.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/154.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/155.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/156.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/157.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/158.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/159.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/160.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/161.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/162.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/163.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/164.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/165.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/166.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/167.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/168.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/169.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/170.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/171.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/172.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/173.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/174.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/175.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/176.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/177.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/178.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/179.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/180.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/181.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/182.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/183.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/184.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/185.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/186.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/187.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/188.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/189.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/190.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/191.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/192.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/193.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/194.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/195.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/196.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/197.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/198.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/199.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/200.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/201.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/202.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/203.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/204.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/205.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/206.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/207.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/208.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/209.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/210.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/211.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/212.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/213.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/214.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/215.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/216.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/217.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/218.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/219.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/220.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/221.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/222.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/223.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/224.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/225.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/226.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/227.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/228.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/229.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/230.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/231.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/232.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/233.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/234.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/235.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/236.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/237.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/238.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/239.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/240.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/241.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/242.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/243.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/244.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/245.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/246.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/247.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/248.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/249.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/250.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/251.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/252.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/253.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/254.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/255.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/256.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/257.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/258.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/259.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/260.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/261.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/262.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/263.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/264.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/265.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/266.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/267.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/268.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/269.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/270.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/271.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/272.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/273.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/274.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/275.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/276.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/277.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/278.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/279.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/280.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/281.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/282.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/283.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/284.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/285.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/286.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/287.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/288.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/289.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/290.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/291.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/292.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/293.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/294.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/295.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/296.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/297.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/298.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/299.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/300.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/301.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/302.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/303.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/304.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/305.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/306.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/307.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/308.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/309.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/310.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/311.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/312.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/313.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/314.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/315.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/316.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/317.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/318.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/319.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/320.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/321.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/322.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/323.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/324.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/325.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/326.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/327.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/328.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/329.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/330.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/331.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/332.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/333.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/334.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/335.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/336.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/337.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/338.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/339.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/340.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/341.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/342.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/343.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/344.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/345.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/346.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/347.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/348.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/349.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/350.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/351.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/352.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/353.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/354.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/355.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/356.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/357.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/358.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/359.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/360.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/361.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/362.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/363.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/364.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/365.jpg",
+      "match": true
+    },
+    {
+      "entry": "assets/web/travel/credits.json",
+      "match": true
+    },
+    {
+      "entry": "assets/voice/asr/model.int8.onnx",
+      "match": true
+    },
+    {
+      "entry": "assets/voice/asr/tokens.txt",
+      "match": true
+    },
+    {
+      "entry": "lib/arm64-v8a/libonnxruntime.so",
+      "match": true
+    },
+    {
+      "entry": "lib/arm64-v8a/libsherpa-onnx-jni.so",
+      "match": true
+    },
+    {
+      "entry": "lib/armeabi-v7a/libonnxruntime.so",
+      "match": true
+    },
+    {
+      "entry": "lib/armeabi-v7a/libsherpa-onnx-jni.so",
+      "match": true
+    },
+    {
+      "entry": "lib/x86/libonnxruntime.so",
+      "match": true
+    },
+    {
+      "entry": "lib/x86/libsherpa-onnx-jni.so",
+      "match": true
+    },
+    {
+      "entry": "lib/x86_64/libonnxruntime.so",
+      "match": true
+    },
+    {
+      "entry": "lib/x86_64/libsherpa-onnx-jni.so",
+      "match": true
+    }
+  ]
+}

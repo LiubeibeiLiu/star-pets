@@ -1,0 +1,16 @@
+**/node_modules/
+**/build/
+**/dist/
+**/DerivedData/
+star-pets-android/assets/web/
+star-pets-ios/StarPets/web/
+*.apk
+*.ipa
+*.class
+*.dex
+*.log
+*.keystore
+*.jks
+.env
+.env.*
+!.env.example

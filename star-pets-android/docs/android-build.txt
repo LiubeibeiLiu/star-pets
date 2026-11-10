@@ -1,0 +1,18 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): false
+Verified using v3 scheme (APK Signature Scheme v3): true
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Star Pets Local, OU=Personal, O=Star Pets, C=CN
+Signer #1 certificate SHA-256 digest: df0667973d17c402854bc809e8396b950ab0d5f4ee154872c7625b7154ad2509
+Signer #1 certificate SHA-1 digest: d56e314ce1fd89754e99a6154af923bc131e7569
+Signer #1 certificate MD5 digest: 80aa8019643750a4aabfb5a2ca02b7c3
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Signer #1 public key SHA-256 digest: 9fe472a76d80443523967549aec5b79c61424afacabd1a43d358c2ae4a882080
+Signer #1 public key SHA-1 digest: a9b31affa6ff4a5b2be2f70e54767b25964da32d
+Signer #1 public key MD5 digest: fb84a5f80120a7fc88b5143592792c07
+APK: C:\Users\lbzcu\Documents\Codex\2026-10-28\new-chat-3\outputs\star-pets-android\..\星星宠物-Android-v1.0.0.apk

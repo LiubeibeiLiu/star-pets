@@ -1,0 +1,26 @@
+{
+  "name": "star-pets-android",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build:web": "vite build --config vite.config.mjs",
+    "build:web:ios": "vite build --config vite.config.mjs --mode ios",
+    "typecheck": "vue-tsc --noEmit",
+    "preview": "node scripts/preview.mjs"
+  },
+  "dependencies": {
+    "@fontsource/baloo-2": "^5.3.0",
+    "@mingcute/icons": "^3.0.2",
+    "@types/three": "^0.170.0",
+    "three": "^0.170.0",
+    "vue": "3.4.21"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "5.0.5",
+    "typescript": "5.6.3",
+    "vite": "5.2.8",
+    "vue-tsc": "2.1.10"
+  }
+}

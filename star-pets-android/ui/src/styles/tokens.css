@@ -1,0 +1,248 @@
+/* 设计令牌：页面只引用这里的变量。主题只改色彩与材质，尺寸、节奏、动效全局一致。 */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --gutter: 20px;
+  --card-pad: 18px;
+  --card-gap: 16px;
+  --group-gap: 20px;
+  --plan-card-min-height: 184px;
+
+  --text-page: 23px;
+  --text-section: 19px;
+  --text-item: 17px;
+  --text-helper: 14px;
+  --text-display: 32px;
+
+  /* 递进圆角：lg - 8px = md，lg - 12px = sm，xl - 8px = lg。 */
+  --r-sm: 14px;
+  --r-md: 18px;
+  --r-lg: 26px;
+  --r-xl: 40px;
+  --r-pill: 999px;
+
+  --fs-xs: 12px;
+  --fs-sm: 14px;
+  --fs-md: 16px;
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 26px;
+  --lh-tight: 1.25;
+  --lh-body: 1.55;
+
+  --control: 48px;
+  --control-sm: 48px;
+  --icon-btn: 48px;
+  --icon: 22px;
+  --icon-sm: 18px;
+  --header: 56px;
+  --tabbar: 62px;
+  --tabbar-gap: 0px;
+  --zone: 220px;
+  --font: -apple-system, 'PingFang SC', 'HarmonyOS Sans SC', 'MiSans', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-num: 'Baloo 2', var(--font);
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t-fast: 140ms;
+  --t-base: 220ms;
+  --t-slow: 340ms;
+
+  /* 材质：面板 surface / 浮层 glass-strong / 内嵌 well / 控件 fill、chip */
+  --blur: blur(30px) saturate(175%);
+  --blur-sm: blur(16px) saturate(155%);
+  --surface: #fcfdff;
+  --surface-2: #f7f9fd;
+  --surface-solid: #fcfdff;
+  --glass-strong: rgba(252, 253, 255, 0.94);
+  --panel-glint: rgba(255, 255, 255, 0.46);
+  --header-glint: rgba(255, 255, 255, 0.3);
+  --tab-glint: rgba(255, 255, 255, 0.2);
+  --float-glint: rgba(255, 255, 255, 0.24);
+  --glass-edge: #e4e8f2;
+  --inner-edge: #dbe1ee;
+  --inner-hi: rgba(255, 255, 255, 0.92);
+  --header-bg: rgba(247, 249, 254, 0.94);
+  --fill: #f1f4fa;
+  --chip: #f2f5fb;
+  --raised: #fff;
+  --halo: #f3f6ff;
+  --line: rgba(var(--ink-rgb), 0.09);
+  --line-strong: rgba(var(--ink-rgb), 0.17);
+  --tint: #f4f6fb;
+  --well: #edf1f8;
+  --well-strong: rgba(var(--p-rgb), 0.12);
+  --primary-soft: rgba(var(--p-rgb), 0.12);
+  --shadow-card:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 1px 2px rgba(var(--ink-rgb), 0.035),
+    0 16px 36px -23px rgba(var(--ink-rgb), 0.24);
+  --shadow-float:
+    inset 0 1px 0 var(--inner-hi),
+    0 3px 8px rgba(var(--ink-rgb), 0.07),
+    0 28px 58px -24px rgba(var(--ink-rgb), 0.38);
+  --shadow-btn:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 2px 5px rgba(var(--p-rgb), 0.16),
+    0 12px 24px -13px rgba(var(--p-rgb), 0.52);
+  --shadow-inner:
+    inset 0 1px 2px rgba(var(--ink-rgb), 0.08),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.8);
+  --gloss: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 62%);
+  --primary-gradient: linear-gradient(135deg, #0b62bd 0%, #1554a9 100%);
+  --success-gradient: linear-gradient(135deg, #176c57, #19745c);
+  --sun-gradient: linear-gradient(135deg, #ffd98a, #f4b755);
+  --on-primary: #fff;
+  --on-action: #fff;
+  --on-danger: #fff;
+
+  --danger: #a13f53;
+  --danger-gradient: linear-gradient(135deg, #96394d, #a13f53);
+  --danger-soft: rgba(207, 96, 116, 0.13);
+  --success: #19745c;
+  --success-soft: rgba(69, 188, 150, 0.14);
+  --sun: #f7c96c;
+  --on-sun: #684c13;
+  --sun-soft: rgba(247, 201, 108, 0.18);
+  --sun-ink: #8a6317;
+  --scrim: rgba(var(--ink-rgb), 0.32);
+  --focus: var(--primary-ink);
+  --grain: 0.02;
+  --orb-opacity: 0.5;
+
+  /* 默认主题与通用语义令牌：组件只消费语义，不感知主题名称。 */
+  --ink: #141923;
+  --ink-2: #566171;
+  --ink-3: #626d7c;
+  --ink-rgb: 20, 25, 35;
+  --primary: #0b5bb4;
+  --primary-deep: #0b4e9b;
+  --primary-ink: #0b53a4;
+  --p-rgb: 11, 91, 180;
+  --tint-1: #64adff;
+  --tint-2: #aed3ff;
+  --glow: rgba(33, 114, 209, 0.28);
+  --bg-a: #f7f9fe;
+  --bg-b: #eff3fa;
+  --orb-1: rgba(190, 207, 255, 0.9);
+  --orb-2: rgba(203, 186, 255, 0.58);
+  --orb-3: rgba(208, 239, 234, 0.75);
+  color-scheme: light;
+}
+
+/* 露草蓝 #0079FF / #64ADFF / #AED3FF */
+:root[data-theme='dayflower'] {
+  color-scheme: light;
+}
+
+/* 星夜黑 #000000 / #BFCBD9 / #E4E8EF：纯黑强调搭配偏蓝灰层次。 */
+:root[data-theme='starry'] {
+  --ink: #f3f5fb;
+  --ink-2: #b7c0d2;
+  --ink-3: #9ba6ba;
+  --ink-rgb: 8, 11, 18;
+  --primary: #93a7ff;
+  --primary-deep: #7589e8;
+  --primary-ink: #b0bdff;
+  --p-rgb: 147, 167, 255;
+  --tint-1: #7789ca;
+  --tint-2: #303c61;
+  --glow: rgba(126, 151, 255, 0.4);
+  --bg-a: #11151f;
+  --bg-b: #080b12;
+  --orb-1: rgba(79, 101, 174, 0.48);
+  --orb-2: rgba(99, 72, 159, 0.4);
+  --orb-3: rgba(38, 105, 110, 0.32);
+  --surface: #1b2333;
+  --surface-2: #222c40;
+  --surface-solid: #1b2333;
+  --glass-strong: rgba(25, 32, 46, 0.96);
+  --panel-glint: rgba(255, 255, 255, 0.04);
+  --header-glint: rgba(255, 255, 255, 0.04);
+  --tab-glint: rgba(255, 255, 255, 0.04);
+  --float-glint: rgba(255, 255, 255, 0.04);
+  --glass-edge: #344158;
+  --inner-edge: #3c4962;
+  --inner-hi: rgba(255, 255, 255, 0.14);
+  --header-bg: rgba(17, 23, 35, 0.96);
+  --fill: #222d42;
+  --chip: #28354b;
+  --raised: #34415c;
+  --halo: rgba(63, 77, 112, 0.55);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --tint: #253047;
+  --well: #1e293d;
+  --well-strong: rgba(147, 167, 255, 0.15);
+  --primary-soft: rgba(147, 167, 255, 0.16);
+  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.35), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+  --primary-gradient: linear-gradient(135deg, #8197f5, #a39ae9);
+  --on-primary: #111827;
+  --on-danger: #111827;
+  --on-action: #111827;
+  --danger-gradient: linear-gradient(135deg, #ef8193, #f09aaa);
+  --success: #69cfac;
+  --success-soft: rgba(105, 207, 172, 0.14);
+  --sun: #d7aa57;
+  --on-sun: #211a0c;
+  --sun-soft: rgba(215, 170, 87, 0.16);
+  --sun-ink: #e7c67f;
+  --danger: #ef8193;
+  --danger-soft: rgba(239, 129, 147, 0.14);
+  --scrim: rgba(0, 0, 0, 0.58);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0ms;
+    --t-base: 0ms;
+    --t-slow: 0ms;
+  }
+}
+/* 星雾紫 #7C5CE6 / #B39EF5 / #EDE7FB：柔和薰衣草紫层次。 */
+:root[data-theme='lavender'] {
+  --ink: #1b162a;
+  --ink-2: #5e5675;
+  --ink-3: #69617e;
+  --ink-rgb: 27, 22, 42;
+  --primary: #5742b2;
+  --primary-deep: #6650c2;
+  --primary-ink: #5a43af;
+  --p-rgb: 87, 66, 178;
+  --tint-1: #b39ef5;
+  --tint-2: #ede7fb;
+  --glow: rgba(124, 92, 230, 0.34);
+  --bg-a: #f8f6fb;
+  --bg-b: #f0edf7;
+  --orb-1: #ede7fb;
+  --orb-2: rgba(179, 158, 245, 0.45);
+  --orb-3: #f5f1fe;
+  --primary-gradient: linear-gradient(135deg, #5942b2, #694596 58%, #794b79);
+  --surface: #fdfcff;
+  --surface-2: #f8f5fd;
+  --surface-solid: #fdfcff;
+  --glass-strong: rgba(253, 251, 255, 0.95);
+  --glass-edge: #e7e0f1;
+  --inner-edge: #e2dbea;
+  --header-bg: rgba(249, 246, 253, 0.95);
+  --fill: #f2eef8;
+  --chip: #f4f0fa;
+  --tint: #f5f1fb;
+  --well: #eee8f7;
+  color-scheme: light;
+}
+
+
+/* 小屏保留字阶，先收窄两侧和容器留白。 */
+@media (max-width: 359px) {
+  :root {
+    --gutter: 16px;
+    --card-pad: 16px;
+    --card-gap: 12px;
+  }
+}

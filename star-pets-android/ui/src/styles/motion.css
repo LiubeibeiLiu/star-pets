@@ -1,0 +1,249 @@
+/* 动效层：只动 transform / opacity，不在玻璃层上做持续动画，兼顾流畅与省电。 */
+
+/* 按压：缩小 → 松手弹回 */
+:where(button),
+.pet-card,
+.theme-option,
+.today-goal {
+  transition:
+    transform var(--t-base) var(--spring),
+    background var(--t-base) var(--ease),
+    color var(--t-base) var(--ease),
+    border-color var(--t-base) var(--ease),
+    box-shadow var(--t-base) var(--ease),
+    opacity var(--t-base) var(--ease);
+}
+:where(button):active:not(:disabled),
+button.primary:active:not(:disabled),
+.pet-card:active {
+  transform: scale(0.98);
+  transition-duration: 80ms;
+}
+.icon-button:active:not(:disabled),
+.dock-item:active:not(:disabled),
+.tabbar button:active {
+  transform: scale(0.96);
+}
+
+/* 选中：轻弹放大 */
+.tabbar button.active:not(.home-tab) .tab-icon,
+.dock-item.active svg,
+.chip.active,
+.rule-chip.active,
+.avatar-choices button.active,
+.theme-option.active .theme-option-copy svg {
+  animation: pop var(--t-slow) var(--spring);
+}
+.segmented:not(.page-tabs) button.active {
+  animation: pop-soft var(--t-slow) var(--spring);
+}
+.tabbar button.home-tab:active {
+  transform: none;
+}
+@keyframes pop {
+  0% {
+    transform: scale(0.94);
+  }
+  60% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes pop-soft {
+  0% {
+    transform: scale(0.94);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* 出现：从触发点放大展开 */
+.plan-menu,
+.ui-select-menu,
+.dock-menu {
+  animation: grow-in var(--t-base) var(--spring);
+}
+.plan-menu {
+  transform-origin: calc(100% - 20px) 0;
+}
+dialog[open] {
+  animation: dialog-in var(--t-slow) var(--spring);
+}
+dialog[open]::backdrop {
+  animation: fade-in var(--t-base) var(--ease);
+}
+@keyframes grow-in {
+  from {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+}
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+}
+
+/* 页面与区块：轻微上浮淡入（只在进入时一次，避免跳动） */
+.zone-card,
+.home-zone > .chat-panel,
+.empty-state,
+.form-hint {
+  animation: rise var(--t-slow) var(--ease) backwards;
+}
+.shell > :nth-child(3) {
+  animation-delay: 30ms;
+}
+.shell > :nth-child(4) {
+  animation-delay: 60ms;
+}
+.shell > :nth-child(5) {
+  animation-delay: 90ms;
+}
+.tile-grid > *,
+.memory-list > *,
+.record-list > * {
+  animation: rise var(--t-slow) var(--ease) backwards;
+}
+.tile-grid > :nth-child(2),
+.memory-list > :nth-child(2),
+.record-list > :nth-child(2) {
+  animation-delay: 25ms;
+}
+.tile-grid > :nth-child(3),
+.memory-list > :nth-child(3),
+.record-list > :nth-child(3) {
+  animation-delay: 50ms;
+}
+.tile-grid > :nth-child(n + 4),
+.memory-list > :nth-child(n + 4),
+.record-list > :nth-child(n + 4) {
+  animation-delay: 75ms;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+
+/* 漂浮：小元素慢速上下浮动，吸引注意但不打扰 */
+.ration-bubble {
+  animation: float 3.2s ease-in-out infinite;
+}
+.head-bubble:not(.ration-bubble) {
+  animation: bubble-in var(--t-slow) var(--spring);
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.8);
+  }
+}
+
+/* 进度：数值变化时平滑过渡 */
+.bar i {
+  transition: width var(--t-slow) var(--spring);
+}
+
+/* 环境与材质只做低频、低振幅呼吸，交互元素保持快速且可预期。 */
+body::before {
+  animation: ambient-breathe 16s ease-in-out infinite alternate;
+}
+.pet-stage::before {
+  animation: stage-aura 7s ease-in-out infinite alternate;
+}
+.theme-option.active {
+  animation: selected-aura 3.8s ease-in-out infinite alternate;
+}
+@keyframes ambient-breathe {
+  from {
+    opacity: calc(var(--orb-opacity) - 0.14);
+    transform: scale(1.02) translate3d(-0.4%, -0.2%, 0);
+  }
+  to {
+    opacity: var(--orb-opacity);
+    transform: scale(1.055) translate3d(0.5%, 0.3%, 0);
+  }
+}
+@keyframes stage-aura {
+  from {
+    opacity: 0.56;
+    transform: translateX(-50%) scale(0.96);
+  }
+  to {
+    opacity: 0.78;
+    transform: translateX(-50%) scale(1.04);
+  }
+}
+@keyframes selected-aura {
+  from {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  to {
+    filter: drop-shadow(0 7px 12px rgba(var(--p-rgb), 0.16));
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pet-card:hover,
+  .plan-card:hover,
+  .goal-card:hover,
+  .gallery-card:hover,
+  .theme-option:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 var(--inner-hi),
+      0 4px 8px rgba(var(--ink-rgb), 0.06),
+      0 22px 40px -26px rgba(var(--ink-rgb), 0.38);
+  }
+  .icon-button:hover:not(:disabled),
+  .dock-item:hover:not(:disabled) {
+    color: var(--primary);
+    box-shadow:
+      inset 0 1px 0 var(--inner-hi),
+      0 0 16px -8px var(--glow);
+  }
+}
+
+/* 提示条：弹性上滑 */
+.toast {
+  transition:
+    opacity var(--t-base) var(--ease),
+    transform var(--t-slow) var(--spring);
+}
+.toast:not(.show) {
+  transform: translate(-50%, 16px) scale(0.92);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+.no-motion *,
+.no-motion *::before,
+.no-motion *::after {
+  animation: none !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+}

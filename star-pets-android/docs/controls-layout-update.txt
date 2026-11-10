@@ -1,0 +1,11 @@
+界面统一及交互更新（2026-10-29）
+关键文件：ui/src/controls.css、ui/src/mobile-layout.ts、ui/src/main.ts、ui/src/App.vue。
+统一输入框/选择框：14px 圆角、46px 控件高度、浅色透明底、内部焦点高亮、禁用状态；按钮统一圆角与点击状态。
+键盘适配：监听 VisualViewport 和窗口尺寸、焦点变化；输入遮挡时滚入可见区；键盘状态隐藏底部导航；弹窗限定可视高度；首页输入操作区调整为可滚动布局。
+首页：名称恢复至宠物下方居中，等级独立一行；操作面板覆盖该位置。顶部状态/进度/积分区域透明，无底色边框阴影及模糊。
+右侧按钮三组：伙伴管理、日常互动、记录与对话；高度贴合内容，去除多余留白。
+历史记录分页：每页 10 条。
+验证：typecheck/build:web PASS。浏览器设置页 14 个输入/选择控件均为14px圆角、46px高度；横向溢出=false。49条历史记录显示每页10条、共5页。缩短可视高度后，弹窗 top12/bottom260、输入 top115/bottom161 均位于392px可视区域，导航隐藏；键盘模拟 PASS。
+已按用户最新要求停止小屏专项检查，后续以主流屏幕为目标。
+限制：浏览器缩短视口不等同 Android 真机软键盘。Android 真机相机、麦克风、IME NOT_RUN。构建仍有单个JS chunk大于500kB提示。
+最终验证：npm test 31/31 PASS；Android build.ps1及v3签名验证 PASS；首页 computed background rgba(0,0,0,0)、backgroundImage/boxShadow/backdropFilter 均 none。

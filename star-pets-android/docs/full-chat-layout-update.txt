@@ -1,0 +1,6 @@
+小窝布局及完整对话区（2026-10-29）
+对话区取消高度上限及内部滚动，输入自动增高；输入/语音/发送并排显示，消息最多一对；新增消息后自动将操作区滚入底部导航上方，页面可自然滚动。
+宠物和背景圆圈共用展示容器，居中对齐；浮动按钮在右侧；气泡移入宠物容器，头部投影定位，箭头24px，靠近头部。
+验证：typecheck、build:web PASS。浏览器panel overflow=visible、scrollHeight/clientHeight内容完整，语音/发送按钮位于导航上方 PASS。
+关键文件：App.vue、ChatPanel.vue、controls.css。真机 NOT_RUN。
+最终按钮检查：说话、发送各72px宽，white-space=nowrap；输入框随内容增高，聊天卡片overflow=visible。

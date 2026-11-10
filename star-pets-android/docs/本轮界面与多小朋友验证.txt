@@ -1,0 +1,10 @@
+星星宠物本轮交付验证
+完成：习惯加减分同宽按钮；可搜索/手动输入的条款与分值联动；日期时分与备注；统一下拉和滑动开关；完成习惯、计划设置、小朋友资料、快捷规则、模型设置采用返回子页；导航交换；回忆直接显示照片；删除档案纪念册与密码修改入口；两个可命名模型槽位；多小朋友数据隔离；互动按钮缩小。
+关键文件：ui/src/App.vue、QuickScore.vue、UiSelect.vue、CompanionSettings.vue、controls.css、model.js；src/app/starpets/local/CompanionCloud.java。
+PASS npm run typecheck
+PASS npm test：36/36
+PASS npm run build:web；存在 bundle >500KB 提示。
+浏览器 PARTIAL：已查看 412×891 首页、习惯录入、条款分值带出、记录筛选、设置、小朋友列表与资料页。后续浏览器控制连接中断。最终日期时分与开关对齐修订未再次截图验证。
+NOT_RUN：Android 真机指纹、相册头像、两个模型真实联网连接、软键盘实机检查。
+多小朋友积分、习惯、宠物和设置隔离由模型测试验证；API Key 使用设备端加密存储，不进入业务备份。
+预览 http://127.0.0.1:3187/；已请求在 Codex 中重新打开。

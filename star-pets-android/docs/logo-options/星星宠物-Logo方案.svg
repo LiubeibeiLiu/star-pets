@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 340" role="img" aria-labelledby="title desc">
+  <title id="title">星星宠物 Logo 四款方案</title>
+  <desc id="desc">A 星爪，B 星轨小猫，C 月亮伙伴，D 星愿精灵</desc>
+  <defs>
+    <linearGradient id="a" x2="1" y2="1"><stop stop-color="#ac8bd5"/><stop offset="1" stop-color="#674d9c"/></linearGradient>
+    <linearGradient id="b" x2="1" y2="1"><stop stop-color="#dbf6ff"/><stop offset="1" stop-color="#a5cce9"/></linearGradient>
+    <linearGradient id="c" x2="1" y2="1"><stop stop-color="#fae6f0"/><stop offset="1" stop-color="#d0b8e5"/></linearGradient>
+    <linearGradient id="d" x2="1" y2="1"><stop stop-color="#f5d9a0"/><stop offset="1" stop-color="#eb9aa8"/></linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#6e5588" flood-opacity=".20"/></filter>
+  </defs>
+  <rect width="1040" height="340" rx="28" fill="#f7f3fb"/>
+  <g font-family="-apple-system,BlinkMacSystemFont,'Noto Sans CJK SC','Microsoft YaHei',sans-serif" text-anchor="middle">
+    <g transform="translate(65 30)">
+      <rect width="160" height="160" rx="39" fill="url(#a)" filter="url(#shadow)"/>
+      <path d="M80 82c-19 0-35 16-35 35 0 14 10 23 23 23 6 0 9-3 12-3s6 3 12 3c13 0 23-9 23-23 0-19-16-35-35-35Z" fill="#fffafc"/>
+      <ellipse cx="42" cy="75" rx="10" ry="14" transform="rotate(-20 42 75)" fill="#fffafc"/>
+      <ellipse cx="65" cy="54" rx="10" ry="14" transform="rotate(-8 65 54)" fill="#fffafc"/>
+      <ellipse cx="93" cy="54" rx="10" ry="14" transform="rotate(8 93 54)" fill="#fffafc"/>
+      <ellipse cx="117" cy="75" rx="10" ry="14" transform="rotate(20 117 75)" fill="#fffafc"/>
+      <path d="M121 18l4 11 11 4-11 4-4 11-4-11-11-4 11-4Z" fill="#ffe9aa"/>
+      <text x="80" y="218" font-size="20" font-weight="700" fill="#352b49">A · 星爪</text>
+      <text x="80" y="247" font-size="13" fill="#796b8b">简洁、易识别</text>
+    </g>
+    <g transform="translate(320 30)">
+      <rect width="160" height="160" rx="39" fill="url(#b)" filter="url(#shadow)"/>
+      <ellipse cx="80" cy="83" rx="64" ry="43" transform="rotate(-27 80 83)" fill="none" stroke="#6686c3" stroke-width="6" opacity=".55"/>
+      <path d="M49 60 45 35 68 47M111 60l4-25-23 12" fill="#ffe3d0" stroke="#d08d96" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="80" cy="83" r="44" fill="#fff4e8" stroke="#e7b9b5" stroke-width="4"/>
+      <path d="M62 83q6-6 12 0m12 0q6-6 12 0" fill="none" stroke="#665472" stroke-width="4" stroke-linecap="round"/>
+      <path d="M75 99q5 7 10 0" fill="none" stroke="#c66f8c" stroke-width="4" stroke-linecap="round"/>
+      <path d="M128 24l4 12 12 4-12 4-4 12-4-12-12-4 12-4Z" fill="#ffe6a2"/>
+      <text x="80" y="218" font-size="20" font-weight="700" fill="#352b49">B · 星轨小猫</text>
+      <text x="80" y="247" font-size="13" fill="#796b8b">活泼、亲近</text>
+    </g>
+    <g transform="translate(575 30)">
+      <rect width="160" height="160" rx="39" fill="url(#c)" filter="url(#shadow)"/>
+      <path d="M101 26a56 56 0 1 0 31 103A62 62 0 1 1 101 26Z" fill="#fff9dd"/>
+      <path d="M55 118V79l16 14a35 35 0 0 1 19-1l16-13v39c0 21-11 32-25 32s-26-11-26-32Z" fill="#755aa5"/>
+      <circle cx="71" cy="116" r="3" fill="#fff"/><circle cx="91" cy="116" r="3" fill="#fff"/>
+      <path d="M77 128q4 5 8 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      <path d="M41 36l3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" fill="#fff"/>
+      <text x="80" y="218" font-size="20" font-weight="700" fill="#352b49">C · 月亮伙伴</text>
+      <text x="80" y="247" font-size="13" fill="#796b8b">温柔、陪伴</text>
+    </g>
+    <g transform="translate(830 30)">
+      <rect width="160" height="160" rx="39" fill="url(#d)" filter="url(#shadow)"/>
+      <path d="M80 21 97 57l40 6-29 28 7 40-35-19-35 19 7-40-29-28 40-6Z" fill="#fffaf0" stroke="#f3c9ac" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M60 83q7-6 14 0m12 0q7-6 14 0" fill="none" stroke="#785b86" stroke-width="4" stroke-linecap="round"/>
+      <path d="M74 98q6 7 12 0" fill="none" stroke="#d47b8d" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="56" cy="96" r="5" fill="#f2afaa" opacity=".7"/><circle cx="104" cy="96" r="5" fill="#f2afaa" opacity=".7"/>
+      <path d="M127 25l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z" fill="#fff"/>
+      <text x="80" y="218" font-size="20" font-weight="700" fill="#352b49">D · 星愿精灵</text>
+      <text x="80" y="247" font-size="13" fill="#796b8b">明亮、童趣</text>
+    </g>
+  </g>
+</svg>

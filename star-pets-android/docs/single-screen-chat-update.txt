@@ -1,0 +1,5 @@
+一屏对话布局（2026-10-29）
+取消对话组件主动scrollBy/scrollIntoView；普通输入不触发移动布局助手的滚动，仅实际键盘遮挡时保留避让。
+对话展开后固定一屏可用高度，宠物和对话上下共享空间；缩短组件间距；隐藏名称并使用该区域；消息、输入、语音、发送完整显示，无聊天容器内部滚动。
+浏览器发送/收到回复后：scrollY=0，documentHeight=viewport=706；进度top20/bottom114，宠物top135/bottom379，对话top387/bottom591，按钮bottom579，底部突出导航top604。PASS。
+关键文件：ChatPanel.vue、mobile-layout.ts、controls.css。typecheck/build:web PASS；真机 NOT_RUN。

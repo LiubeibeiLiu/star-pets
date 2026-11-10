@@ -1,0 +1,1331 @@
+/* 材质层：表面质感、统一按钮/图标体系与边界状态。几何布局在 components / pages，动效在 motion。 */
+
+/* ---------- 一级：玻璃面板 ---------- */
+.card,
+.pet-card,
+.zone-card,
+.home-zone > .chat-panel,
+.pet-dock,
+.head-bubble,
+.chat-bubble,
+.empty-state--card {
+  border: 1px solid var(--glass-edge);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.card {
+  border-radius: var(--card-radius);
+}
+.pet-card,
+.zone-card,
+.home-zone > .chat-panel,
+.empty-state--card {
+  border-radius: var(--r-lg);
+}
+.search-field,
+.segmented:not(.page-tabs) {
+  border: 1px solid var(--inner-edge);
+  background: var(--fill);
+  box-shadow: none;
+}
+.chat-bubble.user {
+  border-color: transparent;
+  background: var(--gloss), var(--primary);
+  color: var(--on-primary);
+}
+
+/* ---------- 浮层：页头、导航、菜单、弹窗 ---------- */
+.app-header {
+  background: var(--header-bg);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: 0 1px 0 var(--line);
+}
+dialog,
+.ui-select-menu,
+.plan-menu,
+.dock-menu {
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-strong);
+  color: var(--ink);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: var(--shadow-float);
+}
+.tabbar {
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: var(--glass-strong);
+  color: var(--ink);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  box-shadow: none;
+}
+dialog::backdrop {
+  background: var(--scrim);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* ---------- 内嵌：面板里的二级层，不再叠加模糊 ---------- */
+.card .segmented,
+.card .search-field,
+.zone-card .segmented {
+  border-color: transparent;
+  background: var(--chip);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+.plan-card,
+.goal-card,
+.today-goal,
+.memory-note-inline,
+.detail-story,
+.list-link,
+.gallery-image,
+.media-frame,
+.meta-list div {
+  border: 1px solid var(--inner-edge);
+  background: var(--well);
+}
+.plan-card.paused {
+  background: var(--surface-2);
+}
+.footprints-gallery .record-list > .swipe-row {
+  border-color: var(--glass-edge);
+  background: var(--surface);
+}
+
+/* ---------- 按钮体系：一种形状语言，一个图标库 ---------- */
+:where(button) {
+  border: 1px solid var(--inner-edge);
+  background: var(--chip);
+  color: var(--primary-ink);
+  box-shadow: none;
+}
+:where(button):disabled {
+  opacity: 0.42;
+  box-shadow: none;
+}
+button.primary {
+  border: 0;
+  background: var(--gloss), var(--primary);
+  color: var(--on-action);
+  box-shadow: var(--shadow-btn);
+}
+button.primary:disabled {
+  box-shadow: none;
+}
+button.danger-fill,
+button.danger.recording,
+button.primary.danger,
+.record-live.recording {
+  border: 0;
+  background: var(--gloss), var(--danger);
+  color: var(--on-danger);
+  box-shadow: 0 8px 18px -8px rgba(224, 62, 84, 0.7);
+}
+button.secondary {
+  border-color: transparent;
+  background: var(--well-strong);
+  color: var(--primary-ink);
+}
+button.ghost {
+  border-color: transparent;
+  background: transparent;
+}
+button.danger {
+  color: var(--danger);
+}
+.icon-button,
+.pagination button,
+.audio-speed,
+.audio-download {
+  display: grid;
+  place-items: center;
+  width: var(--icon-btn);
+  min-width: var(--icon-btn);
+  height: var(--icon-btn);
+  min-height: var(--icon-btn);
+  padding: 0;
+  border: 1px solid var(--inner-edge);
+  border-radius: var(--r-md);
+  background: var(--chip);
+  color: var(--ink-2);
+}
+.icon-button svg,
+.pagination button svg {
+  width: 20px;
+  height: 20px;
+}
+.icon-button::after {
+  inset: -3px;
+}
+.app-header .icon-button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink);
+}
+.section-head .icon-button {
+  color: var(--primary-ink);
+}
+.search-clear,
+.stepper button,
+.segmented button,
+.setting > button,
+.child-pick,
+.theme-option,
+.stage-stepper button,
+.calendar-grid button,
+.plan-menu button,
+.dock-menu button,
+.ui-select-menu button,
+.summary-progress,
+.swipe-action,
+.tabbar button,
+.dock-item,
+.login-password .eye {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.swipe-action {
+  background: var(--danger);
+  color: var(--on-danger);
+}
+.plan-menu button,
+.dock-menu button,
+.ui-select-menu button {
+  color: var(--ink);
+}
+.plan-menu button.danger {
+  color: var(--danger);
+}
+.plan-menu button:active,
+.dock-menu button:active,
+.ui-select-menu button:active {
+  background: var(--well-strong);
+}
+.ui-select-menu button[aria-selected='true'] {
+  background: var(--well-strong);
+  color: var(--primary-ink);
+}
+.calendar-grid button {
+  color: var(--ink);
+}
+.calendar-grid button.selected {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+/* 分段：选中项为抬起的实色胶囊（iOS 风），不再使用 3D 厚边 */
+.segmented button {
+  color: var(--ink-2);
+}
+.segmented:not(.page-tabs) button.active {
+  background: var(--raised);
+  color: var(--primary-ink);
+  box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.08), 0 4px 12px -6px rgba(var(--ink-rgb), 0.25);
+}
+.deduction .sign-toggle button.active {
+  color: var(--danger);
+}
+
+/* 胶囊 / 选项 */
+.chip,
+.rule-chip,
+.avatar-choices button,
+.days label {
+  border: 1px solid var(--inner-edge);
+  background: var(--chip);
+  color: var(--ink-2);
+}
+.rule-chip {
+  color: var(--ink);
+}
+.chip.active,
+.rule-chip.active,
+.avatar-choices button.active,
+.days label:has(input:checked) {
+  border-color: transparent;
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+  box-shadow: inset 0 0 0 1.5px rgba(var(--p-rgb), 0.55);
+}
+
+/* 输入 */
+:where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']), textarea, select),
+.stepper,
+.ui-select-trigger,
+.date-trigger {
+  border: 1px solid var(--line-strong);
+  background: var(--fill);
+  color: var(--ink);
+  box-shadow: none;
+}
+:where(input, textarea, select):focus,
+.stepper:focus-within,
+.search-field:focus-within {
+  border-color: rgba(var(--p-rgb), 0.7);
+  box-shadow: 0 0 0 4px rgba(var(--p-rgb), 0.16);
+}
+:where(input, textarea)[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+:where(input, textarea, select):disabled {
+  background: var(--well);
+}
+.search-field {
+  color: var(--ink-3);
+}
+.search-field input,
+.stepper input {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.stepper button {
+  color: var(--primary-ink);
+}
+.ios-switch {
+  background: var(--line-strong);
+}
+.ios-switch:checked {
+  background: var(--primary);
+}
+.bar {
+  background: var(--well-strong);
+}
+.bar i {
+  background: var(--gloss), var(--primary);
+}
+.swipe-row.open .swipe-content,
+.swipe-row.dragging .swipe-content {
+  background: var(--surface-solid);
+}
+.badge {
+  background: var(--well-strong);
+  color: var(--primary-ink);
+}
+.tag {
+  background: var(--chip);
+  color: var(--ink-2);
+}
+.tag.owned {
+  background: var(--well-strong);
+  color: var(--primary-ink);
+}
+.card-title svg,
+.tile-icon {
+  color: var(--primary-ink);
+}
+.notice {
+  border: 1px solid var(--inner-edge);
+}
+
+/* ---------- 底部导航：五个入口同一样式 ---------- */
+.tabbar button {
+  color: var(--ink-2);
+}
+.tabbar button.active {
+  color: var(--primary);
+}
+.tabbar button.active .tab-icon {
+  background: transparent;
+}
+.tabbar button.home-tab .tab-icon,
+.tabbar button.home-tab.active .tab-icon {
+  background: var(--gloss), var(--primary-gradient);
+  color: var(--on-action);
+  box-shadow: var(--shadow-float);
+}
+.tabbar button.home-tab {
+  color: var(--primary-ink);
+}
+
+/* ---------- 小窝：宠物舞台是全应用唯一的视觉重心 ---------- */
+.pet-stage {
+  background: radial-gradient(closest-side at 50% 54%, var(--halo) 0%, transparent 100%);
+}
+.pet-stage::after {
+  display: none;
+}
+.pet-stage::before {
+  position: absolute;
+  bottom: 14%;
+  left: 50%;
+  width: min(70%, 300px);
+  aspect-ratio: 4 / 1;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--glow), transparent);
+  opacity: 0.35;
+  transform: translateX(-50%);
+  content: '';
+}
+.pet-dock {
+  border-radius: var(--r-xl);
+  background: var(--glass-strong);
+}
+.dock-item.active {
+  background: transparent;
+  box-shadow: none;
+}
+.ration-bubble {
+  border-color: transparent;
+  background: var(--gloss), var(--sun);
+  color: var(--on-sun);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.head-bubble::after {
+  display: none;
+}
+.head-bubble {
+  color: var(--ink);
+}
+.form-preview {
+  color: var(--on-sun);
+  background: var(--sun);
+}
+.zone-card {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.zone-card::-webkit-scrollbar {
+  display: none;
+}
+.summary-stat {
+  color: var(--ink-3);
+}
+.summary-stat b {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--primary-ink);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.home-empty-orbit {
+  border: 1px solid var(--glass-edge);
+  background:
+    radial-gradient(70% 60% at 50% 10%, var(--primary-soft), transparent),
+    var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-2);
+}
+.home-empty-orbit strong {
+  color: var(--ink);
+}
+.today-goal {
+  padding: 0 var(--space-3) 0 var(--space-2);
+  color: var(--ink);
+}
+.goal-check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid rgba(var(--p-rgb), 0.45);
+  border-radius: 50%;
+  color: transparent;
+  transition:
+    background var(--t-base) var(--ease),
+    color var(--t-base) var(--ease),
+    transform var(--t-base) var(--spring);
+}
+.goal-check svg {
+  width: 16px;
+  height: 16px;
+}
+.today-goal:active:not(:disabled) .goal-check {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--on-primary);
+  transform: scale(1.15);
+}
+.today-empty {
+  border: 1.5px dashed rgba(var(--p-rgb), 0.35);
+  color: var(--primary-ink);
+}
+.today-empty.done {
+  color: var(--success);
+}
+.travel-empty h3 {
+  color: var(--ink);
+}
+.travel-dest {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  color: var(--primary-ink);
+  font-weight: 600;
+}
+.travel-dest svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.travel-times {
+  display: flex;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 0;
+}
+.travel-times div {
+  min-width: 92px;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--inner-edge);
+  border-radius: var(--r-md);
+  background: var(--chip);
+}
+.travel-times dt {
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+.travel-times dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--fs-lg);
+  line-height: 1.2;
+}
+.rec-time {
+  margin-left: var(--space-1);
+  font-size: var(--fs-sm);
+  opacity: 0.85;
+}
+
+/* ---------- 信息结构：标签行 / 元数据 ---------- */
+.record-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  color: var(--ink-2);
+}
+.record small.record-meta {
+  display: flex;
+}
+.record b,
+.goal-card b,
+.plan-head h3,
+.pet-card h3 {
+  color: var(--ink);
+  font-size: var(--text-item);
+  font-weight: 650;
+}
+.meta-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+.meta-list.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.meta-list div {
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-md);
+  text-align: center;
+}
+.meta-list dt {
+  color: var(--ink-2);
+  font-size: var(--fs-xs);
+}
+.meta-list dd {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: var(--fs-md);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.meta-list dd small {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+}
+.plan-meta {
+  color: var(--ink-2);
+}
+.plan-card .plan-more {
+  width: var(--icon-btn);
+  min-width: var(--icon-btn);
+  height: var(--icon-btn);
+  min-height: var(--icon-btn);
+  margin-top: var(--space-1);
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-3);
+}
+.plan-card .plan-more::after {
+  inset: 0;
+}
+.plan-card .plan-more[aria-expanded='true'] {
+  color: var(--primary-ink);
+}
+.plan-card.done .bar i {
+  background: var(--gloss), var(--primary);
+}
+.plan-criteria {
+  min-height: 0;
+  color: var(--ink-3);
+}
+.section-stat b {
+  color: var(--primary-ink);
+}
+.section-stat b.neg {
+  color: var(--danger);
+}
+.memory-reversed {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--r-md);
+  background: var(--danger-soft);
+}
+.memory-reversed svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  margin-top: 1px;
+}
+.memory-reversed b {
+  display: block;
+  font-size: var(--fs-sm);
+}
+.memory-reversed small {
+  display: block;
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+.goal-card .tile-icon {
+  border-radius: 50%;
+  background: var(--chip);
+}
+.submit-points {
+  min-width: 2ch;
+  margin-left: 2px;
+  font-size: var(--fs-lg);
+  line-height: 1;
+}
+.gallery-caption b {
+  color: var(--ink);
+}
+.memory-date b,
+.gallery-caption small {
+  color: var(--ink-2);
+}
+
+/* ---------- 头像（统一图标库） ---------- */
+.child-avatar {
+  border: 0;
+  background: transparent;
+  color: var(--primary-ink);
+}
+.child-avatar svg {
+  width: 26px;
+  height: 26px;
+}
+.child-avatar.large svg {
+  width: 50px;
+  height: 50px;
+}
+.setting-value .child-avatar {
+  width: 28px;
+  height: 28px;
+}
+.setting-value .child-avatar svg {
+  width: 18px;
+  height: 18px;
+  color: var(--primary-ink);
+}
+.setting-value .badge {
+  min-width: 24px;
+  height: 22px;
+  font-size: var(--fs-xs);
+}
+.setting-name {
+  max-width: 7em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.avatar-choices button {
+  color: var(--primary-ink);
+}
+.avatar-choices button .child-avatar svg {
+  width: 24px;
+  height: 24px;
+}
+.setting > button,
+.setting > label,
+.child-pick {
+  color: var(--ink);
+}
+.theme-option {
+  color: var(--ink-2);
+}
+
+/* ---------- 空状态 / 校验提示 / 媒体兜底 ---------- */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-6) var(--space-4);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: var(--space-2);
+  border-radius: 50%;
+  background: var(--well-strong);
+  color: var(--primary-ink);
+}
+.empty-icon svg {
+  width: 26px;
+  height: 26px;
+}
+.empty-state b {
+  max-width: 100%;
+  color: var(--ink);
+  font-size: var(--fs-md);
+  overflow-wrap: anywhere;
+}
+.empty-state small {
+  max-width: 28ch;
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-body);
+}
+.empty-state button {
+  margin-top: var(--space-3);
+}
+.form-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+}
+.form-hint svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  margin-top: 1px;
+  color: var(--ink-3);
+}
+.form-hint.error,
+.form-hint.error svg {
+  color: var(--danger);
+}
+.field > span,
+.field > label {
+  color: var(--ink-2);
+}
+.field > span:has(.count) {
+  display: flex;
+  justify-content: space-between;
+}
+.count {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.rule-chips-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 1.5px dashed var(--line-strong);
+  color: var(--ink-2);
+  text-align: center;
+}
+.rule-chips-empty svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.media-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--r-md);
+}
+.gallery-image .media-frame {
+  border: 0;
+  border-radius: 0;
+}
+.media-frame:not(.loaded):not(.broken)::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, var(--chip) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  content: '';
+}
+.media-frame img {
+  width: 100%;
+}
+.gallery-image .media-frame img,
+.gallery-image .media-broken {
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+.memory-detail-photo img {
+  object-fit: contain;
+  -webkit-touch-callout: none;
+}
+.media-broken {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 160px;
+  color: var(--ink-3);
+}
+.media-broken svg {
+  width: 32px;
+  height: 32px;
+}
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ---------- 文本边界：长文本不撑破布局 ---------- */
+.today-list,
+.record-list,
+.memory-list,
+.page-actions,
+.login-actions,
+.memory-detail-actions,
+.memory-body,
+.dock-menu {
+  grid-template-columns: minmax(0, 1fr);
+}
+.today-list > *,
+.record-list > *,
+.memory-list > *,
+.tile-grid > *,
+.card > *,
+.zone-card > *,
+.field > * {
+  min-width: 0;
+}
+.today-name,
+.gallery-caption b,
+.child-pick b,
+.goal-card b,
+.detail-hero h2,
+.travel-empty h3,
+.summary-child-name,
+.record b,
+.record .record-note {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.head-bubble:not(.ration-bubble) {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.head-bubble,
+.chat-bubble,
+.gallery-note,
+.memory-note-inline,
+.plan-criteria,
+.plan-head h3,
+.goal-card small,
+dialog p,
+.toast span {
+  overflow-wrap: anywhere;
+}
+
+/* ---------- 微光白玉系统：统一海拔、受光边缘与模块物料感 ---------- */
+/* Apply the same curvature to every existing rounded surface, including
+   scoped components and their pseudo-elements. Square edges stay square. */
+@supports (corner-shape: superellipse(1.25)) {
+  *,
+  *::before,
+  *::after {
+    corner-shape: superellipse(1.25);
+  }
+}
+
+.card,
+.pet-card,
+.zone-card,
+.home-zone > .chat-panel,
+.empty-state--card {
+  border-color: var(--glass-edge);
+  background:
+    linear-gradient(145deg, var(--panel-glint), transparent 38%),
+    var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.card::selection,
+.pet-card::selection {
+  background: var(--primary-soft);
+}
+
+.app-header {
+  border-bottom: 1px solid var(--glass-edge);
+  background:
+    linear-gradient(180deg, var(--header-glint), transparent),
+    var(--header-bg);
+  box-shadow:
+    inset 0 -1px 0 rgba(var(--ink-rgb), 0.035),
+    0 10px 30px -24px rgba(var(--ink-rgb), 0.32);
+}
+
+.tabbar {
+  border-top-color: var(--glass-edge);
+  background:
+    linear-gradient(180deg, var(--tab-glint), transparent 58%),
+    var(--glass-strong);
+  box-shadow:
+    inset 0 1px 0 var(--inner-hi),
+    0 -16px 34px -28px rgba(var(--ink-rgb), 0.32);
+}
+
+dialog,
+.ui-select-menu,
+.plan-menu {
+  border-color: var(--glass-edge);
+  background:
+    linear-gradient(145deg, var(--float-glint), transparent 42%),
+    var(--glass-strong);
+}
+
+:where(button):not(.ghost, .tabbar button, .app-header button) {
+  box-shadow: none;
+}
+
+button.primary {
+  background: var(--gloss), var(--primary-gradient);
+  color: var(--on-action);
+  box-shadow: var(--shadow-btn);
+}
+
+button.danger-fill,
+button.danger.recording,
+button.primary.danger {
+  background: var(--gloss), var(--danger-gradient);
+  color: var(--on-danger);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    0 12px 24px -14px rgba(207, 96, 116, 0.72);
+}
+
+button.secondary {
+  border: 1px solid rgba(var(--p-rgb), 0.14);
+  background: var(--primary-soft);
+}
+
+.icon-button,
+.audio-speed,
+.audio-download,
+.pagination button {
+  background: var(--chip);
+  box-shadow: none;
+}
+
+:where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']), textarea, select),
+.stepper,
+.ui-select-trigger,
+.date-trigger,
+.search-field {
+  border-color: var(--inner-edge);
+  background: var(--fill);
+  box-shadow: none;
+}
+
+:where(input, textarea, select):focus,
+.stepper:focus-within,
+.search-field:focus-within {
+  border-color: rgba(var(--p-rgb), 0.52);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.ios-switch {
+  box-shadow:
+    inset 0 1px 3px rgba(var(--ink-rgb), 0.2),
+    inset 0 -1px 0 var(--inner-hi);
+}
+.ios-switch:checked {
+  background: var(--primary-gradient);
+  box-shadow:
+    inset 0 1px 2px rgba(var(--ink-rgb), 0.12),
+    0 0 14px -5px var(--glow);
+}
+.ios-switch::after {
+  box-shadow:
+    0 1px 2px rgba(20, 25, 35, 0.16),
+    0 4px 10px rgba(20, 25, 35, 0.14);
+}
+
+.segmented:not(.page-tabs),
+.pagination {
+  border: 1px solid var(--inner-edge);
+  background: var(--well);
+  box-shadow: none;
+}
+.pagination-shell .pagination-stepper {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  padding: var(--space-1);
+  border-radius: var(--r-md);
+}
+.pagination-shell .pagination-stepper button {
+  background: var(--surface);
+  box-shadow: none;
+}
+.pagination-shell .pagination-stepper button:disabled {
+  background: transparent;
+}
+.pagination-shell .pagination-stepper span {
+  color: var(--ink);
+}
+.segmented:not(.page-tabs) button.active {
+  background: var(--raised);
+  box-shadow: 0 1px 3px rgba(var(--ink-rgb), 0.1);
+}
+
+.chip.active,
+.rule-chip.active,
+.avatar-choices button.active,
+.days label:has(input:checked) {
+  background: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px rgba(var(--p-rgb), 0.34);
+}
+
+/* 宠物舞台：环境光、接触阴影与一体化悬浮胶囊。 */
+.pet-stage,
+.home-orbit {
+  isolation: isolate;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background:
+    radial-gradient(58% 54% at 50% 43%, rgba(var(--p-rgb), 0.16), transparent 72%),
+    radial-gradient(70% 38% at 50% 88%, var(--orb-3), transparent 74%),
+    linear-gradient(165deg, rgba(255, 255, 255, 0.18), var(--well));
+  box-shadow:
+    0 18px 42px -34px rgba(var(--p-rgb), 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -28px 60px -46px var(--glow);
+}
+.pet-stage::before {
+  z-index: 0;
+  bottom: 9%;
+  width: min(76%, 330px);
+  background:
+    radial-gradient(closest-side, rgba(var(--p-rgb), 0.22), transparent 72%);
+  opacity: 0.72;
+  filter: blur(2px);
+}
+.pet-stage::after {
+  display: block;
+  z-index: 0;
+  bottom: 12%;
+  width: min(48%, 210px);
+  height: 22px;
+  background: radial-gradient(
+    ellipse,
+    rgba(var(--ink-rgb), 0.2),
+    rgba(var(--p-rgb), 0.1) 42%,
+    transparent 74%
+  );
+  opacity: 0.62;
+  filter: blur(8px);
+}
+.live-pet {
+  filter: drop-shadow(0 16px 18px rgba(var(--ink-rgb), 0.1));
+}
+.pet-card canvas.pet,
+.detail-swipe-stage {
+  background:
+    radial-gradient(65% 56% at 50% 54%, rgba(var(--p-rgb), 0.14), transparent 72%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.22), var(--well));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.58),
+    inset 0 -18px 34px -28px var(--glow);
+}
+.pet-dock {
+  border-color: var(--glass-edge);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.34), transparent 52%),
+    var(--glass-strong);
+  box-shadow: var(--shadow-float);
+}
+.dock-group + .dock-group {
+  border-top-color: var(--line);
+}
+.dock-item {
+  color: var(--primary-ink);
+}
+.dock-item.active,
+.dock-trigger.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--p-rgb), 0.18),
+    0 0 16px -8px var(--glow);
+}
+
+/* 仪表盘、四宫格与列表对齐。 */
+.plan-card,
+.goal-card,
+.today-goal {
+  border-color: var(--inner-edge);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.28), transparent 45%),
+    var(--well);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.62),
+    0 8px 20px -18px rgba(var(--ink-rgb), 0.36);
+}
+.plan-head h3,
+.goal-card b {
+  letter-spacing: -0.015em;
+}
+.record-meta .tag {
+  padding: 3px 7px;
+  border: 1px solid var(--inner-edge);
+  border-radius: var(--r-pill);
+  background: var(--chip);
+}
+.plan-card .card-corner-action,
+.gallery-card .card-corner-action {
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: none;
+}
+.card-corner-action:hover {
+  color: var(--primary-ink);
+}
+.card-corner-action:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -3px;
+}
+.bar {
+  box-shadow:
+    inset 0 1px 2px rgba(var(--ink-rgb), 0.12),
+    0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.bar i {
+  background: var(--gloss), var(--primary-gradient);
+  box-shadow: 0 0 12px -4px var(--glow);
+}
+
+.footprints-gallery .record-list > .swipe-row,
+.child-row {
+  border-color: var(--inner-edge);
+}
+.record-mark {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.7), transparent 34%),
+    var(--success-soft);
+  box-shadow:
+    inset 0 1px 0 var(--inner-hi),
+    0 6px 14px -11px var(--success);
+}
+.record-mark.neg {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.62), transparent 34%),
+    var(--danger-soft);
+  box-shadow:
+    inset 0 1px 0 var(--inner-hi),
+    0 6px 14px -11px var(--danger);
+}
+.record .score {
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  background: var(--success-soft);
+  text-align: center;
+}
+.record .score.neg {
+  background: var(--danger-soft);
+}
+
+/* 回忆卡片模拟带浮雕边缘的相纸，音频控件使用微光声波。 */
+.gallery-card {
+  border-color: rgba(255, 255, 255, 0.86);
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.46), transparent 42%),
+    color-mix(in srgb, var(--surface-solid) 88%, var(--tint-2));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.94),
+    0 3px 6px rgba(var(--ink-rgb), 0.06),
+    0 20px 38px -26px rgba(var(--ink-rgb), 0.34);
+}
+.gallery-image {
+  border: 1px solid var(--inner-edge);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+    0 7px 18px -14px rgba(var(--ink-rgb), 0.42);
+}
+.memory-note-inline {
+  box-shadow: var(--shadow-inner);
+}
+.card .audio-player .audio-play,
+.card .audio-player .audio-speed,
+.card .audio-player .audio-download {
+  border-color: var(--inner-edge);
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.54), transparent 34%),
+    var(--chip);
+  box-shadow:
+    inset 0 1px 0 var(--inner-hi),
+    0 8px 16px -12px rgba(var(--ink-rgb), 0.42);
+}
+.audio-player .audio-wave i {
+  background: color-mix(in srgb, var(--primary) 24%, var(--line-strong));
+  box-shadow: 0 0 5px -2px var(--glow);
+}
+.audio-player .audio-wave i.heard {
+  background: var(--primary);
+  box-shadow: 0 0 8px -2px var(--glow);
+}
+
+/* 设置采用 Inset Grouped 物料，主题预览是微缩立体界面。 */
+.settings-card,
+.companion-settings,
+.child-list {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.28), transparent 42%),
+    var(--surface);
+}
+.setting + .setting,
+.child-row + .child-row {
+  border-top-color: var(--line);
+}
+.setting > button:active,
+.setting > label:active {
+  background: var(--chip);
+}
+.theme-option {
+  border-color: var(--inner-edge);
+  background: var(--surface-solid);
+  box-shadow: 0 5px 16px -14px rgba(var(--ink-rgb), 0.3);
+}
+.theme-preview {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.66),
+    0 9px 18px -14px rgba(var(--ink-rgb), 0.46);
+}
+.theme-option.active {
+  box-shadow:
+    inset 0 0 0 1px var(--swatch-primary),
+    0 0 0 3px rgba(var(--p-rgb), 0.1);
+}
+
+.tile-add,
+.rule-chips-empty,
+.today-empty {
+  border-color: rgba(var(--p-rgb), 0.3);
+  background: var(--primary-soft);
+  box-shadow: none;
+}
+.empty-icon {
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.64), transparent 34%),
+    var(--well-strong);
+  box-shadow:
+    inset 0 1px 0 var(--inner-hi),
+    0 12px 24px -18px var(--glow);
+}
+
+:root[data-theme='starry'] .card,
+:root[data-theme='starry'] .pet-card,
+:root[data-theme='starry'] .zone-card,
+:root[data-theme='starry'] .home-zone > .chat-panel {
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), transparent 42%),
+    var(--surface);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    0 3px 8px rgba(0, 0, 0, 0.18),
+    0 20px 44px -24px rgba(0, 0, 0, 0.78);
+}
+
+/* ---------- 小屏与矮屏 ---------- */
+@media (max-width: 359px) {
+  .pet-dock {
+    right: var(--space-2);
+  }
+  .dock-item {
+    width: 32px;
+  }
+}
+@media (max-height: 680px) {
+  :root {
+    --zone: 188px;
+  }
+  .dock-item {
+    height: 32px;
+  }
+  .dock-item span {
+    display: none;
+  }
+}
+
+/* Mobile Safari pays a high compositing cost for many simultaneous blur layers.
+   Keep blur on navigation and overlays, while cards use the same opaque material. */
+
+/* ---------- 降级：关闭玻璃效果或不支持 backdrop-filter ---------- */
+.no-glass *,
+.no-glass *::before,
+.no-glass *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.no-glass .card,
+.no-glass .pet-card,
+.no-glass .zone-card,
+.no-glass .search-field,
+.no-glass .segmented:not(.page-tabs),
+.no-glass .pet-dock,
+.no-glass .tabbar,
+.no-glass .app-header,
+.no-glass dialog,
+.no-glass .ui-select-menu,
+.no-glass .plan-menu,
+.no-glass .dock-menu {
+  background-color: var(--surface-solid);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .card,
+  .pet-card,
+  .zone-card,
+  .search-field,
+  .segmented:not(.page-tabs),
+  .pet-dock,
+  .tabbar,
+  .app-header,
+  dialog,
+  .ui-select-menu,
+  .plan-menu,
+  .dock-menu {
+    background-color: var(--surface-solid);
+  }
+}
+
+

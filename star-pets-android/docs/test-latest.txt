@@ -1,0 +1,269 @@
+
+> star-pets-android@1.1.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# Subtest: legacy default deductions migrate once and deleted rules stay deleted
+ok 1 - legacy default deductions migrate once and deleted rules stay deleted
+  ---
+  duration_ms: 12.6215
+  ...
+# Subtest: rule search separates signs and clamps pages after filtering
+ok 2 - rule search separates signs and clamps pages after filtering
+  ---
+  duration_ms: 0.4965
+  ...
+# Subtest: AI choreography allows only bounded known actions and never executable payloads
+ok 3 - AI choreography allows only bounded known actions and never executable payloads
+  ---
+  duration_ms: 1.3302
+  ...
+# Subtest: malformed AI content falls back to a valid local plan
+ok 4 - malformed AI content falls back to a valid local plan
+  ---
+  duration_ms: 1.5276
+  ...
+# Subtest: local bilingual replies and six-pose repeat avoidance work without API
+ok 5 - local bilingual replies and six-pose repeat avoidance work without API
+  ---
+  duration_ms: 1.0804
+  ...
+# Subtest: companion settings persist, reject unsupported modes, and never change score
+ok 6 - companion settings persist, reject unsupported modes, and never change score
+  ---
+  duration_ms: 0.8007
+  ...
+# Subtest: growth starts gently and each successive pet requires more experience
+ok 7 - growth starts gently and each successive pet requires more experience
+  ---
+  duration_ms: 5.8725
+  ...
+# Subtest: photo remarks change independently from scores and stored media
+ok 8 - photo remarks change independently from scores and stored media
+  ---
+  duration_ms: 9.9095
+  ...
+# Subtest: quick release before native cancel finishes never starts recording
+ok 9 - quick release before native cancel finishes never starts recording
+  ---
+  duration_ms: 4.8599
+  ...
+# Subtest: hold then release stops capture and fills draft without confirmation notice
+ok 10 - hold then release stops capture and fills draft without confirmation notice
+  ---
+  duration_ms: 2.3179
+  ...
+# Subtest: slide up cancels recording and keeps prior text
+ok 11 - slide up cancels recording and keeps prior text
+  ---
+  duration_ms: 1.3375
+  ...
+# Subtest: pointer interruption cancels and cannot submit recognized text
+ok 12 - pointer interruption cancels and cannot submit recognized text
+  ---
+  duration_ms: 1.2322
+  ...
+# Subtest: habit memory links to score, reversal is visible, repeated reversal rejected
+ok 13 - habit memory links to score, reversal is visible, repeated reversal rejected
+  ---
+  duration_ms: 13.8383
+  ...
+# Subtest: only current calendar month is reversible; prior month rejected without mutation
+ok 14 - only current calendar month is reversible; prior month rejected without mutation
+  ---
+  duration_ms: 3.5709
+  ...
+# Subtest: targeted reversal reduces only selected pet, clamps zero and subsequent score refills it
+ok 15 - targeted reversal reduces only selected pet, clamps zero and subsequent score refills it
+  ---
+  duration_ms: 1.3486
+  ...
+# Subtest: 18 unique pets, 10 monotone levels, five visible evolution stages
+ok 16 - 18 unique pets, 10 monotone levels, five visible evolution stages
+  ---
+  duration_ms: 3.2404
+  ...
+# Subtest: immutable commands and persistent revision
+ok 17 - immutable commands and persistent revision
+  ---
+  duration_ms: 9.8967
+  ...
+# Subtest: level gates, max overflow and new adoption conserve all points
+ok 18 - level gates, max overflow and new adoption conserve all points
+  ---
+  duration_ms: 2.4391
+  ...
+# Subtest: all pets maxed retains overflow without clearing lifetime score
+ok 19 - all pets maxed retains overflow without clearing lifetime score
+  ---
+  duration_ms: 15.2376
+  ...
+# Subtest: deduction preserves XP, enforces floor and records reason
+ok 20 - deduction preserves XP, enforces floor and records reason
+  ---
+  duration_ms: 1.5997
+  ...
+# Subtest: duplicate token, decimal, zero, nonfinite, oversized score rejected
+ok 21 - duplicate token, decimal, zero, nonfinite, oversized score rejected
+  ---
+  duration_ms: 1.4784
+  ...
+# Subtest: cross-pet correction replays allocation and preserves adoption history
+ok 22 - cross-pet correction replays allocation and preserves adoption history
+  ---
+  duration_ms: 1.9578
+  ...
+# Subtest: correction cannot create a negative balance
+ok 23 - correction cannot create a negative balance
+  ---
+  duration_ms: 1.1502
+  ...
+# Subtest: daily rewards exactly once with correction allowing redo
+ok 24 - daily rewards exactly once with correction allowing redo
+  ---
+  duration_ms: 3.3757
+  ...
+# Subtest: weekly target covers multiple days and resets Monday
+ok 25 - weekly target covers multiple days and resets Monday
+  ---
+  duration_ms: 2.3416
+  ...
+# Subtest: schedule ranges, weekday, interval, pause and disabled module
+ok 26 - schedule ranges, weekday, interval, pause and disabled module
+  ---
+  duration_ms: 1.3308
+  ...
+# Subtest: habit historical names and points remain unchanged
+ok 27 - habit historical names and points remain unchanged
+  ---
+  duration_ms: 0.6613
+  ...
+# Subtest: future backfill and invalid schedule rejected
+ok 28 - future backfill and invalid schedule rejected
+  ---
+  duration_ms: 1.4233
+  ...
+# Subtest: ration once per day; feed independent of points
+ok 29 - ration once per day; feed independent of points
+  ---
+  duration_ms: 1.4687
+  ...
+# Subtest: sleep/boarding pauses hunger, rollback pauses further decay
+ok 30 - sleep/boarding pauses hunger, rollback pauses further decay
+  ---
+  duration_ms: 1.1905
+  ...
+# Subtest: large history pagination search date and last page clamping
+ok 31 - large history pagination search date and last page clamping
+  ---
+  duration_ms: 16.825
+  ...
+# Subtest: nickname rename and memory snapshot survive later changes
+ok 32 - nickname rename and memory snapshot survive later changes
+  ---
+  duration_ms: 1.1059
+  ...
+# Subtest: invalid import state, duplicate ledger and unknown reversal rejected
+ok 33 - invalid import state, duplicate ledger and unknown reversal rejected
+  ---
+  duration_ms: 0.4264
+  ...
+# Subtest: Vue reactive state works for hunger and immutable commands
+ok 34 - Vue reactive state works for hunger and immutable commands
+  ---
+  duration_ms: 205.3192
+  ...
+# Subtest: frequency edits count actual completion days and prevent duplicate rewards
+ok 35 - frequency edits count actual completion days and prevent duplicate rewards
+  ---
+  duration_ms: 1.3788
+  ...
+# Subtest: impossible dates rejected even when Date.parse normalizes them
+ok 36 - impossible dates rejected even when Date.parse normalizes them
+  ---
+  duration_ms: 0.7918
+  ...
+# Subtest: corrupt XP, unsafe imported URLs, malformed media and settings rejected
+ok 37 - corrupt XP, unsafe imported URLs, malformed media and settings rejected
+  ---
+  duration_ms: 1.5936
+  ...
+# Subtest: maxed companions never become hungry
+ok 38 - maxed companions never become hungry
+  ---
+  duration_ms: 0.7805
+  ...
+# Subtest: 25 rules paginate 12/12/1, filter signs and clamp stale page
+ok 39 - 25 rules paginate 12/12/1, filter signs and clamp stale page
+  ---
+  duration_ms: 2.9522
+  ...
+# Subtest: DeepSeek config fixes official endpoint, retains saved key and rejects invalid data
+ok 40 - DeepSeek config fixes official endpoint, retains saved key and rejects invalid data
+  ---
+  duration_ms: 1.7316
+  ...
+# Subtest: serial state saves preserve ordering and recover after rejected write
+ok 41 - serial state saves preserve ordering and recover after rejected write
+  ---
+  duration_ms: 2.1986
+  ...
+# Subtest: Gemini uses fixed official endpoint and does not accept custom names or models
+ok 42 - Gemini uses fixed official endpoint and does not accept custom names or models
+  ---
+  duration_ms: 0.615
+  ...
+# Subtest: old single-child data migrates without changing its scores
+ok 43 - old single-child data migrates without changing its scores
+  ---
+  duration_ms: 13.0597
+  ...
+# Subtest: two child profiles isolate scores, habits, memories, pets and settings
+ok 44 - two child profiles isolate scores, habits, memories, pets and settings
+  ---
+  duration_ms: 7.0331
+  ...
+# Subtest: manual score date is preserved and invalid future date is rejected
+ok 45 - manual score date is preserved and invalid future date is rejected
+  ---
+  duration_ms: 1.2147
+  ...
+# Subtest: all ten profile ranks obey star and sun boundaries
+ok 46 - all ten profile ranks obey star and sun boundaries
+  ---
+  duration_ms: 3.4387
+  ...
+# Subtest: 18 original pets × 5 stages bind normalized mesh weights and independent joints
+ok 47 - 18 original pets × 5 stages bind normalized mesh weights and independent joints
+  ---
+  duration_ms: 1460.0752
+  ...
+# Subtest: eight photo poses differ at joints; speech changes jaw geometry only
+ok 48 - eight photo poses differ at joints; speech changes jaw geometry only
+  ---
+  duration_ms: 13.9878
+  ...
+# Subtest: ear weights affect original mesh and nuanced poses stay finite with fixed root
+ok 49 - ear weights affect original mesh and nuanced poses stay finite with fixed root
+  ---
+  duration_ms: 46.5002
+  ...
+# Subtest: travel persists deadline, marks use, returns once and deletes memory without resetting usage
+ok 50 - travel persists deadline, marks use, returns once and deletes memory without resetting usage
+  ---
+  duration_ms: 15.982
+  ...
+# Subtest: return while another child is active writes only origin child and stays idempotent after deletion
+ok 51 - return while another child is active writes only origin child and stays idempotent after deletion
+  ---
+  duration_ms: 6.0168
+  ...
+1..51
+# tests 51
+# suites 0
+# pass 51
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2469.1863

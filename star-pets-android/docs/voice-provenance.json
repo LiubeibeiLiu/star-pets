@@ -1,0 +1,70 @@
+{
+  "scope": "Vendored offline ASR and runtime; no bundled generative language model or Kokoro TTS",
+  "sources": {
+    "sherpa": "https://github.com/k2-fsa/sherpa-onnx/releases/tag/v2.0.1",
+    "asr": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-int8-2024-07-17.tar.bz2",
+    "kotlin": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.2.20/kotlin-stdlib-2.2.20.jar"
+  },
+  "files": [
+    {
+      "path": "libs/kotlin-stdlib-2.2.20.jar",
+      "bytes": 1761444,
+      "sha256": "8836ccffd3585fadda9901244b20d42901d2f3cd581058d8434e2ffabcf3a3e7"
+    },
+    {
+      "path": "libs/sherpa-onnx-2.0.1.jar",
+      "bytes": 245045,
+      "sha256": "0ee4991c56c19ef5a8a573b01891193d7298ffe7ebcc68f42b944361d8869d93"
+    },
+    {
+      "path": "jniLibs/arm64-v8a/libonnxruntime.so",
+      "bytes": 22249560,
+      "sha256": "33847ad43bffe204699fd4a27f7f3603452a8cdaf2f9a44983a0bc31ffcf2da1"
+    },
+    {
+      "path": "jniLibs/arm64-v8a/libsherpa-onnx-jni.so",
+      "bytes": 4609320,
+      "sha256": "5db8f89f12b2c900a98c9e01e00c475c59db35e9437a62e36e27839ec48b5575"
+    },
+    {
+      "path": "jniLibs/armeabi-v7a/libonnxruntime.so",
+      "bytes": 15359592,
+      "sha256": "7a8f17a707e52e0ac3a026be319272876d9eae61f4bb19585292772d785f7744"
+    },
+    {
+      "path": "jniLibs/armeabi-v7a/libsherpa-onnx-jni.so",
+      "bytes": 3381796,
+      "sha256": "d45f377249d5c3191b91de6ba6edffcd83e4cf7e109bc523b212db341581c2a8"
+    },
+    {
+      "path": "jniLibs/x86/libonnxruntime.so",
+      "bytes": 26491148,
+      "sha256": "fcb6cd80415f7951e58fdd8158a238946dce3710d5fee492b67174d5131f9eee"
+    },
+    {
+      "path": "jniLibs/x86/libsherpa-onnx-jni.so",
+      "bytes": 5261876,
+      "sha256": "1eb37aaa10e377f6635086bec09685859ca8c7465460fdf9346a21eba90a4ee4"
+    },
+    {
+      "path": "jniLibs/x86_64/libonnxruntime.so",
+      "bytes": 25581120,
+      "sha256": "087e84297cad64acb823c3d901d6e0cc934e91add7cdb20da802cd1c0bea5c3e"
+    },
+    {
+      "path": "jniLibs/x86_64/libsherpa-onnx-jni.so",
+      "bytes": 5053592,
+      "sha256": "878d61116f244131263eec24297ef05bf508d02bccdede2a4e3ad3202bbdaa48"
+    },
+    {
+      "path": "assets/voice/asr/model.int8.onnx",
+      "bytes": 239233841,
+      "sha256": "c71f0ce00bec95b07744e116345e33d8cbbe08cef896382cf907bf4b51a2cd51"
+    },
+    {
+      "path": "assets/voice/asr/tokens.txt",
+      "bytes": 315894,
+      "sha256": "f449eb28dc567533d7fa59be34e2abca8784f771850c78a47fb731a31429a1dc"
+    }
+  ]
+}

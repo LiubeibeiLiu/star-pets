@@ -1,0 +1,5 @@
+宠物场景下移与成长门槛减半（2026-10-29）
+宠物区增加顶部间距，展示高度随可用高度调整；名称等级避免与底部突出按钮重叠。
+满级门槛：第n只=round(60*(1+0.35*(n-1)+0.05*(n-1)^2))，前六只60/84/114/150/192/240。首只各级累计门槛0/2/4/8/13/19/28/38/48/60。
+成长迁移版本3：既有门槛仅降低，积分流水不变，经验重新分配并结转。typecheck PASS，test 33/33 PASS，build:web PASS；Android真机 NOT_RUN。
+关键文件：ui/src/controls.css、ui/src/catalog.js、ui/src/model.js、tests/growth.test.mjs、tests/model.test.mjs。
