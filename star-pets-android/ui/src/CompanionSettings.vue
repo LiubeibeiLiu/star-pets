@@ -37,6 +37,11 @@ const slots = ref<any[]>([blank(0)]),
 const keyVisible = ref(false),
   previousProvider = ref('deepseek');
 const chosen = computed(() => slots.value[editSlot.value]);
+// 轻震反馈（15ms）：模板内不能直接写 navigator（vue-tsc 会当作成员属性），
+// 与 QuickScore.vue 的 navigator.vibrate?.(20) 同一写法，只是包一层。
+function buzz() {
+  navigator.vibrate?.(15);
+}
 function savePreference() {
   emit('save', { ...local.value });
 }
@@ -142,25 +147,37 @@ onMounted(async () => {
   <section class="card companion-settings"
     ><h2 class="card-title">互动偏好</h2>
     <div class="setting"
-      ><label
-        ><span>云端智能对话</span
-        ><input
-          class="ios-switch"
-          type="checkbox"
-          v-model="local.chatEnabled"
-          @change="savePreference" /></label
+      ><span class="setting-label">云端智能对话</span
+      ><button
+        type="button"
+        class="plan-toggle"
+        :class="{ off: !local.chatEnabled }"
+        :aria-pressed="local.chatEnabled"
+        aria-label="云端智能对话"
+        @click="
+          buzz();
+          local.chatEnabled = !local.chatEnabled;
+          savePreference();
+        "
+        ><Icon name="power" /></button
     ></div>
     <div class="setting"
-      ><label
-        ><span>朗读伙伴回复</span
-        ><input
-          class="ios-switch"
-          type="checkbox"
-          v-model="local.voice"
-          @change="savePreference" /></label
+      ><span class="setting-label">朗读伙伴回复</span
+      ><button
+        type="button"
+        class="plan-toggle"
+        :class="{ off: !local.voice }"
+        :aria-pressed="local.voice"
+        aria-label="朗读伙伴回复"
+        @click="
+          buzz();
+          local.voice = !local.voice;
+          savePreference();
+        "
+        ><Icon name="power" /></button
     ></div>
     <div class="setting"
-      ><span>对话语言</span
+      ><span class="setting-label">对话语言</span
       ><UiSelect
         v-model="local.language"
         label="对话语言"
@@ -171,7 +188,7 @@ onMounted(async () => {
         @change="savePreference"
     /></div>
     <div class="setting"
-      ><span>动作风格</span
+      ><span class="setting-label">动作风格</span
       ><UiSelect
         v-model="local.actionMode"
         label="动作风格"
@@ -182,7 +199,7 @@ onMounted(async () => {
         @change="savePreference"
     /></div>
     <div class="setting"
-      ><span>主动问候</span
+      ><span class="setting-label">主动问候</span
       ><UiSelect
         v-model="local.proactive"
         label="主动问候频率"
@@ -194,7 +211,7 @@ onMounted(async () => {
         @change="savePreference"
     /></div>
     <div class="setting"
-      ><span>习惯陪伴</span
+      ><span class="setting-label">习惯陪伴</span
       ><UiSelect
         v-model="local.habitFocus"
         label="习惯陪伴方式"
@@ -206,7 +223,7 @@ onMounted(async () => {
         @change="savePreference"
     /></div>
     <div class="setting"
-      ><span>表达亲密度</span
+      ><span class="setting-label">表达亲密度</span
       ><UiSelect
         v-model="local.affection"
         label="表达亲密度"

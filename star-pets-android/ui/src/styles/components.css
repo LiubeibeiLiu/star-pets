@@ -19,6 +19,10 @@
   );
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  /* 主题切换只过渡颜色类属性；reduceMotion 下 --t-base 归零，过渡自动消失。 */
+  transition:
+    background-color var(--t-base) var(--ease),
+    color var(--t-base) var(--ease);
 }
 .shell::-webkit-scrollbar {
   display: none;
@@ -534,6 +538,63 @@ input[type='range'] {
   justify-content: space-between;
   min-height: var(--control);
 }
+/* 新建日常表现的图标选择器：分组网格，可滚动；选中态主色描边 + 淡底。 */
+.icon-picker {
+  display: grid;
+  gap: var(--space-2);
+  max-height: 272px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.icon-pick-group > p {
+  margin: 0 0 var(--space-1);
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+}
+.icon-pick-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+.icon-pick {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+.icon-pick img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.icon-pick.selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+.icon-pick.auto {
+  justify-self: start;
+  aspect-ratio: auto;
+  padding: var(--space-1) var(--space-3);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.form-hint .hint-3d {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: -4px;
+}
 .two-col {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -733,6 +794,42 @@ input[type='range'] {
   color: var(--primary-ink);
   font-weight: 700;
 }
+/* B3 分段切换滑动指示：两钮分段时用一条独立指示条（::before）代替
+   激活钮直接换底色；指示条按激活项滑动，transform 过渡复用 --t-base/--ease，
+   reduceMotion 下令牌归零即瞬时到位。只对恰好两钮的分段生效，三处共用
+   （习惯页签、回忆页签、伙伴筛选）同为两钮，故改组件本身即可。 */
+.segmented:has(> button:nth-child(2):last-child) {
+  position: relative;
+}
+.segmented:has(> button:nth-child(2):last-child)::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  top: var(--segment-pad);
+  bottom: var(--segment-pad);
+  left: var(--segment-pad);
+  width: calc((100% - var(--segment-pad) * 2 - var(--space-1)) / 2);
+  border-radius: calc(var(--segment-radius) - var(--segment-pad) - var(--segment-border));
+  background: var(--raised);
+  box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.08), 0 4px 12px -6px rgba(var(--ink-rgb), 0.25);
+  transition: transform var(--t-base) var(--ease);
+  pointer-events: none;
+}
+.segmented:has(> button:nth-child(2):last-child):has(> button:nth-child(2).active)::before {
+  transform: translateX(calc(100% + var(--space-1)));
+}
+.segmented:has(> button:nth-child(2):last-child) button {
+  position: relative;
+  z-index: 1;
+}
+.segmented:has(> button:nth-child(2):last-child) button.active {
+  background: transparent;
+  box-shadow: none;
+}
+.segmented.page-tabs:has(> button:nth-child(2):last-child)::before {
+  background: var(--surface-solid);
+  box-shadow: 0 1px 4px rgba(var(--ink-rgb), 0.1);
+}
 .chip-group {
   display: flex;
   flex-wrap: wrap;
@@ -777,6 +874,19 @@ input[type='range'] {
   border-color: var(--line);
   color: var(--ink-2);
   font-size: var(--fs-sm);
+}
+/* 回忆筛选 chips：图标 + 文字横排（仅等宽回忆筛选组；其他 chips 仍是纯文字）。 */
+.equal-chips .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+.chip-3d {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 .chip.active {
   border-color: var(--primary);
@@ -826,6 +936,15 @@ input[type='range'] {
   min-height: var(--control-sm);
   border-radius: var(--r-pill);
   font-size: var(--fs-sm);
+}
+/* 设置行里的下拉 pill：主色文字 + 主色淡底，不再是灰字浅底。 */
+.setting > .ui-select .ui-select-trigger {
+  background: var(--primary-soft);
+  border-color: transparent;
+  color: var(--primary-deep);
+}
+.setting > .ui-select .ui-select-trigger svg {
+  color: var(--primary-deep);
 }
 .ui-select-menu,
 .plan-menu {
@@ -1069,8 +1188,97 @@ dialog > p {
   font-weight: 700;
   text-align: center;
 }
+/* ---------- 分页滑动（Pager）：步进器已取消，只留圆点；列表左右滑动切页 ---------- */
+.pager-viewport {
+  touch-action: pan-y;
+  border-radius: var(--r-md);
+}
+.pager-viewport:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+/* 只在拖拽/动画/露边提示时裁剪，平时保持 visible，卡片里的弹出菜单（如计划“更多”）才不会被裁掉。 */
+.pager-viewport.clipped {
+  overflow: hidden;
+}
+.pager-viewport.dragging {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pager-viewport.swipeable {
+  cursor: grab;
+}
+/* 露边渐隐已删：右缘 10px mask 会把列表行的右圆角/边框渐隐成透明，
+   在单列通栏行上看起来像右侧被裁掉（卡片明明左右对称 20px，行右缘却
+   没显示完全）。可滑动的提示仍由挂载时的轻推动画（pager-peek）+ 小圆点承担。 */
+.pager-track {
+  will-change: transform;
+}
+/* 首次挂载的露边提示：轨道往左轻点一下再回来，演示可以横滑。 */
+.pager-track.peek-hint {
+  animation: pager-peek calc(var(--t-slow) * 2) var(--ease);
+}
+@keyframes pager-peek {
+  0% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(-18px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+/* 圆点区下方留白：滚到底时圆点落在空白处，不再压住最后一行卡片；
+   96px ≥ 圆点 sticky 偏移（约 84px），滚到底后圆点与末行留 12px 空隙。 */
+.pager {
+  padding-bottom: 96px;
+}
 .pagination-dots {
-  display: none;
+  /* sticky 贴在网格底部上方：随页面滚，但始终在底栏之上可见；
+     滚动容器是 .shell（overflow-y: auto），圆点是 .pager 的直属子节点、
+     不在 overflow:hidden 的 viewport 内，sticky 能正常生效。
+     贴住时盖在卡片上，加淡色 pill 底 + 阴影保住可读性。 */
+  position: sticky;
+  bottom: calc(var(--tabbar) + var(--tabbar-gap) + var(--safe-bottom) + var(--space-3));
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  width: max-content;
+  margin: var(--space-3) auto 0;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.pagination-dots button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.pagination-dots button::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  background: rgba(var(--ink-rgb), 0.18);
+  transition:
+    background var(--t-fast) var(--ease),
+    transform var(--t-fast) var(--ease);
+}
+.pagination-dots button.active::after {
+  background: var(--primary);
+  transform: scale(1.25);
 }
 .swipe-row {
   position: relative;

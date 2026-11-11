@@ -24,6 +24,6 @@ export const NAV_TABS = [
   ['habits', '习惯', 'habit'],
   ['photos', '回忆', 'camera'],
   ['home', '小窝', 'home'],
-  ['pets', '伙伴', 'pet'],
+  ['pets', '伙伴', 'cat'],
   ['settings', '设置', 'settings'],
 ] as const;

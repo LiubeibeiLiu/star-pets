@@ -1,4 +1,4 @@
-export const DEFAULT_THEME_ID = 'dayflower';
+export const DEFAULT_THEME_ID = 'milo';
 
 export const themes = Object.freeze([
   Object.freeze({
@@ -23,6 +23,22 @@ export const themes = Object.freeze([
     description: '柔和、梦幻，温柔陪伴成长时光',
     colors: Object.freeze(['#7C5CE6', '#B39EF5', '#EDE7FB']),
     background: '#FFFFFF',
+    darkSurface: false,
+  }),
+  Object.freeze({
+    id: 'milo',
+    name: '暖陶 Milo',
+    description: '温暖、现代，陶瓷质感的日常陪伴',
+    colors: Object.freeze(['#F2A88A', '#E8A85C', '#F7EDE3']),
+    background: '#F7EDE3',
+    darkSurface: false,
+  }),
+  Object.freeze({
+    id: 'azure',
+    name: '蔚蓝',
+    description: '清爽、现代，智能家居风的蓝色',
+    colors: Object.freeze(['#2B6CF6', '#FF8A3D', '#F2F6FC']),
+    background: '#F2F6FC',
     darkSurface: false,
   }),
 ]);

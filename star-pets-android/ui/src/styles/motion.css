@@ -3,6 +3,7 @@
 /* 按压：缩小 → 松手弹回 */
 :where(button),
 .pet-card,
+.gallery-card,
 .theme-option,
 .today-goal {
   transition:
@@ -92,7 +93,8 @@ dialog[open]::backdrop {
 .zone-card,
 .home-zone > .chat-panel,
 .empty-state,
-.form-hint {
+.form-hint,
+.login-card {
   animation: rise var(--t-slow) var(--ease) backwards;
 }
 .shell > :nth-child(3) {
@@ -135,6 +137,59 @@ dialog[open]::backdrop {
 /* 漂浮：小元素慢速上下浮动，吸引注意但不打扰 */
 .ration-bubble {
   animation: float 3.2s ease-in-out infinite;
+}
+/* 登录品牌图标：缓慢上下浮动；解锁成功时内层图标再播一次 pop。 */
+.brand-icon {
+  animation: float 3.2s ease-in-out infinite;
+}
+.brand-icon.unlock-pop .star-paw-mark {
+  animation: pop var(--t-slow) var(--spring);
+}
+/* 静态原画待机：低频低幅呼吸（仅 LivePet fallback 时挂 is-fallback）。 */
+.live-pet.is-fallback {
+  animation: pet-breathe 4s ease-in-out infinite;
+}
+@keyframes pet-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.015);
+  }
+}
+/* 外出态罗盘：指针缓慢摆动。 */
+.travel-icon img,
+.travel-icon svg {
+  animation: compass-sway 3s ease-in-out infinite;
+}
+@keyframes compass-sway {
+  0%,
+  100% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(8deg);
+  }
+}
+/* 等级提升：等级数字播一次 pop。 */
+.summary-stat .num.level-pop {
+  animation: pop var(--t-slow) var(--spring);
+}
+/* dock 展开：各项在 dock-actions-in 基础上逐项 stagger，每项 20ms。 */
+.dock-actions .dock-item {
+  animation: rise var(--t-base) var(--ease) backwards;
+  animation-delay: calc(var(--dock-i, 0) * 20ms);
+}
+/* 等级提升庆祝：舞台周围飘星，外层 rise 上浮淡入，内层 pop 轻弹，
+   每颗延迟错开 60ms。 */
+.celebrate-star {
+  animation: rise var(--t-slow) var(--ease) backwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+.celebrate-star i {
+  animation: pop var(--t-slow) var(--spring) backwards;
+  animation-delay: calc(var(--i, 0) * 60ms);
 }
 .head-bubble:not(.ration-bubble) {
   animation: bubble-in var(--t-slow) var(--spring);
@@ -217,6 +272,60 @@ body::before {
     box-shadow:
       inset 0 1px 0 var(--inner-hi),
       0 0 16px -8px var(--glow);
+  }
+}
+
+/* 点按：照片卡片按压缩放（与全局按钮按压同款 80ms），再进详情；
+   放 hover 块之后，桌面端 hover 与 active 同时命中时按压优先。 */
+.gallery-card:active {
+  transform: scale(0.98);
+  transition-duration: 80ms;
+}
+
+/* 今日计划卡片堆：换位用入场速度 + 弹簧，出场（飞走）用 140ms 快速度。 */
+.today-plan {
+  transition:
+    top var(--t-base) var(--spring),
+    transform var(--t-base) var(--spring),
+    opacity var(--t-fast) var(--ease);
+}
+.today-plan.leaving {
+  opacity: 0;
+  transform: translateY(-10px) scale(calc(0.97 - var(--stack-i, 0) * 0.03));
+  transition-duration: var(--t-fast), var(--t-fast), var(--t-fast);
+}
+/* +N 小 chip：从完成按钮飞到顶部进度条，落点后进度条闪一下。 */
+.quick-fly-chip {
+  animation: quick-fly var(--t-base) var(--ease) forwards;
+}
+@keyframes quick-fly {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  70% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.9;
+    transform: translate(calc(-50% + var(--fly-dx, 0px)), calc(-50% + var(--fly-dy, 0px))) scale(0.9);
+  }
+}
+.summary-progress.flash svg {
+  animation: progress-flash 480ms var(--ease);
+}
+@keyframes progress-flash {
+  0% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  40% {
+    filter: brightness(1.35);
+    transform: scale(1.03);
+  }
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
   }
 }
 

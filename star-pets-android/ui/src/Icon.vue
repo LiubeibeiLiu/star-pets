@@ -54,6 +54,7 @@ import Stop from '@mingcute/icons/core-regular/stop';
 import MapPin from '@mingcute/icons/core-regular/map-pin';
 import Calendar from '@mingcute/icons/core-regular/calendar';
 import Information from '@mingcute/icons/core-regular/information';
+import Power from '@mingcute/icons/core-regular/power';
 
 const props = defineProps<{ name: string }>();
 const icons: Record<string, IconDefinition> = {
@@ -110,6 +111,7 @@ const icons: Record<string, IconDefinition> = {
   'map-pin': MapPin,
   calendar: Calendar,
   information: Information,
+  power: Power,
 };
 const icon = computed(() => icons[props.name] || Star);
 const body = computed(() => renderIconBody(icon.value));

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UiSelect from './UiSelect.vue';
+import Icon from './Icon.vue';
 import { ref, onMounted, watch } from 'vue';
 import { renderSkinPose } from './pet-skin';
 import { POSES, choosePhotoPose } from './companion.js';
@@ -25,6 +26,11 @@ const x = ref(0.68),
 let photo: HTMLImageElement,
   pet: HTMLCanvasElement,
   drag = false;
+// 轻震反馈（15ms）：模板内不能直接写 navigator（vue-tsc 会当作成员属性），
+// 与 QuickScore.vue 的 navigator.vibrate?.(20) 同一写法，只是包一层。
+function buzz() {
+  navigator.vibrate?.(15);
+}
 function image(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const im = new Image();
@@ -153,12 +159,34 @@ onMounted(init);
           POSES.map(([value, label]) => ({ value, label }))
         " /></label></div
   ><button class="ghost wide" @click="shuffle">换一个姿势</button
-  ><label class="field inline"
+  ><div class="field inline"
     ><span>左右翻转</span
-    ><input class="ios-switch" type="checkbox" v-model="flip" /></label
-  ><label class="field inline"
+    ><button
+      type="button"
+      class="plan-toggle"
+      :class="{ off: !flip }"
+      :aria-pressed="flip"
+      aria-label="左右翻转"
+      @click="
+        buzz();
+        flip = !flip;
+      "
+      ><Icon name="power" /></button
+  ></div
+  ><div class="field inline"
     ><span>纪念相框</span
-    ><input class="ios-switch" type="checkbox" v-model="frame" /></label
+    ><button
+      type="button"
+      class="plan-toggle"
+      :class="{ off: !frame }"
+      :aria-pressed="frame"
+      aria-label="纪念相框"
+      @click="
+        buzz();
+        frame = !frame;
+      "
+      ><Icon name="power" /></button
+  ></div
   ><label class="field"
     ><span>合照标题</span><input v-model="caption" maxlength="30" placeholder="写下这一刻" /></label
   ><footer

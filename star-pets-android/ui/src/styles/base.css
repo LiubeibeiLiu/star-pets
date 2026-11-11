@@ -27,6 +27,10 @@ body {
   overflow: hidden;
   touch-action: manipulation;
   background: transparent;
+  /* 主题切换只过渡颜色类属性；reduceMotion 下 --t-base 归零，过渡自动消失。 */
+  transition:
+    background-color var(--t-base) var(--ease),
+    color var(--t-base) var(--ease);
 }
 /* 弥散网格光场 + 细颗粒：为毛玻璃提供可透出的环境深度。 */
 body::before,

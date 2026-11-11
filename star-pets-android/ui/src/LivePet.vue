@@ -17,6 +17,8 @@ const props = withDefaults(
 );
 const canvas = ref<HTMLCanvasElement>(),
   failed = ref(false);
+const emit = defineEmits<{ 'live-failed': [value: boolean] }>();
+watch(failed, (v) => emit('live-failed', v), { immediate: true });
 let rig: SkinRig | undefined,
   s: ReturnType<typeof skinStudio>,
   texture: Texture | undefined,
@@ -150,16 +152,12 @@ onBeforeUnmount(() => {
 });
 </script>
 <template>
-  <div class="live-pet"
+  <div class="live-pet" :class="{ 'is-fallback': failed && !reduceMotion }"
     ><canvas
       v-if="!failed"
       ref="canvas"
       :aria-label="`${pet.name} ${level}级 · 原画骨骼互动`"
       role="img"
-    /><template v-else
-      ><Pet :pet="pet" :level="level" /><small
-        >当前设备显示静态原画</small
-      ></template
-    ></div
+    /><template v-else><Pet :pet="pet" :level="level" /></template></div
   >
 </template>

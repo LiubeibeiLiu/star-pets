@@ -16,6 +16,7 @@ import Icon from './Icon.vue';
 import Pager from './Pager.vue';
 import AudioPlayer from './AudioPlayer.vue';
 import BrandMark from './BrandMark.vue';
+import TweenNumber from './TweenNumber.vue';
 import SwipeRow from './SwipeRow.vue';
 import UiDate from './UiDate.vue';
 import Avatar from './Avatar.vue';
@@ -34,6 +35,7 @@ import { preferences } from './companion.js';
 import { NAV_TABS, TITLES, TOP_VIEWS } from './navigation';
 import { usePreviewView } from './preview-view';
 import { findHabitForGoal, goalDisplayName as displayGoalName } from './goal-library.js';
+import { ruleIconFile } from './rule-icons.js';
 const Pet = defineAsyncComponent(() => import('./Pet.vue'));
 const PhotoEditor = defineAsyncComponent(() => import('./PhotoEditor.vue'));
 import { native, isNative, type PlatformStatus } from './platform';
@@ -92,6 +94,7 @@ const dockOpen = ref(false),
 const greeting = ref(''),
   headBubbles = ref<{ id: number; text: string }[]>([]);
 const attentionDismissed = ref(false);
+const liveFailed = ref(false);
 let openedAt = Date.now();
 const memoryInline = ref(false),
   memoryText = ref(''),
@@ -118,13 +121,22 @@ const renameOpen = ref(false),
   scoreSearch = ref<InstanceType<typeof SearchField>>(),
   scoreReason = ref(''),
   profileDraft = ref<any>({}),
-  newRule = ref({ name: '', points: 3 }),
+  newRule = ref({ name: '', points: 3, icon: '' }),
   newRuleError = computed(() => {
     const p = newRule.value.points as any;
     if (p === '' || p === null || !Number.isFinite(+p)) return '请填写分值';
     if (!Number.isInteger(+p)) return '分值需要是整数';
     if (+p === 0) return '分值不能为 0';
     if (Math.abs(+p) > 1000) return '分值范围是 -1000 到 1000';
+    return '';
+  }),
+  // 选择器里已选图标的中文名（展示用）；没选时为空，走自动匹配。
+  newRuleIconLabel = computed(() => {
+    if (!newRule.value.icon) return '';
+    for (const g of RULE_ICON_PICKER) {
+      const hit = g.items.find((i) => i.file === newRule.value.icon);
+      if (hit) return hit.label;
+    }
     return '';
   }),
   avatarChoices = [
@@ -263,7 +275,7 @@ async function pickProfileAvatar() {
   });
 }
 function addRule(sign: number) {
-  newRule.value = { name: '', points: sign < 0 ? -3 : 3 };
+  newRule.value = { name: '', points: sign < 0 ? -3 : 3, icon: '' };
   void open('ruleAdd');
 }
 async function saveNewRule() {
@@ -273,7 +285,12 @@ async function saveNewRule() {
     return;
   }
   await run(async () => {
-    const rule = { id: uid(), name, points: Number(newRule.value.points) };
+    const rule = {
+      id: uid(),
+      name,
+      points: Number(newRule.value.points),
+      ...(newRule.value.icon ? { icon: newRule.value.icon } : {}),
+    };
     await commit({
       type: 'rules',
       rules: [...state.value.rules, rule],
@@ -305,6 +322,24 @@ async function goScore() {
   scoreSearch.value?.focus();
   document.getElementById('habit-search-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+// 足迹空态：去习惯页的计划 tab 完成今日计划；习惯页挂载时内容自带 rise 入场。
+function goFootprintPlans() {
+  habitTab.value = 'plans';
+  nav('habits');
+}
+// 日常表现抽屉的最近记录：按表现名精确匹配最近 5 条加减分事件（新在前）。
+// 注意不用 records() 的子串查询，避免别条表现的备注把记录串进来。
+const scoreRuleHistory = computed(() => {
+  const name = scoreReason.value.trim();
+  if (!name) return [];
+  return state.value.events
+    .filter(
+      (e: any) =>
+        (e.kind === 'plus' || e.kind === 'minus') && e.reason === name,
+    )
+    .slice(-5)
+    .reverse();
+});
 async function saveCustomScore(value: any) {
   await run(async () => {
     await commit({
@@ -363,11 +398,14 @@ const state = ref<any>(initialState()),
   password = ref(''),
   showPassword = ref(false),
   loginShake = ref(false),
+  unlockPop = ref(false),
   view = usePreviewView(isNative ? undefined : sessionStorage),
   detailId = ref(''),
   detailLevel = ref(1),
   toast = ref(''),
   emotion = ref(''),
+  celebrate = ref(false),
+  celebrateKey = ref(0),
   playing = ref(false),
   previewAll = ref(false),
   preview = ref<Record<string, boolean>>({}),
@@ -536,6 +574,229 @@ const builtInGoals = [
     hint: '把快乐说给家人听',
   },
 ];
+// 分类配色：五个分类各取一个柔和色相，未知分类默认 cat-1（只换颜色，不动布局）。
+const CATEGORY_HUES: Record<string, string> = {
+  '日常自理': 'cat-1',
+  '学习阅读': 'cat-5',
+  '家庭责任': 'cat-2',
+  '运动健康': 'cat-4',
+  '友善表达': 'cat-3',
+};
+function categoryHue(category: string): string {
+  return CATEGORY_HUES[category] || 'cat-1';
+}
+// 图鉴卡 / 详情页配色：按宠物 id 散列取五个分类色之一，只换颜色，不动布局。
+const PET_HUES = ['cat-1', 'cat-2', 'cat-3', 'cat-4', 'cat-5'];
+function petHue(p: any): string {
+  const id = String(p?.id || '');
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return PET_HUES[h % PET_HUES.length];
+}
+// 3D 图标（Microsoft Fluent Emoji，MIT 协议）：按目标模板 id 取计划图标，
+// 自定义模板按分类取图标；找不到时回退到线形图标。
+const ICON_3D = import.meta.glob('./assets/icons-3d/*.png', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>;
+const icon3d = (file: string) => (file ? ICON_3D[`./assets/icons-3d/${file}`] || '' : '');
+const GOAL_3D_ICON: Record<string, string> = {
+  'builtin-brush': 'brush-toothbrush.png',
+  'builtin-bag': 'bag-backpack.png',
+  'builtin-read': 'read-book.png',
+  'builtin-help': 'help-broom.png',
+  'builtin-sport': 'pick-shoe.png',
+  'builtin-thanks': 'pick-heart-hands.png',
+  'builtin-water': 'water-cup.png',
+  'builtin-sleep': 'sleep-moon.png',
+  'builtin-greet': 'greet-hand.png',
+  'builtin-homework': 'homework-pencil.png',
+  'builtin-toys': 'toys-teddy.png',
+  'builtin-share': 'pick-gift.png',
+};
+const CATEGORY_3D_ICON: Record<string, string> = {
+  '日常自理': 'cat-selfcare-soap.png',
+  '学习阅读': 'cat-study-books.png',
+  '家庭责任': 'cat-home-house.png',
+  '运动健康': 'cat-sport-runner.png',
+  '友善表达': 'cat-kind-heart.png',
+};
+const CATEGORY_LINE_ICON: Record<string, string> = {
+  '日常自理': 'heart',
+  '学习阅读': 'habit',
+  '家庭责任': 'home',
+  '运动健康': 'play',
+  '友善表达': 'star',
+};
+function planIcon3d(h: any): string {
+  return icon3d(GOAL_3D_ICON[h.goalId] || CATEGORY_3D_ICON[h.category] || '');
+}
+// 目标库卡片复用同一套映射：按目标模板 id 取计划图标，自定义模板按分类取。
+function goalIcon3d(g: any): string {
+  return icon3d(GOAL_3D_ICON[g.id] || CATEGORY_3D_ICON[g.category] || '');
+}
+// 记分事件图标：与日常表现列表走同一套映射（rule-icons.js），不另起关键词猜测。
+// 计划完成类事件（带 habitId）取计划图标；撤销类取被撤销原事件的图标；
+// 规则已被删除、计划已被删除的孤儿事件不猜图标，返回 ''，调用方保留原来的
+// 星星/减号，避免再出现“没有礼貌地回应家人”被关键词命中扫帚的情况。
+function eventIcon3d(e: any): string {
+  if (!e) return '';
+  if (e.kind === 'reverse' && e.ref) {
+    const orig = state.value.events.find((x: any) => x.id === e.ref);
+    return orig ? eventIcon3d(orig) : '';
+  }
+  if (e.habitId) {
+    const h = state.value.habits.find((x: any) => x.id === e.habitId);
+    if (h) return planIcon3d(h);
+  }
+  const sign = e.kind === 'minus' ? -1 : 1;
+  const rule = state.value.rules.find(
+    (r: any) => r.name === e.reason && Math.sign(r.points) === sign,
+  );
+  return rule ? icon3d(ruleIconFile(rule)) : '';
+}
+// 习惯来源的文字回忆（计划完成时记下的）：用该计划的图标，不用通用备忘录图。
+function memoryNoteIcon3d(m: any): string {
+  if (m.source === 'habit' && m.habitId) {
+    const h = state.value.habits.find((x: any) => x.id === m.habitId);
+    if (h) return planIcon3d(h);
+  }
+  return icon3d('memory-memo.png');
+}
+// 新建日常表现的图标选择器：扩充后的图库（109 张）按类分组；不选则保存时
+// 按表现名自动匹配（规则映射表）。分组只影响选择器里的排布，不影响映射。
+const RULE_ICON_PICKER: { label: string; items: { file: string; label: string }[] }[] = [
+  { label: '情绪表情', items: [
+    { file: 'pick-smile.png', label: '开心大笑' },
+    { file: 'pick-happy.png', label: '愉快微笑' },
+    { file: 'pick-hug.png', label: '拥抱安慰' },
+    { file: 'pick-think.png', label: '思考' },
+    { file: 'pick-excited.png', label: '兴奋期待' },
+    { file: 'pick-calm.png', label: '平静放松' },
+    { file: 'pick-pleading.png', label: '委屈请求' },
+    { file: 'pick-sad.png', label: '难过' },
+    { file: 'pick-halo.png', label: '诚实乖巧' },
+    { file: 'pick-steam-face.png', label: '发脾气' },
+    { file: 'pick-angry-face.png', label: '生气顶嘴' },
+  ] },
+  { label: '日常习惯', items: [
+    { file: 'pick-apple.png', label: '吃苹果' },
+    { file: 'pick-milk.png', label: '喝牛奶' },
+    { file: 'pick-plate.png', label: '好好吃饭' },
+    { file: 'pick-shower.png', label: '洗澡' },
+    { file: 'pick-sponge.png', label: '擦洗打扫' },
+    { file: 'pick-tshirt.png', label: '自己穿衣' },
+    { file: 'pick-shoe.png', label: '运动跑步' },
+    { file: 'pick-basketball.png', label: '打篮球' },
+    { file: 'pick-bike.png', label: '骑车' },
+    { file: 'pick-alarm.png', label: '守时起床' },
+    { file: 'pick-hourglass.png', label: '等待耐心' },
+    { file: 'pick-bell.png', label: '提醒' },
+  ] },
+  { label: '学习专注', items: [
+    { file: 'pick-palette.png', label: '画画' },
+    { file: 'pick-music.png', label: '唱歌音乐' },
+    { file: 'pick-scissors.png', label: '手工剪纸' },
+    { file: 'pick-puzzle.png', label: '拼图专注' },
+    { file: 'pick-brain.png', label: '动脑思考' },
+    { file: 'pick-eyes.png', label: '认真看' },
+    { file: 'pick-ear.png', label: '认真倾听' },
+    { file: 'pick-speaking.png', label: '大胆表达' },
+  ] },
+  { label: '交往品格', items: [
+    { file: 'pick-gift.png', label: '分享礼物' },
+    { file: 'pick-handshake.png', label: '合作和好' },
+    { file: 'pick-bow.png', label: '鞠躬道谢' },
+    { file: 'pick-muscle.png', label: '勇敢坚持' },
+    { file: 'pick-heart-hands.png', label: '关爱' },
+    { file: 'pick-seedling.png', label: '爱护植物' },
+    { file: 'pick-rainbow.png', label: '彩虹' },
+    { file: 'pick-sun.png', label: '晴天早起' },
+    { file: 'pick-key.png', label: '保管物品' },
+    { file: 'pick-moneybag.png', label: '存钱节约' },
+    { file: 'pick-shield.png', label: '遵守安全' },
+  ] },
+  { label: '动物食物', items: [
+    { file: 'pick-dog.png', label: '小狗' },
+    { file: 'pick-cat.png', label: '小猫' },
+    { file: 'pick-rabbit.png', label: '小兔子' },
+    { file: 'pick-lion.png', label: '狮子勇敢' },
+    { file: 'pick-turtle.png', label: '乌龟耐心' },
+    { file: 'pick-butterfly.png', label: '蝴蝶' },
+    { file: 'pick-strawberry.png', label: '草莓' },
+    { file: 'pick-cookie.png', label: '饼干分享' },
+    { file: 'pick-carrot.png', label: '吃胡萝卜' },
+    { file: 'pick-droplet.png', label: '喝水节约' },
+  ] },
+  { label: '加分常用', items: [
+    { file: 'brush-toothbrush.png', label: '刷牙' },
+    { file: 'bag-backpack.png', label: '整理书包' },
+    { file: 'read-book.png', label: '阅读' },
+    { file: 'help-broom.png', label: '做家务' },
+    { file: 'sport-ball.png', label: '运动' },
+    { file: 'thanks-hands.png', label: '感谢' },
+    { file: 'water-cup.png', label: '喝水' },
+    { file: 'sleep-moon.png', label: '睡觉' },
+    { file: 'greet-hand.png', label: '问好' },
+    { file: 'homework-pencil.png', label: '写作业' },
+    { file: 'toys-teddy.png', label: '玩具' },
+    { file: 'share-sparkles.png', label: '分享' },
+  ] },
+  { label: '减分常用', items: [
+    { file: 'minus-stop-sign.png', label: '推搡制止' },
+    { file: 'minus-hammer.png', label: '损坏' },
+    { file: 'minus-anger.png', label: '伤人的话' },
+    { file: 'minus-scroll.png', label: '违反约定' },
+    { file: 'minus-warning.png', label: '危险行为' },
+    { file: 'minus-basket.png', label: '拒绝收拾' },
+    { file: 'minus-zipper-mouth.png', label: '隐瞒说谎' },
+    { file: 'minus-megaphone.png', label: '打断讲话' },
+    { file: 'minus-snail.png', label: '拖延' },
+    { file: 'minus-mobile.png', label: '超时用电子设备' },
+    { file: 'minus-wastebasket.png', label: '浪费' },
+    { file: 'minus-rolling-eyes.png', label: '没礼貌回应' },
+    { file: 'minus-notebook.png', label: '拒绝写作业' },
+    { file: 'minus-bed.png', label: '不准备睡觉' },
+    { file: 'minus-raised-hand.png', label: '拿走他人物品' },
+    { file: 'minus-see-no-evil.png', label: '无视安全提醒' },
+    // 新减分规则的图标：不洗手（肥皂）。赖床（闹钟）在“日常习惯”组、
+    // 哭闹（难过脸）在“情绪表情”组已可挑，不重复放。
+    { file: 'cat-selfcare-soap.png', label: '不洗手' },
+  ] },
+];
+// 回忆类型 3D 图标：照片 / 声音 / 文字 / 探索各一张，找不到回退到线形图标。
+const MEMORY_KIND_3D: Record<string, string> = {
+  photo: 'memory-camera.png',
+  audio: 'memory-microphone.png',
+  note: 'memory-memo.png',
+  exploration: 'travel-compass.png',
+};
+function memoryKind3d(kind: string): string {
+  return icon3d(MEMORY_KIND_3D[kind] || '');
+}
+function planIcon(h: any): string {
+  return CATEGORY_LINE_ICON[h.category] || 'star';
+}
+// 照料操作（小窝 dock）：每个操作一个 3D 图标 + 分类色淡色圆底，
+// 与计划卡同一套语言；找不到时回退到线形图标。圆底色只取 --cat-1..5。
+const DOCK_3D_ICON: Record<string, { file: string; hue: string; line: string }> = {
+  trigger: { file: 'share-sparkles.png', hue: 'cat-1', line: 'star' },
+  feed: { file: 'care-feed-bowl.png', hue: 'cat-2', line: 'food' },
+  play: { file: 'cat-kind-heart.png', hue: 'cat-3', line: 'heart' },
+  photo: { file: 'care-photo-camera.png', hue: 'cat-1', line: 'camera' },
+  chat: { file: 'care-chat-balloon.png', hue: 'cat-5', line: 'chat' },
+  mic: { file: 'mic-microphone.png', hue: 'cat-4', line: 'mic' },
+  travel: { file: 'travel-compass.png', hue: 'cat-2', line: 'map-pin' },
+  rename: { file: 'homework-pencil.png', hue: 'cat-5', line: 'edit' },
+  pet: { file: 'pet-paw-prints.png', hue: 'cat-3', line: 'pet' },
+  today: { file: 'today-calendar.png', hue: 'cat-4', line: 'habit' },
+};
+function dockIcon3d(key: string): string {
+  return icon3d(DOCK_3D_ICON[key]?.file || '');
+}
+function dockHue(key: string): string {
+  return DOCK_3D_ICON[key]?.hue || 'cat-1';
+}
 const goalPage = ref(1),
   goalQuery = ref(''),
   goalDraftOnly = ref(false),
@@ -619,6 +880,7 @@ function previewPointerUp(event: PointerEvent) {
 }
 let toastTimer: ReturnType<typeof setTimeout>,
   emotionTimer: ReturnType<typeof setTimeout>,
+  celebrateTimer: ReturnType<typeof setTimeout>,
   shakeTimer: ReturnType<typeof setTimeout>,
   recordTimer: ReturnType<typeof setInterval>,
   clockTimer: ReturnType<typeof setInterval>;
@@ -759,7 +1021,15 @@ const trip = computed(() => state.value.care.trip),
     () =>
       trip.value?.petId === current.value?.id &&
       refreshClock.value < trip.value.returnAt,
-  );
+  ),
+  // 外出进度环：出发 → 预计回来，refreshClock 每分钟推进一次。
+  travelProgress = computed(() => {
+    const t = trip.value;
+    if (!t) return 0;
+    const span = t.returnAt - t.departAt;
+    if (span <= 0) return 1;
+    return Math.min(1, Math.max(0, (refreshClock.value - t.departAt) / span));
+  });
 const homeMessage = computed(() => {
   const lines = away.value
     ? [
@@ -1061,6 +1331,8 @@ function toggleToday() {
   chatOpen.value = false;
   greeting.value = '';
   todayOpen.value = next;
+  // 打开时若今日计划已全部完成，亮一下完成态就自动收起。
+  if (next) scheduleQuickDoneClose();
 }
 const titles = TITLES;
 const topViews = TOP_VIEWS;
@@ -1097,7 +1369,7 @@ function keepInView(id: string) {
     host.getBoundingClientRect().top +
     host.scrollTop -
     (header?.getBoundingClientRect().height || 72);
-  if (host.scrollTop > top) scrollPageTo(top);
+  if (Math.abs(host.scrollTop - top) > 1) scrollPageTo(top);
 }
 function fill<T>(items: T[], size: number, page: number, pages: number) {
   return page === pages ? Math.max(0, size - items.length) : 0;
@@ -1129,6 +1401,88 @@ const todayGoals = computed(() =>
     )
     .slice(0, 3),
 );
+// 小窝「今日计划」卡片堆：快速完成的状态。
+// quickLeavingId 正在飞走的卡片；quickBusy 飞行/提交进行中，忽略重复点按；
+// quickFly 飞向顶部进度条的 +N 小 chip（null 即不飞）；quickFlash 进度条落点闪光。
+const quickLeavingId = ref(''),
+  quickBusy = ref(false),
+  quickFly = ref<{
+    x: number;
+    y: number;
+    dx: number;
+    dy: number;
+    points: number;
+    key: number;
+  } | null>(null),
+  quickFlash = ref(false);
+let quickFlyTimer: ReturnType<typeof setTimeout> | undefined,
+  quickFlashTimer: ReturnType<typeof setTimeout> | undefined,
+  quickDoneTimer: ReturnType<typeof setTimeout> | undefined;
+function scheduleQuickDoneClose() {
+  clearTimeout(quickDoneTimer);
+  if (todayOpen.value && !todayGoals.value.length && tasks.value.length)
+    quickDoneTimer = setTimeout(() => {
+      todayOpen.value = false;
+    }, 1500);
+}
+// B5 计划卡完成反馈：正在播 pop / 爆星的卡片（null 即无）；
+// reduceMotion 时不设，点按直接记分。
+const planPop = ref<{ id: string; key: number } | null>(null);
+let planPopTimer: ReturnType<typeof setTimeout> | undefined;
+watch(todayGoals, scheduleQuickDoneClose);
+async function quickComplete(h: any, event?: Event) {
+  if (quickBusy.value || busy.value) return;
+  if (!h || habitCount(state.value, h, dayKey()) >= h.target) return;
+  quickBusy.value = true;
+  quickLeavingId.value = h.id;
+  const payload = buildScoreForm(1, h);
+  form.value = payload;
+  const reduceMotion = !!state.value.settings.reduceMotion;
+  let flew = false;
+  if (!reduceMotion) {
+    const from = (
+      event?.currentTarget as HTMLElement | null
+    )?.getBoundingClientRect();
+    const bar = document
+      .querySelector('.summary-progress')
+      ?.getBoundingClientRect();
+    if (from && bar) {
+      flew = true;
+      quickFly.value = {
+        x: from.left + from.width / 2,
+        y: from.top + from.height / 2,
+        dx: bar.left + bar.width / 2 - (from.left + from.width / 2),
+        dy: bar.top + bar.height / 2 - (from.top + from.height / 2),
+        points: h.points,
+        key: Date.now(),
+      };
+      // 等 chip 飞到进度条（出场 140ms / 入场 220ms 那套速度）再记分，数字随落点涨上去。
+      await new Promise((resolve) => {
+        clearTimeout(quickFlyTimer);
+        quickFlyTimer = setTimeout(resolve, 240);
+      });
+      quickFly.value = null;
+    }
+  }
+  if (flew) {
+    quickFlash.value = true;
+    clearTimeout(quickFlashTimer);
+    quickFlashTimer = setTimeout(() => {
+      quickFlash.value = false;
+    }, 500);
+  }
+  try {
+    // 飞行等待期间若有别的入口改写了表单，记分前恢复成本次载荷。
+    form.value = payload;
+    // 跳过 habitComplete 确认框，但走 saveScore 同一套提交逻辑；
+    // 宠物外出时只飞进度条，不播宠物反应（舞台上没有宠物）。
+    await saveScore({ silentPet: away.value });
+    navigator.vibrate?.(15);
+  } finally {
+    quickLeavingId.value = '';
+    quickBusy.value = false;
+  }
+}
 let completeFrom = 'habits';
 function planMenuKey(event: KeyboardEvent) {
   if (event.key !== 'Escape') return;
@@ -1390,11 +1744,12 @@ async function login(mode: 'password' | 'bio' = 'password') {
   const saved =
     mode === 'password' && !password.value && status.value.remembered;
   if (mode === 'password' && !password.value && !saved) {
-    notify('请输入家长密码');
+    notify('请输入密码');
     shakePassword();
     return;
   }
   busy.value = true;
+  unlockPop.value = false;
   try {
     if (mode === 'bio') await native('bio');
     else if (saved) await native('rememberLogin');
@@ -1402,6 +1757,11 @@ async function login(mode: 'password' | 'bio' = 'password') {
       await native('login', { password: password.value, remember: true });
       status.value.remembered = true;
     }
+    // 解锁成功态：品牌图标先播一次 pop，再切页，全程 220ms 内。
+    await nextTick();
+    unlockPop.value = true;
+    if (!state.value.settings.reduceMotion)
+      await new Promise((resolve) => setTimeout(resolve, 220));
     await load();
   } catch (e: any) {
     notify(e?.message || '未能解锁，请重试');
@@ -1421,6 +1781,15 @@ function animate(name: string) {
     emotion.value = '';
     playing.value = false;
   }, 3800);
+  // 等级提升庆祝：舞台飘星 + 等级数字 pop，星星 900ms 后收起。
+  if (name === 'upgrade') {
+    celebrateKey.value++;
+    celebrate.value = true;
+    clearTimeout(celebrateTimer);
+    celebrateTimer = setTimeout(() => {
+      celebrate.value = false;
+    }, 900);
+  }
 }
 function petDetail(id: string) {
   priorView = view.value === 'detail' ? 'pets' : view.value;
@@ -1429,9 +1798,10 @@ function petDetail(id: string) {
   detailLevel.value = p ? levelOf(p) : 1;
   nav('detail');
 }
-function score(sign = 1, h?: any) {
-  if (h && habitCount(state.value, h, dayKey()) >= h.target) return;
-  form.value = {
+// 记分表单：确认框路径（score → habitComplete → saveScore）与小窝快速完成
+// （quickComplete → saveScore）共用同一份载荷，分值与等级累计完全一致。
+function buildScoreForm(sign = 1, h?: any) {
+  return {
     points: h ? h.points : sign * 3,
     reason: h ? h.name : '',
     note: '',
@@ -1441,13 +1811,31 @@ function score(sign = 1, h?: any) {
     token: uid(),
     sign,
   };
+}
+function score(sign = 1, h?: any) {
+  if (h && habitCount(state.value, h, dayKey()) >= h.target) return;
+  form.value = buildScoreForm(sign, h);
   if (h) {
     completeFrom = view.value === 'home' ? 'home' : 'habits';
     void open('habitComplete', form.value);
   }
   else void goScore();
 }
-async function saveScore() {
+// B5：点计划卡“完成 +N”瞬间卡片播 pop 并爆一颗星星（plan-pop class +
+// plan-burst），再走原有 score() 开确认框；reduceMotion 时不播动画，直接记分。
+function planComplete(h: any) {
+  if (state.value.settings.reduceMotion) {
+    score(1, h);
+    return;
+  }
+  planPop.value = { id: h.id, key: Date.now() };
+  clearTimeout(planPopTimer);
+  planPopTimer = setTimeout(() => {
+    planPop.value = null;
+  }, 600);
+  score(1, h);
+}
+async function saveScore(opts: any = {}) {
   await run(async () => {
     const old = current.value ? levelOf(current.value) : 0;
     const wasHabit = !!form.value.habitId;
@@ -1459,12 +1847,15 @@ async function saveScore() {
     if (modal.value) close();
     if (!wasHabit) nav('home');
     await nextTick();
-    animate(level.value > old ? 'upgrade' : result.emotion);
-    notify(
-      result.emotion === 'happy'
-        ? '已记录，这份努力会被记住'
-        : '已记录减分，可以陪伙伴缓一缓',
-    );
+    // 小窝快速完成且宠物外出时：舞台上没有宠物，只涨进度，不播宠物反应。
+    if (!opts?.silentPet) animate(level.value > old ? 'upgrade' : result.emotion);
+    if (level.value > old) notify(`升到 Lv.${level.value} 啦`);
+    else
+      notify(
+        result.emotion === 'happy'
+          ? '已记录，这份努力会被记住'
+          : '已记录减分，可以陪伙伴缓一缓',
+      );
   });
 }
 function adoptWords() {
@@ -1583,6 +1974,36 @@ function addedHabitForGoal(goal: any) {
 function goalDisplayName(goal: any) {
   return displayGoalName(state.value.habits, goal);
 }
+// G1 分值：自定义模板自带 points；12 个内置目标没有 points 字段，
+// 新建习惯时 activateGoal 用 goal.points || 3 兜底，故 chip 取同一口径：
+// 已建习惯的分值 → 模板自带分值 → 默认 3。
+function goalPoints(goal: any): number {
+  return addedHabitForGoal(goal)?.points || goal.points || 3;
+}
+// B4 计划卡副文案兜底：习惯自带 criteria → 目标库里该计划的描述
+// （内置目标取 hint；自定义模板的 hint 本身就是 criteria || category）
+// → 都没有时用已有字段拼“每天一次 · 19:00”。
+function goalForHabit(h: any) {
+  return (
+    goalList.value.find((g: any) => g.id === h.goalId) ||
+    goalList.value.find((g: any) => g.name === h.name)
+  );
+}
+function planCriteria(h: any): string {
+  if (h.criteria && h.criteria !== h.category) return h.criteria;
+  const hint = goalForHabit(h)?.hint;
+  if (hint && hint !== h.category) return hint;
+  const times = (h.times || []).join('、');
+  const count =
+    h.target === 1
+      ? '一次'
+      : h.target === 2
+        ? '两次'
+        : h.target === 3
+          ? '三次'
+          : `${h.target}次`;
+  return times ? `每天${count} · ${times}` : `每天${count}`;
+}
 function editAddedGoal(goal: any) {
   const habit = addedHabitForGoal(goal);
   if (habit) habitEdit({ ...habit, goalId: goal.id }, 'goalLibrary');
@@ -1698,6 +2119,7 @@ async function saveHabit() {
 async function setHabitStatus(h: any, status: string) {
   await run(async () => {
     await commit({ type: 'habit', value: { ...h, status } });
+    navigator.vibrate?.(15);
   });
 }
 async function setting(k: string, value: any) {
@@ -2008,8 +2430,11 @@ onBeforeUnmount(() => {
       >界面预览</div
     >
     <main v-if="!auth" class="login-shell">
+      <span class="login-star" aria-hidden="true">✦</span>
+      <span class="login-star" aria-hidden="true">✦</span>
+      <span class="login-star" aria-hidden="true">✦</span>
       <section class="card login-card" aria-labelledby="login-title">
-        <div class="brand-icon" aria-hidden="true"><BrandMark /></div
+        <div class="brand-icon" :class="{ 'unlock-pop': unlockPop }" aria-hidden="true"><BrandMark /></div
         ><h1 id="login-title">星星宠物</h1
         ><p class="tagline">把每一次认真，都变成成长的星光</p>
         <form @submit.prevent="login('password')">
@@ -2023,7 +2448,7 @@ onBeforeUnmount(() => {
               :placeholder="
                 status.remembered
                   ? '已保存密码，可直接解锁'
-                  : '请输入家长密码'
+                  : '请输入密码'
               "
               autocomplete="off"
               maxlength="128" /><button
@@ -2076,25 +2501,26 @@ onBeforeUnmount(() => {
         ></div
       >
       <template v-if="view === 'home'">
-        <section :class="['home-world', { hungry: hungry.stage > 0 }]">
+        <section :class="['home-world', { hungry: hungry.stage > 0, 'dock-open': dockOpen }]">
           <div v-if="current" class="home-summary"
               ><div class="summary-message" aria-live="polite"
                 ><p v-for="line in homeMessage" :key="line">{{ line }}</p></div
               ><div class="summary-metrics"
                 ><div class="summary-stat" aria-label="伙伴等级"
-                  ><b class="num">{{ homeLevel }}</b><span>等级</span></div
+                  ><b class="num" :class="{ 'level-pop': celebrate }"><TweenNumber :value="homeLevel" :reduce-motion="state.settings.reduceMotion" /></b><span>等级</span></div
                 ><button
                   class="summary-stat"
                   @click="previewNextForm"
                   aria-label="点按预览下一等级形态"
-                  ><b class="num">{{ pct(current) }}%</b><span>进度</span></button
+                  ><b class="num"><TweenNumber :value="pct(current)" suffix="%" :reduce-motion="state.settings.reduceMotion" /></b><span>进度</span></button
                 ><div class="summary-stat" :title="String(total.earned)"
-                  ><b class="num">{{ short(total.earned) }}</b><span>累计</span></div
+                  ><b class="num"><TweenNumber :value="total.earned" :format="short" :reduce-motion="state.settings.reduceMotion" /></b><span>累计</span></div
                 ><div class="summary-stat" :title="String(total.net)"
-                  ><b class="num">{{ short(total.net) }}</b><span>当前</span></div
+                  ><b class="num"><TweenNumber :value="total.net" :format="short" :reduce-motion="state.settings.reduceMotion" /></b><span>当前</span></div
                 ></div
               ><button
                 class="summary-progress"
+                :class="{ flash: quickFlash }"
                 @click="previewNextForm"
                 aria-label="点按成长进度预览下一形态"
                 ><svg
@@ -2130,6 +2556,7 @@ onBeforeUnmount(() => {
               class="pet-playground"
               :class="{
                 'chat-active': chatOpen,
+                'dock-open': dockOpen,
                 'inline-active':
                   chatOpen || renameOpen || memoryInline || photoOpen || todayOpen,
               }"
@@ -2159,7 +2586,7 @@ onBeforeUnmount(() => {
                   ></div
               ><div class="pet-stage home-orbit"
                 ><div v-if="away" class="travel-empty"
-                  ><Icon name="map-pin" class="travel-icon" />
+                  ><span class="travel-icon" aria-hidden="true"><img v-if="dockIcon3d('travel')" :src="dockIcon3d('travel')" alt="" /><Icon v-else name="map-pin" /></span>
                   <h3>{{ current.name }}去探索啦</h3
                   ><p class="travel-dest"><Icon name="map-pin" />{{ trip.name }}</p
                   ><dl class="travel-times"
@@ -2178,7 +2605,22 @@ onBeforeUnmount(() => {
                           hour: '2-digit',
                           minute: '2-digit',
                         })
-                      }}</dd></div
+                      }}<span
+                        class="travel-ring"
+                        role="img"
+                        :aria-label="
+                          '已出发 ' + Math.round(travelProgress * 100) + '%'
+                        "
+                        ><svg viewBox="0 0 24 24" aria-hidden="true"
+                          ><circle class="travel-ring-track" cx="12" cy="12" r="10" /><circle
+                            class="travel-ring-fill"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            pathLength="100"
+                            stroke-dasharray="100"
+                            :stroke-dashoffset="100 - travelProgress * 100" /></svg></span
+                      ></dd></div
                     ></dl
                   ></div
                 ><LivePet
@@ -2189,11 +2631,27 @@ onBeforeUnmount(() => {
                   :speech="speech"
                   :reduce-motion="state.settings.reduceMotion"
                   :affection="companion.affection"
+                  @live-failed="liveFailed = $event"
                   @click="randomInteraction"
-                /><p v-if="homeLevel !== level" class="form-preview"
+                /><div
+                  v-if="celebrate && !state.settings.reduceMotion"
+                  class="celebrate-stars"
+                  aria-hidden="true"
+                  ><span
+                    v-for="n in 7"
+                    :key="celebrateKey + '-' + n"
+                    class="celebrate-star"
+                    :style="{ '--i': n - 1 }"
+                    ><i>★</i></span
+                  ></div
+                ><p v-if="homeLevel !== level" class="form-preview"
                   >形态预览中 · 当前 Lv.{{ level }}</p
                 ></div
-              ><div class="home-identity"
+              ><small
+                  v-if="liveFailed && !away"
+                  class="static-art-note"
+                  >当前设备显示静态原画</small
+                ><div class="home-identity"
                 ><button
                   class="summary-child-name"
                   @click="cycleChild"
@@ -2206,68 +2664,77 @@ onBeforeUnmount(() => {
                 aria-label="伙伴互动"
                 ><button
                   class="dock-item dock-trigger"
-                  :class="{ active: dockOpen }"
+                  :class="[{ active: dockOpen }, dockHue('trigger')]"
                   :aria-expanded="dockOpen"
                   :aria-label="dockOpen ? '收起伙伴互动' : '展开伙伴互动'"
                   title="伙伴互动"
                   @click="dockOpen = !dockOpen"
-                  ><Icon name="star" /></button
+                  ><img v-if="dockIcon3d('trigger')" :src="dockIcon3d('trigger')" alt="" /><Icon v-else name="star" /><span class="dock-label">互动</span></button
                 ><div v-if="dockOpen" class="dock-actions"
                   ><div v-if="!away" class="dock-group" aria-label="日常互动"
                     ><button
                       class="dock-item"
+                      :class="dockHue('feed')"
+                      :style="{ '--dock-i': 0 }"
                       :disabled="busy"
                       aria-label="喂食"
                       title="喂食"
                       @click="
                         care('feed');
                       "
-                      ><Icon name="food" /></button
+                      ><img v-if="dockIcon3d('feed')" :src="dockIcon3d('feed')" alt="" /><Icon v-else name="food" /><span class="dock-label">喂食</span></button
                     ><button
                       class="dock-item"
+                      :class="dockHue('play')"
+                      :style="{ '--dock-i': 1 }"
                       aria-label="玩耍"
                       title="玩耍"
                       :disabled="busy"
                       @click="
                         randomInteraction();
                       "
-                      ><Icon name="heart" /></button
+                      ><img v-if="dockIcon3d('play')" :src="dockIcon3d('play')" alt="" /><Icon v-else name="heart" /><span class="dock-label">玩耍</span></button
                     ></div
                   ><div v-if="!away" class="dock-group" aria-label="陪伴功能"
                     ><button
                       class="dock-item"
-                      :class="{ active: photoOpen }"
+                      :class="[{ active: photoOpen }, dockHue('photo')]"
+                      :style="{ '--dock-i': 2 }"
                       :aria-pressed="photoOpen"
                       aria-label="合影"
                       title="合影"
                       @click="
                         togglePhoto();
                       "
-                      ><Icon name="camera" /></button
+                      ><img v-if="dockIcon3d('photo')" :src="dockIcon3d('photo')" alt="" /><Icon v-else name="camera" /><span class="dock-label">合影</span></button
                     ><button
                       class="dock-item"
-                      :class="{ active: chatOpen }"
+                      :class="[{ active: chatOpen }, dockHue('chat')]"
+                      :style="{ '--dock-i': 3 }"
                       :aria-pressed="chatOpen"
                       aria-label="聊天"
                       title="聊天"
                       @click="
                         toggleChat();
                       "
-                      ><Icon name="chat" /></button
+                      ><img v-if="dockIcon3d('chat')" :src="dockIcon3d('chat')" alt="" /><Icon v-else name="chat" /><span class="dock-label">聊天</span></button
                     ></div
                   ><div v-if="!away" class="dock-group" aria-label="扩展工具"
                     ><button
                       class="dock-item"
-                      :class="{ active: memoryInline }"
+                      :class="[{ active: memoryInline }, dockHue('mic')]"
+                      :style="{ '--dock-i': 4 }"
                       :aria-pressed="memoryInline"
                       aria-label="录一段声音"
                       title="录一段声音"
                       @click="
                         memoryOpen();
                       "
-                      ><Icon name="mic" /></button
+                      ><img v-if="dockIcon3d('mic')" :src="dockIcon3d('mic')" alt="" /><Icon v-else name="mic" /><span class="dock-label">录音</span></button
                     ><button
                       class="dock-item"
+                      :class="dockHue('travel')"
+                      :style="{ '--dock-i': 5 }"
                       :disabled="
                         busy || state.settings.travelEnabled === false || !!trip
                       "
@@ -2276,38 +2743,42 @@ onBeforeUnmount(() => {
                       @click="
                         startTravel();
                       "
-                      ><Icon name="map-pin" /></button
+                      ><img v-if="dockIcon3d('travel')" :src="dockIcon3d('travel')" alt="" /><Icon v-else name="map-pin" /><span class="dock-label">探索</span></button
                     ><button
                       class="dock-item"
-                      :class="{ active: renameOpen }"
+                      :class="[{ active: renameOpen }, dockHue('rename')]"
+                      :style="{ '--dock-i': 6 }"
                       :aria-pressed="renameOpen"
                       aria-label="改个名字"
                       title="改个名字"
                       @click="
                         toggleRename();
                       "
-                      ><Icon name="edit" /></button
+                      ><img v-if="dockIcon3d('rename')" :src="dockIcon3d('rename')" alt="" /><Icon v-else name="edit" /><span class="dock-label">改名</span></button
                     ><button
                       class="dock-item"
+                      :class="dockHue('pet')"
+                      :style="{ '--dock-i': 7 }"
                       :disabled="state.pets.length <= 1"
                       aria-label="换个伙伴"
                       title="换个伙伴"
                       @click="
                         cycleCompanion();
                       "
-                      ><Icon name="pet" /></button
+                      ><img v-if="dockIcon3d('pet')" :src="dockIcon3d('pet')" alt="" /><Icon v-else name="pet" /><span class="dock-label">伙伴</span></button
                     ></div
-                  ><div class="dock-group" aria-label="今日约定"
+                  ><div v-if="current" class="dock-group" aria-label="今日计划"
                     ><button
                       class="dock-item"
-                      :class="{ active: todayOpen }"
+                      :class="[{ active: todayOpen }, dockHue('today')]"
+                      :style="{ '--dock-i': 8 }"
                       :aria-pressed="todayOpen"
-                      aria-label="今日约定"
-                      title="今日约定"
+                      :aria-label="todayGoals.length ? '今日计划，还有 ' + todayGoals.length + ' 个未完成' : '今日计划'"
+                      title="今日计划"
                       @click="
                         toggleToday();
                       "
-                      ><Icon name="habit" /></button
+                      ><img v-if="dockIcon3d('today')" :src="dockIcon3d('today')" alt="" /><Icon v-else name="habit" /><span class="dock-label">计划</span><span v-if="todayGoals.length" class="dock-badge num" aria-hidden="true">{{ cap(todayGoals.length) }}</span></button
                     ></div
                 ></div
                 ></aside
@@ -2428,21 +2899,30 @@ onBeforeUnmount(() => {
                   ></div
                 ><div v-else-if="todayOpen" class="zone-card today-card"
                   ><div class="zone-head"
-                    ><b>今日约定</b
+                    ><b>今日计划</b
                     ><small v-if="tasks.length" class="num"
                       >{{ done }}/{{ tasks.length }}</small
-                    ><button class="icon-button" aria-label="关闭今日约定" @click="todayOpen = false"><Icon name="close" /></button></div
-                  ><div v-if="todayGoals.length" class="today-list"
-                    ><button
-                      v-for="h in todayGoals"
+                    ><button class="icon-button" aria-label="关闭今日计划" @click="todayOpen = false"><Icon name="close" /></button></div
+                  ><div v-if="todayGoals.length" class="today-stack" role="list" aria-label="今日未完成计划"
+                    ><article
+                      v-for="(h, i) in todayGoals"
                       :key="h.id"
-                      class="today-goal"
-                      :disabled="busy"
-                      :aria-label="'完成' + h.name + '，加' + h.points + '分'"
-                      @click="score(1, h)"
-                      ><span class="goal-check" aria-hidden="true"><Icon name="check" /></span
-                      ><span class="today-name">{{ h.name }}</span
-                      ><b class="num">+{{ h.points }}</b></button
+                      class="today-plan"
+                      :class="{ leaving: quickLeavingId === h.id }"
+                      :style="{ '--stack-i': i }"
+                      role="listitem"
+                      ><span class="tile-icon today-icon" :class="categoryHue(h.category)" aria-hidden="true"><img v-if="planIcon3d(h)" :src="planIcon3d(h)" :alt="h.name + '图标'" /><Icon v-else :name="planIcon(h)" /></span
+                      ><span class="today-plan-main"
+                        ><b class="today-name">{{ h.name }}</b
+                        ><small class="today-sub">{{ h.category }} · 今日 {{ habitCount(state, h, dayKey()) }}/{{ h.target }} 次</small></span
+                      ><button
+                        class="primary small today-complete"
+                        type="button"
+                        :disabled="i !== 0 || quickBusy || busy"
+                        :aria-label="'完成' + h.name + '，加' + h.points + '分'"
+                        @click="quickComplete(h, $event)"
+                        >完成 +{{ h.points }}</button
+                      ></article
                     ></div
                   ><button
                     v-else-if="!tasks.length"
@@ -2450,9 +2930,7 @@ onBeforeUnmount(() => {
                     @click="nav('goalLibrary')"
                     ><Icon name="plus" /><span>挑一个今天想完成的计划</span></button
                   ><p v-else class="today-empty done"
-                    ><Icon name="check" /><span
-                      >今天的约定都完成了，每一次认真都值得被看见。</span
-                    ></p
+                    ><Icon name="check" /><span>今日计划都完成啦</span></p
                   ></div
                 ></div
               ></div
@@ -2480,6 +2958,19 @@ onBeforeUnmount(() => {
               ></div
             ></template
           >
+          <span
+            v-if="quickFly"
+            :key="quickFly.key"
+            class="quick-fly-chip num"
+            aria-hidden="true"
+            :style="{
+              left: quickFly.x + 'px',
+              top: quickFly.y + 'px',
+              '--fly-dx': quickFly.dx + 'px',
+              '--fly-dy': quickFly.dy + 'px',
+            }"
+            >+{{ quickFly.points }}</span
+          >
         </section>
       </template>
       <section v-if="view === 'photo' && photoOwned" class="card photo-subpage"
@@ -2498,6 +2989,7 @@ onBeforeUnmount(() => {
         aria-label="回忆详情"
       >
         <div class="memory-detail-meta"
+          ><span class="kind-icon" :class="'kind-' + selectedMemory.kind" aria-hidden="true"><img v-if="memoryKind3d(selectedMemory.kind)" :src="memoryKind3d(selectedMemory.kind)" alt="" /></span
           ><span class="badge">{{
             ({ photo: '照片', audio: '声音', note: '文字' } as any)[
               selectedMemory.kind
@@ -2637,7 +3129,7 @@ onBeforeUnmount(() => {
                 type="button"
                 role="radio"
                 class="chip"
-                :class="{ active: filter.kind === value }"
+                :class="[{ active: filter.kind === value }, 'chip-kind-' + value]"
                 :aria-checked="filter.kind === value"
                 @click="
                   filter.kind = value;
@@ -2660,6 +3152,14 @@ onBeforeUnmount(() => {
                 dateRange = String($event);
                 filter.page = 1;
               " /></div
+          ><Pager
+            label="成长足迹翻页"
+            :page="list.page"
+            :pages="list.pages"
+            @change="
+              filter.page = $event;
+              keepInView('habit-footprints');
+            "
           ><div class="record-list"
             ><SwipeRow
               v-for="e in list.items"
@@ -2679,7 +3179,7 @@ onBeforeUnmount(() => {
                   class="record-mark"
                   :class="{ neg: e.kind === 'minus' }"
                   aria-hidden="true"
-                  ><Icon :name="e.kind === 'minus' ? 'minus' : 'star'" /></span
+                  ><img v-if="eventIcon3d(e)" :src="eventIcon3d(e)" alt="" /><img v-else-if="e.kind !== 'minus'" :src="icon3d('record-star.png')" alt="" /><Icon v-else name="minus" /></span
                 ><div class="grow"
                   ><b>{{ e.reason }}</b
                   ><small class="record-meta"
@@ -2701,6 +3201,7 @@ onBeforeUnmount(() => {
               v-if="!list.total && footprintFiltering"
               variant="card"
               icon="search"
+              :icon3d="icon3d('pick-search.png')"
               title="没有符合条件的记录"
               hint="换个关键词或时间范围试试"
               action="清除筛选"
@@ -2708,17 +3209,12 @@ onBeforeUnmount(() => {
               v-else-if="!list.total"
               variant="card"
               icon="history"
+              :icon3d="icon3d('footprints-paw.png')"
               title="第一步，正等着被记下"
               hint="完成培养计划或记录日常表现后，成长会在这里留下足迹"
-          /></div
-          ><Pager
-            label="成长足迹翻页"
-            :page="list.page"
-            :pages="list.pages"
-            @change="
-              filter.page = $event;
-              keepInView('habit-footprints');
-            " /></section
+              action="去完成今日计划"
+              @action="goFootprintPlans" /></div
+          ></Pager></section
           ><section
           v-else
           id="memory-gallery"
@@ -2736,18 +3232,19 @@ onBeforeUnmount(() => {
               type="button"
               role="radio"
               class="chip"
-              :class="{ active: memoryKind === value }"
+              :class="[{ active: memoryKind === value }, 'chip-kind-' + value]"
               :aria-checked="memoryKind === value"
               @click="
                 memoryKind = value;
                 galleryPage = 1;
               "
-              >{{ text }}</button
+              ><img v-if="memoryKind3d(value)" class="chip-3d" :src="memoryKind3d(value)" alt="" />{{ text }}</button
             ></div
           ><EmptyState
             v-if="!gallery.length && galleryTotal"
             variant="card"
             icon="search"
+            :icon3d="icon3d('pick-search.png')"
             title="没有找到这样的回忆"
             hint="换个关键词或类型试试"
             action="清除筛选"
@@ -2755,9 +3252,19 @@ onBeforeUnmount(() => {
             v-else-if="!gallery.length"
             variant="card"
             icon="photo"
+            :icon3d="icon3d('memory-camera.png')"
             title="第一颗回忆星星还在路上"
             hint="领养伙伴、收藏声音或留下合影后，会在这里慢慢亮起来"
-          /><div v-else class="memory-list"
+          /><Pager
+            v-else
+            label="回忆翻页"
+            :page="galleryPage"
+            :pages="galleryPages"
+            @change="
+              galleryPage = $event;
+              keepInView('memory-gallery');
+            "
+          ><div class="memory-list"
             ><article
               v-for="m in galleryItems"
               :key="m.id"
@@ -2795,11 +3302,11 @@ onBeforeUnmount(() => {
                   class="list-link"
                   @click="showMemory(m)"
                   aria-label="查看文字回忆"
-                  ><Icon name="sparkles" /><span>文字纪念</span
+                  ><img class="list-link-3d" :src="memoryNoteIcon3d(m)" alt="" /><span>文字纪念</span
                   ><Icon name="chevron" /></button
-                ><div v-else-if="m.kind === 'note'" class="memory-note-inline">{{
+                ><div v-else-if="m.kind === 'note'" class="memory-note-inline"><img class="memory-note-mark" :src="memoryNoteIcon3d(m)" alt="" /><span>{{
                   memoryDisplayText(m)
-                }}</div
+                }}</span></div
                 ><button
                   v-else
                   class="gallery-image"
@@ -2815,6 +3322,7 @@ onBeforeUnmount(() => {
                     :alt="'与' + m.name + '的合照'"
                     lazy /></button
                 ><div class="gallery-caption"
+                  ><span v-if="m.kind !== 'note'" class="kind-icon" :class="'kind-' + m.kind" aria-hidden="true"><img :src="memoryKind3d(m.kind)" alt="" /></span
                   ><b v-if="m.kind !== 'note'">{{ m.name || nameOf(m.petId) }}</b
                   ><small v-if="m.kind !== 'note'" class="num"
                     >Lv.{{ m.level }}</small
@@ -2850,16 +3358,7 @@ onBeforeUnmount(() => {
                 ></div
               ></article
             ></div
-          ><Pager
-            v-if="galleryPages > 1"
-            label="回忆翻页"
-            :page="galleryPage"
-            :pages="galleryPages"
-            @change="
-              galleryPage = $event;
-              keepInView('memory-gallery');
-            "
-        /></section
+          ></Pager></section
       ></template>
       <template v-if="view === 'pets'"
         ><div class="segmented page-tabs" role="tablist" aria-label="伙伴形态筛选"
@@ -2891,15 +3390,26 @@ onBeforeUnmount(() => {
         /><EmptyState
           v-if="!visiblePets.length"
           icon="search"
+          :icon3d="icon3d('pick-search.png')"
           title="没有找到这位伙伴"
           hint="换一个名字或特征试试"
           action="清除搜索"
           @action="petQuery = ''"
-        /><div v-else id="pet-grid" class="tile-grid pet-grid"
+        /><Pager
+          v-else
+          label="伙伴图鉴翻页"
+          :page="petPage"
+          :pages="petPages"
+          @change="
+            petPage = $event;
+            keepInView('pet-grid');
+          "
+        ><div id="pet-grid" class="tile-grid pet-grid"
           ><article
             v-for="p in visiblePets"
             :key="p.id"
             class="pet-card"
+            :class="petHue(p)"
             role="link"
             tabindex="0"
             :aria-label="
@@ -2921,7 +3431,8 @@ onBeforeUnmount(() => {
               :pet="p"
               :level="previewAll ? 10 : 1"
               :show-rank="false"
-            /><h3>{{ previewAll ? p.adult : p.name }}</h3></article
+            /><h3>{{ previewAll ? p.adult : p.name }}</h3
+            ><small class="pet-card-sub">{{ p.description }}</small></article
           ><span
             v-for="n in fill(visiblePets, 6, petPage, petPages)"
             :key="'pet-gap' + n"
@@ -2929,17 +3440,9 @@ onBeforeUnmount(() => {
             aria-hidden="true"
           ></span
         ></div
-        ><Pager
-          label="伙伴图鉴翻页"
-          :page="petPage"
-          :pages="petPages"
-          @change="
-            petPage = $event;
-            keepInView('pet-grid');
-          "
-      /></template>
+        ></Pager></template>
       <template v-if="view === 'detail' && detail"
-        ><section class="card detail-hero"
+        ><section class="card detail-hero" :class="petHue(detail)"
           ><div class="detail-top"
             ><span class="tag">{{ detail.tag }}</span
             ><div class="detail-level-meta"
@@ -2970,6 +3473,7 @@ onBeforeUnmount(() => {
               @click="
                 previewSwiped ? (previewSwiped = false) : animate('happy')
               " /></div
+          ><p class="detail-swipe-hint">← 左右滑，看不同等级的样子 →</p
           ><h2>{{ owned?.name || detail.name }}</h2
           ><div class="detail-stage-copy"
             ><p>{{ detail.description }}</p
@@ -3014,6 +3518,7 @@ onBeforeUnmount(() => {
               v-for="n in 10"
               :key="n"
               type="button"
+              :style="{ '--step-i': n - 1 }"
               :class="{
                 active: detailLevel === n,
                 unlocked: owned && n <= levelOf(owned),
@@ -3096,6 +3601,7 @@ onBeforeUnmount(() => {
             ref="quickScore"
             v-model:reason="scoreReason"
             :rules="state.rules"
+            :history="scoreRuleHistory"
             :busy="busy"
             :net="total.net"
             :done="done"
@@ -3121,6 +3627,7 @@ onBeforeUnmount(() => {
           ><EmptyState
             v-if="planQuery.trim() && !filteredPlans.length"
             icon="search"
+            :icon3d="icon3d('pick-search.png')"
             :title="'没有找到「' + planQuery.trim() + '」'"
             hint="试试别的关键词，或新增一个计划"
             action="清除搜索"
@@ -3130,10 +3637,20 @@ onBeforeUnmount(() => {
             " /><EmptyState
             v-else-if="!filteredPlans.length"
             icon="sparkles"
+            :icon3d="icon3d('pick-seedling.png')"
             title="从第一个小目标开始"
             hint="挑一件愿意每天练习的小事，和伙伴一起慢慢做到。"
             action="挑选培养计划"
-            @action="nav('goalLibrary')" /><div v-else class="tile-grid plan-grid"
+            @action="nav('goalLibrary')" /><Pager
+            v-else
+            label="培养计划翻页"
+            :page="planPage"
+            :pages="planPages"
+            @change="
+              planPage = $event;
+              keepInView('habit-plans');
+            "
+          ><div class="tile-grid plan-grid"
             ><article
               v-for="h in visiblePlans"
               :key="h.id"
@@ -3141,9 +3658,21 @@ onBeforeUnmount(() => {
               :class="{
                 paused: h.status !== 'active',
                 done: habitCount(state, h, dayKey()) >= h.target,
+                'plan-pop': planPop?.id === h.id,
               }"
               ><header class="plan-head"
+                ><span class="tile-icon plan-icon" :class="categoryHue(h.category)"
+                  ><img v-if="planIcon3d(h)" :src="planIcon3d(h)" :alt="h.name + '图标'" /><Icon v-else :name="planIcon(h)" /></span
                 ><h3>{{ h.name }}</h3
+                ><button
+                  class="plan-toggle"
+                  type="button"
+                  :class="{ off: h.status !== 'active' }"
+                  :disabled="busy"
+                  :aria-label="(h.status === 'active' ? '暂停计划：' : '继续计划：') + h.name"
+                  :aria-pressed="h.status === 'active'"
+                  @click="setHabitStatus(h, h.status === 'active' ? 'paused' : 'active')"
+                  ><Icon name="power" /></button
                 ><button
                   class="icon-button plan-more card-corner-action"
                   type="button"
@@ -3186,15 +3715,12 @@ onBeforeUnmount(() => {
                   ></div
                 ></header
               ><p class="plan-meta"
-                ><span class="plan-category">{{ h.category }}</span
+                ><span class="plan-category" :class="categoryHue(h.category)">{{ h.category }}</span
                 ><span class="plan-count" :aria-label="'已完成 ' + habitCount(state, h, dayKey()) + ' 次，目标 ' + h.target + ' 次'"
                   >{{ habitCount(state, h, dayKey()) }}/{{ h.target }}</span
                 ></p
               ><div class="plan-detail-row"
-                ><p
-                  class="plan-criteria"
-                  :class="{ 'plan-criteria-empty': !h.criteria || h.criteria === h.category }"
-                  >{{ h.criteria && h.criteria !== h.category ? h.criteria : '完成标准待补充' }}</p
+                ><p class="plan-criteria">{{ planCriteria(h) }}</p
                 ><span class="plan-time"
                   >{{ h.times.join('、') || '全天' }}</span
                 ></div
@@ -3205,7 +3731,7 @@ onBeforeUnmount(() => {
                   h.status !== 'active' ||
                   habitCount(state, h, dayKey()) >= h.target
                 "
-                @click="score(1, h)"
+                @click="planComplete(h)"
                 ><Icon
                   :name="
                     habitCount(state, h, dayKey()) >= h.target ? 'check' : 'star'
@@ -3216,25 +3742,24 @@ onBeforeUnmount(() => {
                       ? '今日已完成'
                       : '完成 +' + h.points
                 }}</button
+              ><span
+                v-if="planPop?.id === h.id"
+                :key="planPop?.key ?? h.id"
+                class="plan-burst num"
+                aria-hidden="true"
+                ><Icon name="star" />+{{ h.points }}</span
               ></article
-            ><template
+            ><span
               v-for="n in fill(visiblePlans, 4, planPage, planPages)"
               :key="'plan-gap' + n"
-              ><button
-                v-if="n === 1"
-                class="tile-add"
-                @click="nav('goalLibrary')"
-                aria-label="选择已有培养计划"
-                ><Icon name="plus" /><span>新增计划</span></button
-              ><span v-else class="tile-gap" aria-hidden="true"></span></template
+              class="tile-gap"
+              aria-hidden="true"
+            ></span
           ></div
-          ><Pager
-            label="培养计划翻页"
-            :page="planPage"
-            :pages="planPages"
-            @change="planPage = $event" /></section
+          ></Pager></section
         ><section
           v-if="habitMode === 'goalLibrary'"
+          id="goal-library"
           class="card goals-card"
           ><div class="section-head"
             ><div class="section-title"
@@ -3250,11 +3775,21 @@ onBeforeUnmount(() => {
           ><EmptyState
             v-if="!filteredGoals.length"
             icon="search"
+            :icon3d="icon3d('pick-search.png')"
             title="没有匹配的习惯"
             hint="换个关键词，或者自己写一个"
             action="自定义习惯"
             @action="editGoalTemplate()"
-          /><div v-else class="tile-grid goal-grid"
+          /><Pager
+            v-else
+            label="目标翻页"
+            :page="goalPage"
+            :pages="goalPages"
+            @change="
+              goalPage = $event;
+              keepInView('goal-library');
+            "
+          ><div class="tile-grid goal-grid"
             ><article
               v-for="goal in visibleGoals"
               :key="goal.id"
@@ -3268,7 +3803,11 @@ onBeforeUnmount(() => {
                 :disabled="busy"
                 :aria-label="'启用或停用' + goalDisplayName(goal)"
                 @click="activateGoal(goal)"
-                ><span class="tile-icon"><Icon :name="goal.icon" /></span
+                ><span
+                  v-if="addedHabitForGoal(goal)?.status === 'active'"
+                  class="tag enabled-tag"
+                  >已启用 ✓</span
+                ><span class="tile-icon" :class="categoryHue(goal.category || '')"><img v-if="goalIcon3d(goal)" :src="goalIcon3d(goal)" :alt="goalDisplayName(goal) + '图标'" /><Icon v-else :name="goal.icon" /></span
                 ><b>{{ goalDisplayName(goal) }}</b
                 ><small>{{
                   addedHabitForGoal(goal)?.status === 'active'
@@ -3276,7 +3815,7 @@ onBeforeUnmount(() => {
                   : addedHabitForGoal(goal)
                     ? '已停用 · 点按启用'
                   : goal.hint
-                }}</small></button
+                }}</small><span class="goal-points num">+{{ goalPoints(goal) }}</span></button
               ><button
                 v-if="addedHabitForGoal(goal)"
                 class="goal-card-edit"
@@ -3294,11 +3833,7 @@ onBeforeUnmount(() => {
               aria-hidden="true"
             ></span
           ></div
-          ><Pager
-            label="目标翻页"
-            :page="goalPage"
-            :pages="goalPages"
-            @change="goalPage = $event" /></section
+          ></Pager></section
       ></template>
       <SettingsPage
         v-if="view === 'settings'"
@@ -3521,10 +4056,14 @@ onBeforeUnmount(() => {
         ><div class="setting"
           ><label
             ><span>开启本地提醒</span
-            ><input
-              class="ios-switch"
-              type="checkbox"
-              v-model="form.remind" /></label></div
+            ><button
+              type="button"
+              class="plan-toggle"
+              :class="{ off: !form.remind }"
+              :aria-pressed="form.remind"
+              aria-label="开启本地提醒"
+              @click="form.remind = !form.remind"
+              ><Icon name="power" /></button></label></div
         ><p v-if="habitSubmitted && habitError" class="form-hint error"
           ><Icon name="warning" />{{ habitError }}</p
         ><button
@@ -3651,6 +4190,45 @@ onBeforeUnmount(() => {
             :allow-zero="false"
             label="日常表现分值"
           /></div
+        ><div class="field"
+          ><span>图标（选填，不选按表现名自动匹配）</span
+          ><div class="icon-picker" role="radiogroup" aria-label="选择图标"
+            ><button
+              type="button"
+              class="icon-pick auto"
+              :class="{ selected: !newRule.icon }"
+              :aria-checked="!newRule.icon"
+              role="radio"
+              @click="newRule.icon = ''"
+              >自动</button
+            ><div
+              v-for="group in RULE_ICON_PICKER"
+              :key="group.label"
+              class="icon-pick-group"
+              ><p>{{ group.label }}</p
+              ><div class="icon-pick-grid"
+                ><button
+                  v-for="opt in group.items"
+                  :key="opt.file"
+                  type="button"
+                  class="icon-pick"
+                  :class="{ selected: newRule.icon === opt.file }"
+                  :aria-checked="newRule.icon === opt.file"
+                  role="radio"
+                  :aria-label="'选择图标：' + opt.label"
+                  :title="opt.label"
+                  @click="newRule.icon = opt.file"
+                  ><img :src="icon3d(opt.file)" :alt="opt.label" loading="lazy" /></button
+              ></div
+            ></div
+          ></div
+          ><p class="form-hint"
+            ><template v-if="newRule.icon"
+              ><img class="hint-3d" :src="icon3d(newRule.icon)" alt="" />已选图标：{{
+                newRuleIconLabel
+              }}</template
+            ><template v-else>未选图标，保存后按表现名自动匹配</template></p
+          ></div
         ><p v-if="newRuleError" class="form-hint error"
           ><Icon name="warning" />{{ newRuleError }}</p
         ><footer

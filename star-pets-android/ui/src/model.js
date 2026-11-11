@@ -50,6 +50,17 @@ export const positiveRules = [
   { id: 'rule-persist', name: '遇到困难继续尝试', points: 4 },
   { id: 'rule-ready', name: '提前准备第二天用品', points: 3 },
   { id: 'rule-listen', name: '认真听完他人讲话', points: 3 },
+  // v2 目录补充（日常行为缺口）：刷牙/穿衣/吃饭/运动/诚实/冷静/道歉/
+  // 等待/安全——此前 16 条没有覆盖这些每天都会发生的行为。
+  { id: 'rule-brush', name: '自己刷牙', points: 3 },
+  { id: 'rule-dress', name: '自己穿衣服', points: 2 },
+  { id: 'rule-meal', name: '好好吃饭不挑食', points: 3 },
+  { id: 'rule-sport', name: '主动运动锻炼身体', points: 3 },
+  { id: 'rule-honest', name: '诚实说出实情', points: 3 },
+  { id: 'rule-calm', name: '生气时先冷静下来', points: 3 },
+  { id: 'rule-apology', name: '做错事主动道歉', points: 3 },
+  { id: 'rule-wait', name: '耐心等待轮到自己', points: 2 },
+  { id: 'rule-safety', name: '主动遵守安全规则', points: 3 },
 ];
 export const deductionRules = [
   { id: 'rule-push', name: '推搡或动手伤人', points: -3 },
@@ -68,6 +79,12 @@ export const deductionRules = [
   { id: 'rule-bedtime', name: '提醒后仍不准备睡觉', points: -2 },
   { id: 'rule-grab', name: '未经允许拿走他人物品', points: -3 },
   { id: 'rule-ignore', name: '多次无视安全提醒', points: -3 },
+  // v2 目录补充（日常行为缺口）：发脾气/不洗手/赖床/顶嘴/哭闹要买东西。
+  { id: 'rule-tantrum', name: '乱发脾气摔东西', points: -2 },
+  { id: 'rule-wash', name: '饭前便后不洗手', points: -1 },
+  { id: 'rule-latebed', name: '赖床不起', points: -2 },
+  { id: 'rule-talkback', name: '顶撞长辈大声顶嘴', points: -2 },
+  { id: 'rule-whine', name: '哭闹着要买东西', points: -2 },
 ];
 export function initialState(now = Date.now()) {
   const id = uid();
@@ -76,7 +93,7 @@ export function initialState(now = Date.now()) {
     revision: 0,
     createdAt: now,
     deductionDefaults: 1,
-    ruleCatalogVersion: 1,
+    ruleCatalogVersion: 2,
     child: '小星星',
     profiles: [
       {
@@ -1044,7 +1061,21 @@ export function apply(before, cmd, now = Date.now()) {
             Math.abs(r.points) <= 1000,
           '规则名称或分值无效',
         );
-        return { id: r.id || uid(), name: text(r.name, 40), points: r.points };
+        // 规则自带图标（新建规则时用户在图标选择器里挑的）：只保留文件名
+        // 形式的合法值，其它未知字段仍丢弃；加载时校验只检查 name/points，
+        // 带 icon 的规则不受影响，无 icon 的旧规则也不受影响。
+        const icon =
+          typeof r.icon === 'string' &&
+          r.icon.length <= 40 &&
+          /^[a-z0-9][a-z0-9-]*\.png$/.test(r.icon)
+            ? r.icon
+            : '';
+        return {
+          id: r.id || uid(),
+          name: text(r.name, 40),
+          points: r.points,
+          ...(icon ? { icon } : {}),
+        };
       });
       break;
     }
@@ -1227,11 +1258,11 @@ export function apply(before, cmd, now = Date.now()) {
         if (!s.rules.some((r) => r.points < 0)) s.rules.push(...deductionRules);
         s.deductionDefaults = 1;
       }
-      if (!s.ruleCatalogVersion) {
+      if (!s.ruleCatalogVersion || s.ruleCatalogVersion < 2) {
         const existing = new Set(s.rules.map((r) => r.name));
         for (const rule of [...positiveRules, ...deductionRules])
           if (!existing.has(rule.name)) s.rules.push(rule);
-        s.ruleCatalogVersion = 1;
+        s.ruleCatalogVersion = 2;
       }
       break;
     default:

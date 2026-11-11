@@ -406,3 +406,17 @@ test('maxed companions never become hungry', () => {
   assert.equal(hunger(s, now).stage, 0);
   assert.equal(hunger(s, now).label, '满级伙伴 · 自由生活');
 });
+
+test('rules keep a picked 3d icon, drop invalid icon values', () => {
+  const s = step(initialState(now), {
+    type: 'rules',
+    rules: [
+      { id: 'r1', name: '主动收拾书桌', points: 3, icon: 'pick-sponge.png' },
+      { id: 'r2', name: '乱扔垃圾', points: -2, icon: '../evil.png' },
+      { id: 'r3', name: '准时起床', points: 2 },
+    ],
+  });
+  assert.equal(s.rules.find((r) => r.id === 'r1').icon, 'pick-sponge.png');
+  assert.equal(s.rules.find((r) => r.id === 'r2').icon, undefined);
+  assert.equal(s.rules.find((r) => r.id === 'r3').icon, undefined);
+});

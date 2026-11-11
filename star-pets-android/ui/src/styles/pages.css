@@ -1,5 +1,6 @@
 /* ---------- 登录 ---------- */
 .login-shell {
+  position: relative;
   display: grid;
   place-items: center;
   height: var(--viewport);
@@ -10,6 +11,38 @@
   overflow-y: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+/* 登录页空白渐变区的星星：ambient-breathe 式缓慢明暗，卡片盖住时藏在卡后。 */
+.login-star {
+  position: absolute;
+  z-index: 0;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.8);
+  animation: ambient-breathe var(--star-d, 6s) ease-in-out infinite alternate;
+  animation-delay: var(--star-delay, 0s);
+  pointer-events: none;
+}
+.login-star:nth-child(1) {
+  top: 8%;
+  left: 15%;
+  font-size: 18px;
+  --star-d: 5s;
+}
+.login-star:nth-child(2) {
+  top: 13%;
+  right: 12%;
+  font-size: 13px;
+  --star-d: 6.5s;
+  --star-delay: 1.2s;
+}
+.login-star:nth-child(3) {
+  top: 24%;
+  left: 8%;
+  font-size: 12px;
+  --star-d: 8s;
+  --star-delay: 2.4s;
 }
 .login-shell::-webkit-scrollbar {
   display: none;
@@ -27,14 +60,22 @@
   border-radius: var(--login-radius);
   text-align: center;
 }
+/* 登录卡是入口浮层，用浮层阴影（与 pet-dock / 电源开关同一级），区别于内容白卡。 */
+.login-shell .login-card {
+  position: relative;
+  z-index: 1;
+  box-shadow: var(--shadow-float);
+}
 .brand-icon {
   width: 96px;
   height: 96px;
   margin-bottom: var(--space-1);
+  filter: drop-shadow(0 12px 20px rgba(var(--p-rgb), 0.28));
 }
 .login-card h1 {
   font-size: var(--text-display);
   font-weight: 750;
+  letter-spacing: -0.015em;
 }
 .tagline {
   max-width: 280px;
@@ -59,6 +100,8 @@
 }
 .login-password input {
   padding-right: 52px;
+  /* 右侧眼睛按钮占 52px，左侧补同样的内边距，文字才真正居中。 */
+  padding-left: 52px;
   text-align: center;
 }
 .login-password .eye {
@@ -221,7 +264,7 @@
   stop-color: var(--sun);
 }
 .summary-progress clipPath rect {
-  transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width var(--t-slow) var(--spring);
 }
 .pet-playground {
   position: relative;
@@ -248,6 +291,16 @@
   aspect-ratio: 1;
   border-radius: 50%;
   corner-shape: round;
+  transition:
+    transform var(--t-base) var(--spring),
+    width var(--t-base) var(--ease),
+    margin-right var(--t-base) var(--ease);
+}
+/* dock 展开时竖条压住舞台圆圈右缘：圆圈整体缩小 60px 并向左让位
+   （光靠 translateX 会把左缘推出屏外）；393px 与 320px 下右缘都让出竖条。 */
+.pet-playground.dock-open .home-orbit {
+  width: min(calc(100cqw - 60px), 44dvh, calc(100cqh - 128px));
+  margin-right: 60px;
 }
 .pet-stage::after {
   position: absolute;
@@ -278,10 +331,7 @@
   position: relative;
   object-fit: contain;
 }
-.live-pet > small {
-  position: absolute;
-  bottom: var(--space-2);
-  left: var(--space-3);
+.static-art-note {
   color: var(--ink-3);
 }
 canvas.pet {
@@ -344,12 +394,12 @@ canvas.pet {
   transform: translateX(-50%);
   content: '';
 }
-.ration-bubble {
-  background: var(--sun);
-  color: var(--on-sun);
+.head-bubble.ration-bubble {
+  background: var(--primary-soft);
+  color: var(--primary-ink);
 }
-.ration-bubble::after {
-  background: var(--sun);
+.head-bubble.ration-bubble::after {
+  background: var(--primary-soft);
 }
 .keyboard-open .head-bubbles {
   display: none;
@@ -376,6 +426,84 @@ canvas.pet {
 .travel-empty h3 {
   color: var(--ink);
   font-size: var(--fs-xl);
+}
+/* 外出进度环：出发 → 预计回来的进度，贴在“预计回来”时间旁。 */
+.travel-ring {
+  display: inline-flex;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-left: var(--space-2);
+  vertical-align: middle;
+}
+.travel-ring svg {
+  width: 22px;
+  height: 22px;
+  transform: rotate(-90deg);
+}
+.travel-ring-track {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 2.5;
+  opacity: 0.5;
+}
+.travel-ring-fill {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset var(--t-slow) var(--ease);
+}
+/* 等级提升庆祝：7 颗星散在舞台周围，动画见 motion.css。 */
+.celebrate-stars {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+.celebrate-star {
+  position: absolute;
+  color: var(--sun);
+  filter: drop-shadow(0 2px 4px rgba(var(--p-rgb), 0.3));
+}
+.celebrate-star i {
+  display: block;
+  font-style: normal;
+}
+.celebrate-star:nth-child(1) {
+  top: 14%;
+  left: 8%;
+  font-size: 16px;
+}
+.celebrate-star:nth-child(2) {
+  top: 8%;
+  left: 80%;
+  font-size: 20px;
+}
+.celebrate-star:nth-child(3) {
+  top: 44%;
+  left: 90%;
+  font-size: 18px;
+}
+.celebrate-star:nth-child(4) {
+  top: 84%;
+  left: 74%;
+  font-size: 22px;
+}
+.celebrate-star:nth-child(5) {
+  top: 88%;
+  left: 22%;
+  font-size: 16px;
+}
+.celebrate-star:nth-child(6) {
+  top: 50%;
+  left: 2%;
+  font-size: 18px;
+}
+.celebrate-star:nth-child(7) {
+  top: 3%;
+  left: 46%;
+  font-size: 20px;
 }
 .brand-tile {
   display: block;
@@ -414,12 +542,26 @@ canvas.pet {
   border-top: 1px solid var(--line);
 }
 .dock-item {
+  position: relative;
   width: 34px;
   min-height: 0;
-  height: 34px;
-  padding: 0;
+  height: 46px;
+  padding: 3px 0 2px;
   border-radius: var(--r-lg);
   color: var(--ink-2);
+  grid-template-rows: 22px 12px;
+}
+/* dock 标签：10px 两字小字，位于图标下方；竖条实测约 42px 宽，放得下。 */
+.dock-label {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 12px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .dock-item svg {
   width: var(--icon-sm);
@@ -442,6 +584,15 @@ canvas.pet {
   position: relative;
   flex: 0 0 var(--zone);
   min-height: 0;
+  /* 底部留足底栏高度：外高仍是 var(--zone)（border-box，下 padding 只压缩
+     内容区，不顶宠物舞台、不盖顶部数字）；区内卡片 height:100%，卡底与
+     底部按钮随之上抬，不再伸到底栏下面。 */
+  padding-bottom: calc(var(--tabbar) + var(--safe-bottom));
+}
+/* dock 展开时竖条向下伸进 home-zone：区内留出竖条宽度，今日计划堆卡片
+   与聊天输入（发送按钮）不再被竖条盖住；只在 dock 展开时生效。 */
+.home-world.dock-open .home-zone {
+  padding-right: calc(56px + var(--space-2));
 }
 .home-identity {
   display: flex;
@@ -563,6 +714,97 @@ canvas.pet {
 .today-empty svg {
   width: 28px;
   height: 28px;
+}
+/* 今日计划卡片堆：重叠牌堆，只露 3 张；下层卡片只露一条边，点按只认最上面一张。
+   卡片堆复用 home-zone 固定 220px 的位置，不顶宠物舞台、不盖顶部数字，按钮都在卡内。
+   today-card 必须与聊天面板同宽：堆内卡片是绝对定位、对卡片宽度没贡献，
+   不给定宽 today-card 会缩到头栏宽度（约 199px），计划名只剩 1 个字。
+   100cqw 是 .pet-playground（container-type: size）的宽度，即 shell 内容宽；
+   520px 是 shell 最大内容宽（560px - 两侧 20px gutter）。 */
+.today-card {
+  width: min(100cqw, 520px);
+}
+/* dock 展开时卡片定宽会无视 home-zone 的右侧留白，宽度同步收 64px。 */
+.home-world.dock-open .today-card {
+  width: min(calc(100cqw - 64px), 520px);
+}
+.today-stack {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+.today-plan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(var(--stack-i, 0) * 14px);
+  z-index: calc(3 - var(--stack-i, 0));
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border-radius: var(--r-md);
+  transform: scale(calc(1 - var(--stack-i, 0) * 0.03));
+  transform-origin: center top;
+}
+.today-plan .tile-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+}
+.today-plan-main {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+.today-plan-main .today-name {
+  overflow: hidden;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.today-sub {
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.today-complete {
+  flex: none;
+}
+/* 飞向进度条的 +N 小 chip：fixed 定位在视口坐标上，不受卡片堆裁剪。 */
+.quick-fly-chip {
+  position: fixed;
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 28px;
+  padding: 0 var(--space-2);
+  border-radius: var(--r-pill);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+/* 入口角标：今日未完成计划数，贴在 dock 钮右上角；无未完成时不渲染。 */
+.dock-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: var(--r-pill);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 .home-empty-orbit {
   flex-direction: column;
@@ -725,6 +967,12 @@ canvas.pet {
   aspect-ratio: 4 / 3;
   object-fit: cover;
 }
+/* 点按进详情的按压反馈：与全局按钮按压同款 scale 0.98 / 80ms（显式写在照片按钮上，
+   不依赖 :where(button):active 的全局规则）。 */
+.gallery-image:active:not(:disabled) {
+  transform: scale(0.98);
+  transition-duration: 80ms;
+}
 .gallery-caption {
   display: flex;
   flex-wrap: wrap;
@@ -768,6 +1016,14 @@ canvas.pet {
 }
 .memory-detail-actions {
   display: grid;
+}
+/* 保存备注禁用态：不降透明度，改浅底 + 主色文字（与习惯侧同一方案）；
+   只作用于记忆详情这一处，不动全局 :where(button):disabled。 */
+.memory-detail-actions button.primary:disabled {
+  opacity: 1;
+  background: var(--primary-soft);
+  color: var(--primary-deep);
+  box-shadow: none;
 }
 .memory-detail-page > button.small.ghost {
   align-self: center;
@@ -922,11 +1178,17 @@ canvas.pet {
 .detail-level-meta strong {
   color: var(--primary-ink);
   font-size: var(--fs-lg);
+  /* 进场时 Lv 数字同步播一次 pop（只在详情页挂载时触发一次）。 */
+  animation: pop var(--t-slow) var(--spring);
 }
 .detail-level-meta small {
   color: var(--ink-3);
 }
 .detail-swipe-stage {
+  /* P1 根因：.pet-stage 基类是 flex: 1 1 0，detail-hero 是不定高纵向 flex 容器，
+     基值 0 会把 aspect-ratio 顶掉、stage 塌成 0 高（canvas 也随之 0 高），
+     与 .home-orbit 同款做法改成 flex: none，让 aspect-ratio 按宽度定高。 */
+  flex: none;
   aspect-ratio: 6 / 5;
   touch-action: pan-y;
 }
@@ -935,6 +1197,10 @@ canvas.pet {
   inset: 0;
   z-index: 1;
   height: 100%;
+}
+.detail-swipe-hint {
+  color: var(--ink-3);
+  font-size: var(--fs-xs);
 }
 .detail-hero h2 {
   font-size: var(--fs-xl);
@@ -963,6 +1229,16 @@ canvas.pet {
   height: 8px;
   border-radius: var(--r-pill);
   background: var(--line);
+  /* 进场时 10 段逐段点亮：stagger 40ms（--step-i 由模板传入，0..9），--t-fast；
+     动画只挂在挂载时，之后切等级只换背景色，不会重播延迟。 */
+  animation: step-in var(--t-fast) var(--ease) backwards;
+  animation-delay: calc(var(--step-i, 0) * 40ms);
+}
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: scaleX(0.5);
+  }
 }
 .stage-stepper button.unlocked span {
   background: var(--primary-soft);
@@ -1017,19 +1293,23 @@ canvas.pet {
   flex-direction: column;
   gap: var(--space-3);
 }
-.quick-entry-controls {
-  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-}
+/* 单列通栏行：每行一整条，左图标、中名字独占一行不折行、右分值
+   （照视频设备列表行）。两列网格改单列，名字不再折行。
+   控高：每页条数不再写死，QuickScore 挂载/尺寸变化时实测页面几何
+   倒推——先保证小圆点完整显示且不被底栏/凸起小窝键遮挡，剩余高度
+   均分给行（行高经 --chip-h 传入，不低于 44px 触控基准）；
+   日期/步进器/备注/提交已移进点 chip 弹出的底部抽屉，主视图只剩
+   标题 + 加减分切换 + 列表 + 圆点。 */
 .rule-chips {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(4, 44px);
-  gap: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .rule-chip {
   justify-content: space-between;
   min-height: 0;
-  height: 44px;
+  /* 行高由 QuickScore 实测均分后经 --chip-h 传入（默认 44px 触控基准）。 */
+  height: var(--chip-h, 44px);
   padding: 0 var(--space-3);
   border-color: var(--line);
   border-radius: var(--r-md);
@@ -1037,10 +1317,15 @@ canvas.pet {
   font-size: var(--fs-sm);
   font-weight: 500;
 }
-.rule-chip span {
+.quick-score .rule-chip { gap: 10px; padding-inline: 10px; }
+/* 单列行：名字独占一行不折行；只有超长自定义名才用省略号兜底。 */
+.rule-chip span:not(.rule-icon) {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  text-align: left;
 }
 .rule-chip b {
   flex: none;
@@ -1055,12 +1340,258 @@ canvas.pet {
 }
 .rule-chips-empty {
   display: grid;
-  grid-column: 1 / -1;
-  grid-row: 1 / -1;
   place-items: center;
+  min-height: 200px;
   border: 2px dashed var(--line);
   border-radius: var(--r-md);
   color: var(--ink-3);
+  font-size: var(--fs-sm);
+}
+/* 日常表现卡控高：卡内边距 18→12、间距 12→8，Pager 的 96px 底留白只对
+   本卡取消——本卡接近一屏、圆点在流内排在列表下方；
+   其余分页（计划/目标库/回忆/足迹/图鉴）仍保留 96px。
+   实测：页头 121 + 双 tab 58 + 搜索 48 占去卡片上方 287px，8 行 × 44px
+   是硬底线，卡片仍比可视区高约 100px（需轻滚一小段才见末行），
+   再压就要动共享页眉或减每页条数，两者都不在本轮范围。 */
+.score-card {
+  --card-pad: 12px;
+  --card-gap: 8px;
+}
+.score-card .pager {
+  padding-bottom: 0;
+}
+/* 圆点脱离悬浮：回到文档流，紧贴列表正下方水平居中，不再压住行名。
+   position: static 让 components.css 的 sticky/bottom/z-index 全部失效；
+   pill 底 + 阴影本是为压在卡片上保可读性，流内不再需要，去掉后只剩
+   圆点本身（大小、颜色、当前页实心+放大、可点按、无障碍 label 不变）。
+   作用域只限本卡，其他五处分页的悬浮圆点原样不动。 */
+.score-card .pagination-dots {
+  position: static;
+  background: transparent;
+  box-shadow: none;
+  margin-top: var(--space-1);
+}
+
+/* ---------- 日常表现：底部抽屉 ---------- */
+/* 抽屉复用全站 dialog（components.css）底样式，只改成贴底全宽：
+   顶部大圆角 + 底部直角，滑入用现有 --t-base/--ease，reduceMotion 下归零。 */
+.score-sheet {
+  width: min(100vw, 560px);
+  max-width: 100%;
+  margin: auto auto 0;
+  padding: var(--space-2) var(--space-4)
+    calc(var(--space-4) + var(--safe-bottom));
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+}
+.score-sheet[open] {
+  animation: sheet-up var(--t-base) var(--ease);
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0.6;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.score-sheet-handle {
+  width: 36px;
+  height: 4px;
+  margin: 0 auto var(--space-1);
+  border-radius: var(--r-pill);
+  background: rgba(var(--ink-rgb), 0.18);
+}
+.score-sheet-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.score-sheet-head .rule-icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+.score-sheet-head .rule-icon img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+.score-sheet-head .rule-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.score-sheet-head .rule-icon.rule-plus {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.score-sheet-head .rule-icon.rule-minus {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.score-sheet-head h3 {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--fs-lg);
+}
+.sign-pill {
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.sign-pill.plus {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.sign-pill.minus {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.score-sheet .field > span {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+/* 分值步进组：一个整体容器（单一背景 + 单一圆角边框），[−][分值][+]
+   三段内部无缝衔接——减号圆钮、分值、加号圆钮不再是三个散件。
+   加分态成功色、减分态危险色，沿用 chips 的 success/danger 语义。 */
+.score-stepper {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 56px;
+  align-items: stretch;
+  height: 56px;
+  overflow: hidden;
+  border: 1.5px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+}
+.score-stepper:focus-within {
+  border-color: rgba(var(--p-rgb), 0.7);
+  box-shadow: 0 0 0 4px rgba(var(--p-rgb), 0.16);
+}
+.score-stepper button {
+  min-height: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--primary-ink);
+  box-shadow: none;
+}
+.score-stepper button:disabled {
+  background: transparent;
+  color: var(--ink-3);
+  box-shadow: none;
+  opacity: 1;
+}
+.score-stepper input {
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-inline: 1px solid var(--line);
+  background: transparent;
+  font-size: var(--fs-xl);
+  text-align: center;
+}
+.score-stepper.plus {
+  background: var(--success-soft);
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+}
+.score-stepper.plus button {
+  color: var(--success);
+}
+.score-stepper.minus {
+  background: var(--danger-soft);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+.score-stepper.minus button {
+  color: var(--danger);
+}
+/* 最近记录：每行左日期时间、右分值；无记录时给空态，不伪造数据。 */
+.score-history {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.score-history-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 36px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  font-size: var(--fs-sm);
+}
+.score-history-row time {
+  flex: 1;
+  color: var(--ink-2);
+}
+/* 历史行图标：与列表 chip 同款 26px 圆底（加分绿底/减分红底），与抽屉头、
+   列表行走同一套 ruleIcon3d 映射。 */
+.score-history-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+}
+.score-history-icon img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+.score-history-icon svg {
+  width: 16px;
+  height: 16px;
+}
+.score-history-icon.rule-plus {
+  background: var(--success-soft);
+  color: var(--success);
+}
+.score-history-icon.rule-minus {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.score-history-row b {
+  font-family: var(--font-num);
+}
+.score-history-row b.plus {
+  color: var(--success);
+}
+.score-history-row b.minus {
+  color: var(--danger);
+}
+.score-history-empty {
+  display: grid;
+  place-items: center;
+  min-height: 64px;
+  margin: 0;
+  padding: var(--space-2);
+  border: 2px dashed var(--line);
+  border-radius: var(--r-md);
+  color: var(--ink-3);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+.score-sheet-hint {
+  margin: 0;
+  color: var(--danger);
   font-size: var(--fs-sm);
 }
 
@@ -1090,7 +1621,7 @@ canvas.pet {
   padding: var(--plan-pad);
   border: var(--plan-border) solid var(--line);
   border-radius: var(--plan-radius);
-  background: var(--tint);
+  background: var(--surface);
 }
 .plan-card.paused {
   background: var(--surface-2);
@@ -1101,13 +1632,19 @@ canvas.pet {
 }
 .plan-head {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   gap: var(--space-1);
   margin: 0;
 }
+.plan-head .plan-icon { order: 1; }
+.plan-head .plan-toggle { order: 2; margin-left: auto; }
+.plan-head .plan-more { order: 3; }
 .plan-head h3 {
   display: -webkit-box;
   flex: 1;
+  flex-basis: 100%;
+  order: 4;
   min-height: 2.5em;
   overflow: hidden;
   padding-top: var(--space-1);
@@ -1124,7 +1661,7 @@ canvas.pet {
 .plan-menu {
   position: absolute;
   z-index: 15;
-  top: 44px;
+  top: 64px;
   right: var(--space-2);
   display: grid;
   min-width: 148px;
@@ -1160,9 +1697,15 @@ canvas.pet {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* 计划分类文字按分类着色（只换颜色，不改尺寸与间距）。 */
+.plan-category.cat-1 { color: var(--cat-1-ink); }
+.plan-category.cat-2 { color: var(--cat-2-ink); }
+.plan-category.cat-3 { color: var(--cat-3-ink); }
+.plan-category.cat-4 { color: var(--cat-4-ink); }
+.plan-category.cat-5 { color: var(--cat-5-ink); }
 .plan-count {
   justify-self: end;
-  color: inherit;
+  color: var(--primary-ink);
   font: inherit;
   font-variant-numeric: tabular-nums;
   text-align: right;
@@ -1188,11 +1731,11 @@ canvas.pet {
   display: -webkit-box;
   min-height: 0;
   overflow: hidden;
+  /* 完成标准是正文内容（目标库描述兜底），不用父行的 ink-3 弱化色，
+     否则兜底文案仍像占位灰字；时间仍走父行弱化色。 */
+  color: var(--ink);
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-}
-.plan-criteria-empty {
-  color: var(--ink-2);
 }
 .plan-card > button.primary {
   --button-radius: max(0px, calc(var(--plan-radius) - var(--plan-pad) - var(--plan-border)));
@@ -1204,6 +1747,33 @@ canvas.pet {
   color: var(--primary-ink);
   box-shadow: none;
   opacity: 1;
+}
+/* B5 完成反馈：点按瞬间卡片播一次现有 pop（--t-slow + --spring），
+   同时在卡片上爆一颗星星（+N chip 用现有 rise 入场）；reduceMotion 下
+   令牌归零且 JS 侧不挂 plan-pop，降级为瞬时完成。 */
+.plan-card.plan-pop {
+  animation: pop var(--t-slow) var(--spring);
+}
+.plan-burst {
+  position: absolute;
+  z-index: 2;
+  right: var(--space-3);
+  bottom: 64px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px var(--space-2);
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  pointer-events: none;
+  animation: rise var(--t-slow) var(--ease);
+}
+.plan-burst svg {
+  width: 14px;
+  height: 14px;
 }
 .goal-card {
   position: relative;
@@ -1280,8 +1850,47 @@ canvas.pet {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+/* G2 已启用标签：复用现有 .tag，放在卡片内容左上角（图标上方），主色实底。 */
+.goal-card .enabled-tag {
+  align-self: flex-start;
+  background: var(--primary);
+  color: var(--on-primary);
+}
+/* G1 目标卡分值：右下角小“+N”chip，主色淡底，与 chips 同款配色；
+   margin-top: auto 使其在同行等高卡片里对齐到底部。 */
+.goal-card .goal-points {
+  align-self: flex-end;
+  margin-top: auto;
+  padding: 2px var(--space-2);
+  border-radius: var(--r-pill);
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
 .goal-card :is(.goal-card-main, .goal-card-edit):disabled {
   opacity: 0.55;
+}
+/* B1 禁用按钮（方案 a，全站统一口径，习惯页内落地）：禁用态不降透明度，
+   改用浅底 + 主色文字。只覆盖习惯页内的按钮（日常表现、计划卡、目标库），
+   不动全局 :where(button):disabled，回忆详情的“保存备注”由另一路同方案修。
+   注意：.plan-card.done 的已完成态优先级更高，仍保持原有 well-strong 样式。 */
+.quick-score button.primary:disabled,
+.plan-card > button.primary:disabled {
+  opacity: 1;
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+  box-shadow: none;
+}
+.quick-score button.primary.danger-fill:disabled {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.plan-card .plan-toggle:disabled {
+  opacity: 1;
+}
+.goal-card :is(.goal-card-main, .goal-card-edit):disabled {
+  opacity: 1;
 }
 .plans-card {
   min-height: 0;
@@ -1301,8 +1910,13 @@ canvas.pet {
   height: 72px;
   gap: var(--space-2);
 }
+/* G3 卡片空白（核实）：下半截空白来自本行定高——grid-auto-rows: minmax(146px, 1fr)
+   把每行撑到至少 146px，而卡片内容（图标 + 名字 + 两行描述）约 120px，
+   且 .goal-card-main 为 justify-content: flex-start，余量全沉到底部。
+   选内容自适应：行高改为 auto，每行取行内最高卡片的内容高；不动网格结构
+   （仍是 2 列 tile-grid，末页仍用 tile-gap 补齐）。 */
 .goals-card .goal-grid {
-  grid-auto-rows: minmax(146px, 1fr);
+  grid-auto-rows: auto;
 }
 .days {
   display: grid;
@@ -1373,7 +1987,7 @@ canvas.pet {
 .theme-grid {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: calc((100% - var(--space-2)) * 0.44);
+  grid-auto-columns: calc((100% - var(--space-2)) * 0.49);
   gap: var(--space-2);
   width: 100%;
   margin: 0;
@@ -1383,6 +1997,12 @@ canvas.pet {
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+  /* 右缘渐隐：吸合位两张整卡约占 88%，露出邻卡的文字不再被拦腰切断，
+     而是淡出。卡宽由 0.44 放到 0.49：末位主题吸合时左侧邻卡只露约 6px，
+     卡名文字从卡左约 10px 起，6px 只露边框与预览色块、不露文字；
+     snap 位置不动，320px 下单列布局不受影响。 */
+  -webkit-mask-image: linear-gradient(to right, #000 88%, transparent 99%);
+  mask-image: linear-gradient(to right, #000 88%, transparent 99%);
 }
 .theme-grid::-webkit-scrollbar {
   display: none;
@@ -1692,21 +2312,23 @@ canvas.pet {
 
 /* 更窄设备才收紧复杂录入表单。 */
 @media (max-width: 359px) {
-  .rule-chips {
-    grid-template-rows: repeat(4, 56px);
+  /* 单列行窄窗仍单行不折行：320px 下名字列约 200px，8 字名放得下；
+     超长名省略号兜底。 */
+  .rule-chip span:not(.rule-icon) {
+    font-size: 14px;
   }
-  .rule-chip {
-    height: 56px;
+  /* 今日计划堆窄窗收紧：dock 留白后卡片只剩约 224px，名字至少放得下 4 个字
+     （图标 48→36、间距收紧、按钮横向内边距收一档，共约 32px）；只影响 ≤359px。 */
+  .today-plan {
+    gap: var(--space-2);
+    padding: var(--space-2);
   }
-  .rule-chip span {
-    display: -webkit-box;
-    white-space: normal;
-    line-height: 1.25;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+  .today-plan .tile-icon {
+    width: 36px;
+    height: 36px;
   }
-  .quick-entry-controls {
-    grid-template-columns: minmax(0, 1fr);
+  .today-plan .today-complete {
+    padding-inline: var(--space-2);
   }
   .theme-grid {
     grid-auto-flow: row;
