@@ -30,6 +30,23 @@ export function memoryDisplayText(memory) {
   const value = String(memory?.text ?? '');
   return memory?.source === 'habit' ? value.replace(/\s*·\s*$/u, '').trim() : value;
 }
+/** 解析「第一次相遇 · 寄语」：标题加粗居中，寄语按逗号拆成两行。 */
+export function meetingWishParts(text) {
+  const raw = String(text ?? '').trim();
+  const match = raw.match(/^(第一次相遇)\s*[·•]\s*(.+)$/u);
+  if (!match) return null;
+  const title = match[1];
+  const wish = match[2].trim();
+  const comma = wish.indexOf('，');
+  if (comma > 0 && comma < wish.length - 1) {
+    return {
+      title,
+      line1: wish.slice(0, comma + 1),
+      line2: wish.slice(comma + 1).trim(),
+    };
+  }
+  return { title, line1: wish, line2: '' };
+}
 function must(v, msg) {
   if (!v) throw Error(msg);
 }
@@ -146,6 +163,14 @@ const profileFields = [
 ];
 function profileSnapshot(s) {
   return Object.fromEntries(profileFields.map((k) => [k, clone(s[k])]));
+}
+function syncThemeAcrossProfiles(s, theme = s.settings?.theme) {
+  if (!THEME_IDS.includes(theme)) return;
+  s.settings.theme = theme;
+  for (const p of s.profiles || []) {
+    if (p.data?.settings && typeof p.data.settings === 'object')
+      p.data.settings.theme = theme;
+  }
 }
 function ensureProfiles(s) {
   if (!Array.isArray(s.goalTemplates)) s.goalTemplates = [];
@@ -1042,7 +1067,7 @@ export function apply(before, cmd, now = Date.now()) {
       }
       if (v.theme !== undefined) {
         must(THEME_IDS.includes(v.theme), '主题无效');
-        s.settings.theme = v.theme;
+        syncThemeAcrossProfiles(s, v.theme);
       }
       if (v.memoryExpanded !== undefined)
         s.settings.memoryExpanded = !!v.memoryExpanded;
@@ -1095,6 +1120,7 @@ export function apply(before, cmd, now = Date.now()) {
       );
       const fresh = initialState(now);
       fresh.child = name;
+      fresh.settings.theme = s.settings.theme;
       const id = uid();
       s.profiles.push({
         id,
@@ -1132,6 +1158,7 @@ export function apply(before, cmd, now = Date.now()) {
       const p = s.profiles.find((p) => p.id === cmd.id);
       must(p, '孩子档案不存在');
       if (p.id !== s.activeProfileId) {
+        const theme = s.settings.theme;
         const active = s.profiles.find((p) => p.id === s.activeProfileId);
         active.data = profileSnapshot(s);
         must(p.data, '目标孩子数据缺失');
@@ -1139,6 +1166,7 @@ export function apply(before, cmd, now = Date.now()) {
         p.data = null;
         s.activeProfileId = p.id;
         s.child = p.name;
+        syncThemeAcrossProfiles(s, theme);
       }
       break;
     }
@@ -1146,6 +1174,7 @@ export function apply(before, cmd, now = Date.now()) {
       must(s.profiles.length > 1, '至少保留一位小朋友');
       const index = s.profiles.findIndex((p) => p.id === cmd.id);
       must(index >= 0, '孩子档案不存在');
+      const theme = s.settings.theme;
       if (cmd.id === s.activeProfileId) {
         const next = s.profiles.find((p) => p.id !== cmd.id);
         must(next?.data, '下一位小朋友数据缺失');
@@ -1155,6 +1184,7 @@ export function apply(before, cmd, now = Date.now()) {
         next.data = null;
       }
       s.profiles.splice(index, 1);
+      syncThemeAcrossProfiles(s, theme);
       result.profileId = s.activeProfileId;
       break;
     }

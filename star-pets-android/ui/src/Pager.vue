@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
-const props = defineProps<{
-  page: number;
-  pages: number;
-  label?: string;
-  previousLabel?: string;
-  nextLabel?: string;
-  buttonType?: 'button';
-}>();
+const props = withDefaults(
+  defineProps<{
+    page: number;
+    pages: number;
+    label?: string;
+    previousLabel?: string;
+    nextLabel?: string;
+    buttonType?: 'button';
+    /** 挂载后是否播放一次露边提示；图鉴等场景关闭以免干扰当前视图。 */
+    peekHint?: boolean;
+    /** 需先长按再左右滑才翻页（目标库卡片场景）。 */
+    longPressSwipe?: boolean;
+  }>(),
+  { peekHint: true, longPressSwipe: false },
+);
 const emit = defineEmits<{ change: [page: number] }>();
 const dotPages = computed(() => {
   if (props.pages <= 7)
@@ -30,6 +37,8 @@ const ENTER_MS = 220; // 入场/回弹时长 = --t-base
 const CLICK_SUPPRESS_MS = 350; // 滑完后忽略一次误触点按
 const PEEK_DELAY_MS = 500; // 挂载后多久做一次露边提示
 const PEEK_MS = 720; // 露边提示时长（≈ 2 × --t-slow），位移 18px 见 components.css 的 pager-peek
+const LONG_PRESS_MS = 380;
+const LONG_PRESS_MOVE_CANCEL = 10;
 
 const viewportRef = ref<HTMLElement | null>(null);
 const trackRef = ref<HTMLElement | null>(null);
@@ -57,10 +66,17 @@ let activePointerId = -1;
 let locked: 'x' | 'y' | null = null;
 let samples: { x: number; t: number }[] = [];
 let hintTimer: ReturnType<typeof setTimeout> | undefined;
+let longPressTimer: ReturnType<typeof setTimeout> | undefined;
+let longPressReady = false;
 
 function setTrack(transform: string, transition: 'none' | 'fast' | 'base') {
   trackTransform.value = transform;
   trackTransition.value = transition;
+}
+function clearLongPress() {
+  clearTimeout(longPressTimer);
+  longPressTimer = undefined;
+  longPressReady = !props.longPressSwipe;
 }
 function resetTrack() {
   runToken += 1;
@@ -70,6 +86,7 @@ function resetTrack() {
   // 外部改页时正在进行的拖拽一并取消，避免复位后手势又把轨道拖走。
   locked = null;
   activePointerId = -1;
+  clearLongPress();
   removeWindowListeners();
   setTrack('', 'none');
 }
@@ -139,7 +156,7 @@ function goTo(target: number) {
   void animateToPage(target);
 }
 function showPeekHint() {
-  if (hintShown.value || interacted.value) return;
+  if (!props.peekHint || hintShown.value || interacted.value) return;
   if (props.pages <= 1 || props.page >= props.pages) return;
   hintShown.value = true;
   hint.value = true;
@@ -189,6 +206,14 @@ function onPointerDown(e: PointerEvent) {
   activePointerId = e.pointerId;
   locked = null;
   samples = [{ x: e.clientX, t: performance.now() }];
+  clearLongPress();
+  longPressReady = !props.longPressSwipe;
+  if (props.longPressSwipe) {
+    longPressTimer = setTimeout(() => {
+      longPressReady = true;
+      navigator.vibrate?.(12);
+    }, LONG_PRESS_MS);
+  }
   addWindowListeners();
 }
 function onWindowPointerMove(e: PointerEvent) {
@@ -200,6 +225,16 @@ function onWindowPointerMove(e: PointerEvent) {
   if (locked === 'y') return;
   const dx = e.clientX - startX;
   const dy = e.clientY - startY;
+  if (props.longPressSwipe && !longPressReady) {
+    if (Math.hypot(dx, dy) > LONG_PRESS_MOVE_CANCEL) {
+      clearTimeout(longPressTimer);
+      longPressTimer = undefined;
+      locked = 'y';
+      removeWindowListeners();
+      activePointerId = -1;
+    }
+    return;
+  }
   if (!locked) {
     if (
       Math.abs(dx) > ENGAGE_DX &&
@@ -209,9 +244,13 @@ function onWindowPointerMove(e: PointerEvent) {
       phase.value = 'dragging';
       interacted.value = true;
       hint.value = false;
+      clearTimeout(longPressTimer);
+      longPressTimer = undefined;
     } else if (Math.abs(dy) > ENGAGE_DX && Math.abs(dy) >= Math.abs(dx)) {
       // 纵向占主导：不接管，交给页面纵向滚动。
       locked = 'y';
+      clearTimeout(longPressTimer);
+      longPressTimer = undefined;
       removeWindowListeners();
       activePointerId = -1;
       return;
@@ -230,6 +269,8 @@ function onWindowPointerMove(e: PointerEvent) {
   setTrack(`translateX(${resisted}px)`, 'none');
 }
 function finishDrag() {
+  clearTimeout(longPressTimer);
+  longPressTimer = undefined;
   removeWindowListeners();
   activePointerId = -1;
   if (locked !== 'x') {
@@ -285,6 +326,7 @@ onMounted(() => {
 });
 onBeforeUnmount(() => {
   clearTimeout(hintTimer);
+  clearTimeout(longPressTimer);
   removeWindowListeners();
 });
 </script>

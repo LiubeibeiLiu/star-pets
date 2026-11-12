@@ -80,16 +80,19 @@ test('two child profiles isolate scores, habits, memories, pets and settings', (
   assert.equal(s.pets.length, 0);
   assert.equal(s.habits.length, 0);
   s = command(s, { type: 'score', points: 4, reason: '主动打招呼' }).state;
-  s = command(s, { type: 'settings', value: { reduceMotion: true } }).state;
+  s = command(s, { type: 'settings', value: { reduceMotion: true, theme: 'milo' } }).state;
   s = command(s, { type: 'profileSwitch', id: first }).state;
   assert.equal(s.child, '小星星');
   assert.equal(totals(s).earned, 9);
   assert.equal(s.pets.length, 1);
   assert.equal(s.habits.length, 1);
   assert.equal(s.settings.reduceMotion, false);
+  // Theme is household-wide; other settings stay per child.
+  assert.equal(s.settings.theme, 'milo');
   s = command(s, { type: 'profileSwitch', id: added.result.profileId }).state;
   assert.equal(totals(s).earned, 4);
   assert.equal(s.settings.reduceMotion, true);
+  assert.equal(s.settings.theme, 'milo');
   validate(s);
 });
 

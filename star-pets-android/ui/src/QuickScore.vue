@@ -3,9 +3,15 @@ import UiDate from './UiDate.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import Icon from './Icon.vue';
 import Pager from './Pager.vue';
+import CatalogToolbar from './CatalogToolbar.vue';
 import { rulePage } from './companion.js';
 import { dayKey, uid } from './model.js';
 import { computeScoreLayout, SCORE_FALLBACK } from './score-layout.js';
+
+const SCORE_FILTERS = [
+  { value: 'plus', label: '加分' },
+  { value: 'minus', label: '减分' },
+] as const;
 
 const props = defineProps<{
   rules: any[];
@@ -55,6 +61,11 @@ const points = ref(3),
   note = ref(''),
   token = ref(uid());
 const sign = computed(() => (points.value < 0 ? -1 : 1));
+const signFilter = computed({
+  get: () => (points.value < 0 ? 'minus' : 'plus'),
+  set: (value: string) => setSign(value === 'minus' ? -1 : 1),
+});
+const toolbarRef = ref<InstanceType<typeof CatalogToolbar> | null>(null);
 const exactRule = computed(() =>
   props.rules.find(
     (r) => r.name === reason.value && Math.sign(r.points) === sign.value,
@@ -335,7 +346,10 @@ function fmtTime(e: any) {
   if (Number.isNaN(t.getTime())) return '';
   return `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
 }
-defineExpose({ reset, showRule });
+function openSearch() {
+  toolbarRef.value?.openSearch();
+}
+defineExpose({ reset, showRule, openSearch, focus: openSearch });
 </script>
 
 <template>
@@ -345,32 +359,25 @@ defineExpose({ reset, showRule });
     @submit.prevent="submit"
   >
     <div class="section-head"
-      ><div class="section-title"><h2>记下这次表现</h2><small>说清发生了什么，比评价更有帮助</small></div
+      ><div class="section-title"><h2>日常表现</h2><small>单击记录，长按删除；可自定义添加</small></div
       ><button
         type="button"
         class="icon-button"
-        aria-label="添加日常表现"
-        title="添加日常表现"
+        aria-label="自定义日常表现"
+        title="自定义日常表现"
         @click="emit('add', sign)"
         ><Icon name="plus" /></button
     ></div>
-    <div class="segmented sign-toggle" role="radiogroup" aria-label="记录类型"
-      ><button
-        type="button"
-        role="radio"
-        :aria-checked="points > 0"
-        :class="{ active: points > 0 }"
-        @click="setSign(1)"
-        >加分</button
-      ><button
-        type="button"
-        role="radio"
-        :aria-checked="points < 0"
-        :class="{ active: points < 0 }"
-        @click="setSign(-1)"
-        >减分</button
-      ></div
-    >
+    <CatalogToolbar
+      ref="toolbarRef"
+      :options="[...SCORE_FILTERS]"
+      v-model:filter="signFilter"
+      v-model:query="reason"
+      filter-label="记录类型"
+      search-label="搜索日常表现"
+      search-placeholder="搜索日常表现"
+      :sticky-query="false"
+    />
     <Pager
       label="常用表现分页"
       previous-label="常用表现上一页"

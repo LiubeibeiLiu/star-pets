@@ -227,6 +227,7 @@ button.danger {
   color: var(--primary-ink);
   box-shadow: 0 1px 2px rgba(var(--ink-rgb), 0.08), 0 4px 12px -6px rgba(var(--ink-rgb), 0.25);
 }
+.deduction .catalog-filter button.active,
 .deduction .sign-toggle button.active {
   color: var(--danger);
 }
@@ -234,15 +235,19 @@ button.danger {
 .quick-score .rule-chip b { color: var(--success); }
 .quick-score.deduction .rule-chip b { color: var(--danger); }
 /* 日常表现：加分/减分切换照视频快捷场景首片做实色（加分主色、减分危险色）。 */
+.quick-score:not(.deduction) .catalog-filter button.active,
 .quick-score:not(.deduction) .sign-toggle button.active { background: var(--primary); color: var(--on-primary); }
+.quick-score.deduction .catalog-filter button.active,
 .quick-score.deduction .sign-toggle button.active { background: var(--danger); color: var(--on-danger); }
 /* B3 滑动指示（续）：material.css 后于 components.css 加载，且此处激活态
    规则优先级更高，故指示条配色与激活钮透明化须在此覆盖，否则指示条会被
    激活钮的实色底盖住。加分 pill 用主色、减分 pill 用危险色，与原激活底色一致。 */
+.quick-score:not(.deduction) .catalog-filter:has(> button:nth-child(2):last-child)::before,
 .quick-score:not(.deduction) .sign-toggle:has(> button:nth-child(2):last-child)::before {
   background: var(--primary);
   box-shadow: 0 2px 0 var(--primary-deep);
 }
+.quick-score.deduction .catalog-filter:has(> button:nth-child(2):last-child)::before,
 .quick-score.deduction .sign-toggle:has(> button:nth-child(2):last-child)::before {
   background: var(--danger);
   box-shadow: none;
@@ -251,9 +256,11 @@ button.danger {
   background: transparent;
   box-shadow: none;
 }
+.quick-score:not(.deduction) .catalog-filter button.active,
 .quick-score:not(.deduction) .sign-toggle button.active {
   background: transparent;
 }
+.quick-score.deduction .catalog-filter button.active,
 .quick-score.deduction .sign-toggle button.active {
   background: transparent;
 }
@@ -292,6 +299,9 @@ button.danger {
 .chip.active.chip-kind-exploration { background: var(--cat-4-soft); color: var(--cat-4-ink); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--cat-4-ink) 55%, transparent); }
 .chip.active.chip-kind-plus { background: var(--success-soft); color: var(--success); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--success) 55%, transparent); }
 .chip.active.chip-kind-minus { background: var(--danger-soft); color: var(--danger); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--danger) 55%, transparent); }
+.chip.active.chip-kind-active { background: var(--success-soft); color: var(--success); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--success) 55%, transparent); }
+.chip.active.chip-kind-inactive { background: var(--surface-2, var(--well)); color: var(--ink-2); box-shadow: inset 0 0 0 1.5px var(--line); }
+.chip.active.chip-kind-all { background: var(--primary-soft); color: var(--primary-deep); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--primary) 55%, transparent); }
 
 /* 输入 */
 :where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file']), textarea, select),
@@ -681,6 +691,7 @@ button.danger {
 .memory-list .list-link img { flex: none; width: 26px; height: 26px; object-fit: contain; }
 /* 短文字回忆：备忘录 3D 图贴在文字左侧，不改文字本身。 */
 .memory-note-inline { display: flex; align-items: flex-start; gap: var(--space-2); }
+.memory-note-inline.meeting-wish { display: grid; }
 .memory-note-inline > span { min-width: 0; }
 .memory-note-mark { flex: none; width: 24px; height: 24px; margin-top: 1px; object-fit: contain; }
 /* 足迹记录：加分行用 3D 星星，减分行保留减号线形图标（➖ 的 3D 渲染是紫色，与危险红冲突）。 */
@@ -761,29 +772,65 @@ button.danger {
   background: var(--danger);
   color: var(--on-danger);
 }
-/* 计划卡电源开关：启用时实色主色圆钮，停用时灰色描边圆钮（照视频的圆形电源开关）。 */
+/* Apple 风格开关：轨道 + 滑块，开启色跟随主题主色。 */
 .plan-toggle {
+  --switch-h: 31px;
+  --switch-w: 51px;
+  --switch-inset: 2px;
+  --thumb-size: calc(var(--switch-h) - 2 * var(--switch-inset));
+  --thumb-travel: calc(var(--switch-w) - var(--switch-h));
+  position: relative;
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
-  min-height: 36px;
+  display: inline-block;
+  width: var(--switch-w);
+  min-width: var(--switch-w);
+  height: var(--switch-h);
+  min-height: var(--switch-h);
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--primary);
-  color: var(--on-primary);
-  box-shadow: var(--shadow-float);
+  color: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent);
+  transition:
+    background var(--t-fast) var(--ease),
+    box-shadow var(--t-fast) var(--ease);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.plan-toggle svg { width: 20px; height: 20px; }
+.plan-toggle::after {
+  position: absolute;
+  top: var(--switch-inset);
+  left: var(--switch-inset);
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(20, 25, 35, 0.18),
+    0 3px 8px rgba(20, 25, 35, 0.12);
+  content: '';
+  transform: translateX(var(--thumb-travel));
+  transition: transform var(--t-fast) var(--ease);
+}
+.plan-toggle svg {
+  display: none;
+}
 .plan-toggle.off {
-  background: transparent;
-  color: var(--ink-3);
-  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  background: color-mix(in srgb, var(--ink-3) 28%, var(--surface-solid, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-3) 16%, transparent);
 }
-.plan-toggle:disabled { opacity: 0.5; }
+.plan-toggle.off::after {
+  transform: translateX(0);
+}
+.plan-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.plan-toggle:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--primary) 55%, transparent);
+  outline-offset: 3px;
+}
 .submit-points {
   min-width: 2ch;
   margin-left: 2px;
@@ -1037,7 +1084,6 @@ button.danger {
 .memory-note-inline,
 .plan-criteria,
 .plan-head h3,
-.goal-card small,
 dialog p,
 .toast span {
   overflow-wrap: anywhere;
@@ -1157,20 +1203,16 @@ button.secondary {
 }
 
 .ios-switch {
-  box-shadow:
-    inset 0 1px 3px rgba(var(--ink-rgb), 0.2),
-    inset 0 -1px 0 var(--inner-hi);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-3) 16%, transparent);
 }
 .ios-switch:checked {
-  background: var(--primary-gradient);
-  box-shadow:
-    inset 0 1px 2px rgba(var(--ink-rgb), 0.12),
-    0 0 14px -5px var(--glow);
+  background: var(--primary);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 .ios-switch::after {
   box-shadow:
-    0 1px 2px rgba(20, 25, 35, 0.16),
-    0 4px 10px rgba(20, 25, 35, 0.14);
+    0 1px 2px rgba(20, 25, 35, 0.18),
+    0 3px 8px rgba(20, 25, 35, 0.12);
 }
 
 .segmented:not(.page-tabs),
@@ -1469,20 +1511,13 @@ button.secondary {
   background: var(--chip);
 }
 .theme-option {
-  border-color: var(--inner-edge);
   background: var(--surface-solid);
-  box-shadow: 0 5px 16px -14px rgba(var(--ink-rgb), 0.3);
 }
 .theme-preview {
   border: 1px solid rgba(255, 255, 255, 0.5);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.66),
     0 9px 18px -14px rgba(var(--ink-rgb), 0.46);
-}
-.theme-option.active {
-  box-shadow:
-    inset 0 0 0 1px var(--swatch-primary),
-    0 0 0 3px rgba(var(--p-rgb), 0.1);
 }
 
 .tile-add,
@@ -1499,19 +1534,6 @@ button.secondary {
   box-shadow:
     inset 0 1px 0 var(--inner-hi),
     0 12px 24px -18px var(--glow);
-}
-
-:root[data-theme='starry'] .card,
-:root[data-theme='starry'] .pet-card,
-:root[data-theme='starry'] .zone-card,
-:root[data-theme='starry'] .home-zone > .chat-panel {
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.055), transparent 42%),
-    var(--surface);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.09),
-    0 3px 8px rgba(0, 0, 0, 0.18),
-    0 20px 44px -24px rgba(0, 0, 0, 0.78);
 }
 
 /* ---------- 伙伴图鉴 / 详情 / 设置行：抖音参考视觉语言 ---------- */
@@ -1565,30 +1587,33 @@ button.secondary {
   font-weight: 700;
 }
 .setting > button > span:first-child { font-weight: 700; }
-/* 设置行里的电源开关：components 的 .setting > button 行样式会覆盖 .plan-toggle，
-   在此用更高特异性完整还原圆形电源开关外观（与培养计划卡同一套）。 */
+/* 设置行里的开关：压过 .setting > button 行样式，保持标准 Apple 开关尺寸。 */
 .setting > button.plan-toggle {
+  --switch-w: 51px;
+  --switch-h: 31px;
+  --switch-inset: 2px;
+  --thumb-size: calc(var(--switch-h) - 2 * var(--switch-inset));
+  --thumb-travel: calc(var(--switch-w) - var(--switch-h));
   flex: none;
-  display: grid;
-  place-items: center;
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
-  min-height: 36px;
+  display: inline-block;
+  width: var(--switch-w);
+  min-width: var(--switch-w);
+  height: var(--switch-h);
+  min-height: var(--switch-h);
   padding: 0;
   border: 0;
-  border-radius: 50%;
+  border-radius: 999px;
   background: var(--primary);
-  color: var(--on-primary);
-  box-shadow: var(--shadow-float);
+  color: transparent;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 18%, transparent);
 }
 .setting > button.plan-toggle.off {
-  background: transparent;
-  color: var(--ink-3);
-  box-shadow: inset 0 0 0 1.5px var(--line-strong);
+  background: color-mix(in srgb, var(--ink-3) 28%, var(--surface-solid, #fff));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink-3) 16%, transparent);
 }
-.setting > button.plan-toggle svg { color: var(--on-primary); }
-.setting > button.plan-toggle.off svg { color: var(--ink-3); }
+.setting > button.plan-toggle svg {
+  display: none;
+}
 /* 小朋友行：头像 emoji 加分类色淡色圆底，按行循环取色。 */
 .child-row:nth-child(5n + 1) .child-avatar { background: var(--cat-1-soft); }
 .child-row:nth-child(5n + 2) .child-avatar { background: var(--cat-2-soft); }

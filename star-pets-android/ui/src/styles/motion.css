@@ -4,7 +4,6 @@
 :where(button),
 .pet-card,
 .gallery-card,
-.theme-option,
 .today-goal {
   transition:
     transform var(--t-base) var(--spring),
@@ -222,9 +221,6 @@ body::before {
 .pet-stage::before {
   animation: stage-aura 7s ease-in-out infinite alternate;
 }
-.theme-option.active {
-  animation: selected-aura 3.8s ease-in-out infinite alternate;
-}
 @keyframes ambient-breathe {
   from {
     opacity: calc(var(--orb-opacity) - 0.14);
@@ -258,13 +254,16 @@ body::before {
   .pet-card:hover,
   .plan-card:hover,
   .goal-card:hover,
-  .gallery-card:hover,
-  .theme-option:hover {
+  .gallery-card:hover {
     transform: translateY(-2px);
     box-shadow:
       inset 0 1px 0 var(--inner-hi),
       0 4px 8px rgba(var(--ink-rgb), 0.06),
       0 22px 40px -26px rgba(var(--ink-rgb), 0.38);
+  }
+  .theme-option:hover:not(.active) {
+    z-index: 55;
+    transform: scale(0.98) translateY(0);
   }
   .icon-button:hover:not(:disabled),
   .dock-item:hover:not(:disabled) {

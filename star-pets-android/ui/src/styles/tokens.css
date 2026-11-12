@@ -148,79 +148,6 @@
   color-scheme: light;
 }
 
-/* 露草蓝 #0079FF / #64ADFF / #AED3FF */
-:root[data-theme='dayflower'] {
-  color-scheme: light;
-}
-
-/* 星夜黑 #000000 / #BFCBD9 / #E4E8EF：纯黑强调搭配偏蓝灰层次。 */
-:root[data-theme='starry'] {
-  --ink: #f3f5fb;
-  --ink-2: #b7c0d2;
-  --ink-3: #9ba6ba;
-  --ink-rgb: 8, 11, 18;
-  --primary: #93a7ff;
-  --primary-deep: #7589e8;
-  --primary-ink: #b0bdff;
-  --p-rgb: 147, 167, 255;
-  --tint-1: #7789ca;
-  --tint-2: #303c61;
-  --glow: rgba(126, 151, 255, 0.4);
-  --bg-a: #11151f;
-  --bg-b: #080b12;
-  --orb-1: rgba(79, 101, 174, 0.48);
-  --orb-2: rgba(99, 72, 159, 0.4);
-  --orb-3: rgba(38, 105, 110, 0.32);
-  --surface: #1b2333;
-  --surface-2: #222c40;
-  --surface-solid: #1b2333;
-  --glass-strong: rgba(25, 32, 46, 0.96);
-  --panel-glint: rgba(255, 255, 255, 0.04);
-  --header-glint: rgba(255, 255, 255, 0.04);
-  --tab-glint: rgba(255, 255, 255, 0.04);
-  --float-glint: rgba(255, 255, 255, 0.04);
-  --glass-edge: #344158;
-  --inner-edge: #3c4962;
-  --inner-hi: rgba(255, 255, 255, 0.14);
-  --header-bg: rgba(17, 23, 35, 1);
-  --fill: #222d42;
-  --chip: #28354b;
-  --raised: #34415c;
-  --halo: rgba(63, 77, 112, 0.55);
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.15);
-  --tint: #253047;
-  --well: #1e293d;
-  --well-strong: rgba(147, 167, 255, 0.15);
-  --primary-soft: rgba(147, 167, 255, 0.16);
-  --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.35), inset 0 -1px 0 rgba(255, 255, 255, 0.06);
-  --primary-gradient: linear-gradient(135deg, #8197f5, #a39ae9);
-  --on-primary: #111827;
-  --on-danger: #111827;
-  --on-action: #111827;
-  --danger-gradient: linear-gradient(135deg, #ef8193, #f09aaa);
-  --success: #69cfac;
-  --success-soft: rgba(105, 207, 172, 0.14);
-  --sun: #d7aa57;
-  --on-sun: #211a0c;
-  --sun-soft: rgba(215, 170, 87, 0.16);
-  --sun-ink: #e7c67f;
-  --cat-1-soft: rgba(147, 167, 255, 0.16);
-  --cat-1-ink: #b0bdff;
-  --cat-2-soft: rgba(215, 170, 87, 0.16);
-  --cat-2-ink: #e7c67f;
-  --cat-3-soft: rgba(239, 129, 147, 0.14);
-  --cat-3-ink: #f09aaa;
-  --cat-4-soft: rgba(105, 207, 172, 0.14);
-  --cat-4-ink: #69cfac;
-  --cat-5-soft: rgba(179, 158, 245, 0.16);
-  --cat-5-ink: #c9bcf5;
-  --danger: #ef8193;
-  --danger-soft: rgba(239, 129, 147, 0.14);
-  --scrim: rgba(0, 0, 0, 0.58);
-  color-scheme: dark;
-}
-
 @media (prefers-reduced-motion: reduce) {
   :root {
     --t-fast: 0ms;
@@ -349,8 +276,7 @@
 }
 
 
-/* 蔚蓝 #F2F6FC / #2B6CF6 / #FF8A3D：浅灰蓝打底，蓝色主强调，橙色只做点缀，深海军蓝用于品牌元素。
-   配色为按抖音智能家居视频所述观感自选，非从视频提取（视频无可读色值）。
+/* 露草蓝（原蔚蓝）#F2F6FC / #2B6CF6 / #FF8A3D：浅灰蓝打底，蓝色主强调，橙色只做点缀。
    对比度已核验：正文 #16233A / 背景 #F2F6FC = 14.50:1；辅助 #4A5B73 = 6.38:1；
    白字 / 主蓝 #2B6CF6 = 4.59:1，白字 / 深蓝 #1F5CE0 = 5.73:1；主色文字 #1D4FD7 / 白底 = 6.66:1；
    橙色只配深色文字 #9A4D0F（/ 白底 6.10:1），不用白字配橙色（仅 2.35:1）。成功态用蓝色，不用绿色。 */

@@ -28,6 +28,7 @@ import VoiceSettings from './VoiceSettings.vue';
 import QuickScore from './QuickScore.vue';
 import UiSelect from './UiSelect.vue';
 import SearchField from './SearchField.vue';
+import CatalogToolbar from './CatalogToolbar.vue';
 import IntegerStepper from './IntegerStepper.vue';
 import ChatPanel from './ChatPanel.vue';
 import SettingsPage from './SettingsPage.vue';
@@ -35,6 +36,11 @@ import { preferences } from './companion.js';
 import { NAV_TABS, TITLES, TOP_VIEWS } from './navigation';
 import { usePreviewView } from './preview-view';
 import { findHabitForGoal, goalDisplayName as displayGoalName } from './goal-library.js';
+import {
+  computeGoalLayout,
+  GOAL_FALLBACK,
+  GOAL_ROW_GAP,
+} from './goal-layout.js';
 import { ruleIconFile } from './rule-icons.js';
 const Pet = defineAsyncComponent(() => import('./Pet.vue'));
 const PhotoEditor = defineAsyncComponent(() => import('./PhotoEditor.vue'));
@@ -58,6 +64,7 @@ import {
   uid,
   hunger,
   memoryDisplayText,
+  meetingWishParts,
   NAME_LIMITS,
 } from './model.js';
 import { levelOf, thresholds } from './catalog.js';
@@ -118,7 +125,6 @@ function toggleChat() {
 const renameOpen = ref(false),
   renameText = ref(''),
   quickScore = ref<any>(),
-  scoreSearch = ref<InstanceType<typeof SearchField>>(),
   scoreReason = ref(''),
   profileDraft = ref<any>({}),
   newRule = ref({ name: '', points: 3, icon: '' }),
@@ -319,8 +325,7 @@ async function goScore() {
   nav('habits');
   habitTab.value = 'score';
   await nextTick();
-  scoreSearch.value?.focus();
-  document.getElementById('habit-search-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  quickScore.value?.openSearch?.();
 }
 // 足迹空态：去习惯页的计划 tab 完成今日计划；习惯页挂载时内容自带 rise 入场。
 function goFootprintPlans() {
@@ -460,8 +465,8 @@ function clearFootprintFilter() {
   Object.assign(filter.value, { query: '', kind: 'all', from: '', to: '', page: 1 });
   dateRange.value = 'month';
 }
-const habitMode = ref<'list' | 'goalLibrary' | 'habitEdit'>('list');
-const habitEditReturn = ref<'list' | 'goalLibrary'>('list');
+const habitMode = ref<'list' | 'habitEdit'>('list');
+const habitEditReturn = ref<'list'>('list');
 const memoryTab = ref<'gallery' | 'footprints'>('gallery');
 const storedHabitTab = !isNative
   ? sessionStorage.getItem('star-pets-habit-tab')
@@ -663,6 +668,9 @@ function memoryNoteIcon3d(m: any): string {
   }
   return icon3d('memory-memo.png');
 }
+function memoryWish(m: any) {
+  return meetingWishParts(memoryDisplayText(m));
+}
 // 新建日常表现的图标选择器：扩充后的图库（109 张）按类分组；不选则保存时
 // 按表现名自动匹配（规则映射表）。分组只影响选择器里的排布，不影响映射。
 const RULE_ICON_PICKER: { label: string; items: { file: string; label: string }[] }[] = [
@@ -799,8 +807,19 @@ function dockHue(key: string): string {
 }
 const goalPage = ref(1),
   goalQuery = ref(''),
+  goalFilter = ref<'all' | 'active' | 'inactive'>('all'),
   goalDraftOnly = ref(false),
+  goalFilterOptions = [
+    { value: 'all', label: '全部' },
+    { value: 'active', label: '启用' },
+    { value: 'inactive', label: '未启用' },
+  ],
   goalTemplateId = ref(''),
+  // 每页卡片数按可用高度动态倒推（见 goal-layout.js），量不到时回退 3×2。
+  goalPageSize = ref(GOAL_FALLBACK.pageSize),
+  goalRows = ref(GOAL_FALLBACK.rows),
+  goalRowHeight = ref(GOAL_FALLBACK.rowHeight),
+  goalGridRef = ref<HTMLElement | null>(null),
   goalList = computed<any[]>(() => [
     ...builtInGoals,
     ...(state.value.goalTemplates || []).map((g: any) => ({
@@ -809,24 +828,141 @@ const goalPage = ref(1),
       hint: g.criteria || g.category,
     })),
   ]),
-  filteredGoals = computed(() =>
-    goalList.value.filter((g) =>
-      (g.name + ' ' + (addedHabitForGoal(g)?.name || '') + ' ' + (g.hint || '') + ' ' + (g.category || ''))
+  filteredGoals = computed(() => {
+    const q = goalQuery.value.trim().toLocaleLowerCase();
+    return goalList.value.filter((g) => {
+      const active = addedHabitForGoal(g)?.status === 'active';
+      if (goalFilter.value === 'active' && !active) return false;
+      if (goalFilter.value === 'inactive' && active) return false;
+      if (!q) return true;
+      return (g.name + ' ' + (addedHabitForGoal(g)?.name || '') + ' ' + (g.hint || '') + ' ' + (g.category || ''))
         .toLocaleLowerCase()
-        .includes(goalQuery.value.trim().toLocaleLowerCase()),
-    ),
-  ),
+        .includes(q);
+    });
+  }),
   goalPages = computed(() =>
-    Math.max(1, Math.ceil(filteredGoals.value.length / 6)),
+    Math.max(1, Math.ceil(filteredGoals.value.length / goalPageSize.value)),
   ),
   visibleGoals = computed(() =>
-    filteredGoals.value.slice((goalPage.value - 1) * 6, goalPage.value * 6),
+    filteredGoals.value.slice(
+      (goalPage.value - 1) * goalPageSize.value,
+      goalPage.value * goalPageSize.value,
+    ),
+  ),
+  goalGridStyle = computed(() => ({
+    '--goal-rows': String(goalRows.value),
+    '--goal-row-height': `${goalRowHeight.value}px`,
+    height: `${
+      goalRows.value * goalRowHeight.value +
+      Math.max(0, goalRows.value - 1) * GOAL_ROW_GAP
+    }px`,
+  }));
+let goalLayoutTimer: ReturnType<typeof setTimeout> | undefined,
+  goalShellObserver: ResizeObserver | null = null,
+  goalThemeObserver: MutationObserver | null = null;
+function plansCatalogVisible() {
+  return (
+    view.value === 'habits' &&
+    habitMode.value === 'list' &&
+    habitTab.value === 'plans'
   );
+}
+function measureGoalLayout() {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  if (!plansCatalogVisible()) return;
+  const shell = document.querySelector<HTMLElement>('.shell');
+  const gridEl = goalGridRef.value;
+  if (!shell || !gridEl) return;
+  const shellRect = shell.getBoundingClientRect();
+  const gridRect = gridEl.getBoundingClientRect();
+  if (!gridRect.width || !shellRect.height) return;
+  const gridTop = gridRect.top - shellRect.top + shell.scrollTop;
+  let safeBottom = 0;
+  const homeRect = document
+    .querySelector<HTMLElement>('.tabbar button.home-tab .tab-icon')
+    ?.getBoundingClientRect();
+  if (homeRect?.height) safeBottom = homeRect.top - shellRect.top;
+  else {
+    const tabRect = document
+      .querySelector<HTMLElement>('.tabbar')
+      ?.getBoundingClientRect();
+    if (tabRect?.height) safeBottom = tabRect.top - shellRect.top - 36;
+    else safeBottom = window.innerHeight - shellRect.top - 132;
+  }
+  if (safeBottom <= 0) return;
+  const dotsEl = document.querySelector<HTMLElement>(
+    '.goals-card .pagination-dots',
+  );
+  const dotsH = dotsEl?.offsetHeight || 28;
+  const dotsStyle = dotsEl ? getComputedStyle(dotsEl) : null;
+  const dotsGap =
+    (dotsStyle ? Number.parseFloat(dotsStyle.marginTop) || 0 : 8) +
+    (dotsStyle ? Number.parseFloat(dotsStyle.marginBottom) || 0 : 8);
+  const { rows, rowHeight, pageSize } = computeGoalLayout({
+    chipsTop: gridTop,
+    safeBottom,
+    dotsReserve: dotsH + dotsGap + 4,
+  });
+  if (pageSize !== goalPageSize.value) {
+    goalPageSize.value = pageSize;
+    goalPage.value = Math.min(goalPage.value, Math.max(1, Math.ceil(filteredGoals.value.length / pageSize)));
+  }
+  if (rows !== goalRows.value) goalRows.value = rows;
+  if (Math.abs(rowHeight - goalRowHeight.value) > 0.5)
+    goalRowHeight.value = rowHeight;
+}
+function scheduleGoalLayout() {
+  clearTimeout(goalLayoutTimer);
+  goalLayoutTimer = setTimeout(measureGoalLayout, 120);
+}
+function bindGoalLayoutObservers() {
+  if (typeof window === 'undefined') return;
+  window.addEventListener('resize', scheduleGoalLayout);
+  if (typeof ResizeObserver !== 'undefined') {
+    const shell = document.querySelector('.shell');
+    if (shell) {
+      goalShellObserver?.disconnect();
+      goalShellObserver = new ResizeObserver(() => scheduleGoalLayout());
+      goalShellObserver.observe(shell);
+    }
+  }
+  if (typeof MutationObserver !== 'undefined') {
+    goalThemeObserver?.disconnect();
+    goalThemeObserver = new MutationObserver(() => scheduleGoalLayout());
+    goalThemeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme'],
+    });
+  }
+}
+function unbindGoalLayoutObservers() {
+  clearTimeout(goalLayoutTimer);
+  window.removeEventListener('resize', scheduleGoalLayout);
+  goalShellObserver?.disconnect();
+  goalShellObserver = null;
+  goalThemeObserver?.disconnect();
+  goalThemeObserver = null;
+}
 watch(
   () => goalList.value.length,
   () => (goalPage.value = Math.min(goalPage.value, goalPages.value)),
 );
 watch(goalQuery, () => (goalPage.value = 1));
+watch(goalFilter, () => {
+  goalPage.value = 1;
+});
+watch([habitMode, habitTab, view], async () => {
+  if (!plansCatalogVisible()) return;
+  await nextTick();
+  requestAnimationFrame(() => measureGoalLayout());
+  setTimeout(measureGoalLayout, 500);
+});
+watch(goalPages, () => {
+  if (plansCatalogVisible()) scheduleGoalLayout();
+});
+watch(goalGridRef, (el) => {
+  if (el) scheduleGoalLayout();
+});
 watch(
   () => state.value.habits.length,
   () => (planPage.value = Math.min(planPage.value, planPages.value)),
@@ -834,6 +970,7 @@ watch(
 function selectHabitTab(tab: 'score' | 'plans') {
   habitTab.value = tab;
   habitMode.value = 'list';
+  if (tab === 'plans') scheduleGoalLayout();
 }
 let previewStartX = 0,
   previewStartY = 0,
@@ -1337,10 +1474,10 @@ function toggleToday() {
 const titles = TITLES;
 const topViews = TOP_VIEWS;
 const screen = computed(() =>
-  view.value === 'habits' && habitMode.value !== 'list'
-    ? habitMode.value === 'habitEdit' && goalDraftOnly.value
+  view.value === 'habits' && habitMode.value === 'habitEdit'
+    ? goalDraftOnly.value
       ? 'goalDraft'
-      : habitMode.value
+      : 'habitEdit'
     : view.value,
 );
 const subScreen = computed(() => !topViews.includes(screen.value));
@@ -1601,15 +1738,19 @@ function nav(v: string) {
     galleryPage.value = 1;
     memoryTab.value = 'gallery';
   }
-  if (['goalLibrary', 'habitEdit'].includes(v)) {
-    habitMode.value = v as typeof habitMode.value;
-    habitTab.value = v === 'goalLibrary' || v === 'habitEdit' ? 'plans' : 'score';
+  if (v === 'goalLibrary') {
+    // 挑选库已并入培养计划 Tab，旧入口统一落到目录页。
+    habitMode.value = 'list';
+    habitTab.value = 'plans';
+    v = 'habits';
+  } else if (v === 'habitEdit') {
+    habitMode.value = 'habitEdit';
+    habitTab.value = 'plans';
     v = 'habits';
   } else {
     habitMode.value = 'list';
   }
-  if (v === 'habits' && habitMode.value === 'list')
-    habitTab.value = 'plans';
+  if (v === 'habits' && habitMode.value === 'list') habitTab.value = 'plans';
   restoreHomeForm();
   closePhoto();
   renameOpen.value = false;
@@ -1652,11 +1793,8 @@ function back() {
     return;
   }
   if (view.value === 'habits' && habitMode.value !== 'list') {
-    if (habitMode.value === 'habitEdit' && goalDraftOnly.value)
-      habitMode.value = 'goalLibrary';
-    else if (habitMode.value === 'habitEdit')
-      habitMode.value = habitEditReturn.value;
-    else habitMode.value = 'list';
+    habitMode.value = 'list';
+    habitTab.value = 'plans';
     return;
   }
   if (view.value === 'detail') {
@@ -1941,7 +2079,7 @@ async function care(action: string) {
     );
   });
 }
-function habitEdit(h?: any, returnTo: 'list' | 'goalLibrary' = 'list') {
+function habitEdit(h?: any, returnTo: 'list' = 'list') {
   habitSubmitted.value = false;
   habitEditReturn.value = returnTo;
   goalDraftOnly.value = false;
@@ -2006,7 +2144,79 @@ function planCriteria(h: any): string {
 }
 function editAddedGoal(goal: any) {
   const habit = addedHabitForGoal(goal);
-  if (habit) habitEdit({ ...habit, goalId: goal.id }, 'goalLibrary');
+  if (habit) habitEdit({ ...habit, goalId: goal.id }, 'list');
+}
+let lastGoalTap: { id: string; at: number } | null = null;
+let goalTapTimer: ReturnType<typeof setTimeout> | undefined;
+let goalHoldTimer: ReturnType<typeof setTimeout> | undefined;
+let goalHoldX = 0;
+let goalHoldY = 0;
+let goalSuppressClick = false;
+function suppressGoalClick() {
+  goalSuppressClick = true;
+  setTimeout(() => (goalSuppressClick = false), 700);
+}
+function cancelGoalHold() {
+  clearTimeout(goalHoldTimer);
+  goalHoldTimer = undefined;
+}
+function startGoalHold(goal: any, event: PointerEvent) {
+  if (event.pointerType === 'mouse' && event.button !== 0) return;
+  const habit = addedHabitForGoal(goal);
+  if (!habit) return;
+  cancelGoalHold();
+  goalHoldX = event.clientX;
+  goalHoldY = event.clientY;
+  goalHoldTimer = setTimeout(() => {
+    goalHoldTimer = undefined;
+    suppressGoalClick();
+    navigator.vibrate?.(20);
+    confirmDeleteHabit(habit);
+  }, 550);
+}
+function moveGoalHold(event: PointerEvent) {
+  if (
+    Math.abs(event.clientX - goalHoldX) > 10 ||
+    Math.abs(event.clientY - goalHoldY) > 10
+  )
+    cancelGoalHold();
+}
+function onGoalCardDelete(goal: any) {
+  const habit = addedHabitForGoal(goal);
+  if (habit) confirmDeleteHabit(habit);
+}
+function onGoalCardActivate(goal: any) {
+  if (goalSuppressClick) {
+    goalSuppressClick = false;
+    return;
+  }
+  const now = Date.now();
+  if (lastGoalTap && lastGoalTap.id === goal.id && now - lastGoalTap.at < 340) {
+    clearTimeout(goalTapTimer);
+    goalTapTimer = undefined;
+    lastGoalTap = null;
+    onGoalCardDblClick(goal);
+    return;
+  }
+  lastGoalTap = { id: goal.id, at: now };
+  clearTimeout(goalTapTimer);
+  // 稍等，避免双击的第一次点击误触发启停。
+  goalTapTimer = setTimeout(() => {
+    goalTapTimer = undefined;
+    if (lastGoalTap?.id === goal.id) void activateGoal(goal);
+  }, 280);
+}
+function onGoalCardDblClick(goal: any) {
+  if (goalSuppressClick) {
+    goalSuppressClick = false;
+    return;
+  }
+  clearTimeout(goalTapTimer);
+  goalTapTimer = undefined;
+  lastGoalTap = null;
+  const existing = addedHabitForGoal(goal);
+  if (existing) editAddedGoal(goal);
+  else editGoalTemplate(goal);
 }
 function editGoalTemplate(goal?: any) {
   habitEdit();
@@ -2030,7 +2240,7 @@ async function activateGoal(goal: any) {
     if (existing) {
       const status = existing.status === 'active' ? 'paused' : 'active';
       await commit({ type: 'habit', value: { ...existing, goalId: goal.id, status } });
-      notify(status === 'active' ? '培养计划已启用' : '培养计划已停用');
+      notify(status === 'active' ? '习惯已启用' : '习惯已停用');
       return;
     }
     const v = {
@@ -2051,7 +2261,7 @@ async function activateGoal(goal: any) {
       remind: !!goal.remind,
     };
     await commit({ type: 'habit', value: v });
-    notify('培养计划已启用');
+    notify('习惯已启用');
   });
 }
 function deleteHabit() {
@@ -2059,24 +2269,24 @@ function deleteHabit() {
     name = form.value.name;
   if (!id) return;
   ask(
-    '要删除培养计划「' + name + '」吗？已经记下的分数与回忆会继续保留。',
+    '要删除习惯「' + name + '」吗？已经记下的分数与回忆会继续保留。',
     () =>
       void run(async () => {
         await commit({ type: 'habitDelete', id });
-        nav(habitEditReturn.value === 'goalLibrary' ? 'goalLibrary' : 'habits');
+        nav('habits');
         habitTab.value = 'plans';
-        notify('培养计划已删除');
+        notify('习惯已删除');
       }),
   );
 }
 function confirmDeleteHabit(h: any) {
   ask(
-    '要删除培养计划「' + h.name + '」吗？已经记下的分数与回忆会继续保留。',
+    '要删除习惯「' + h.name + '」吗？已经记下的分数与回忆会继续保留。',
     () =>
       void run(async () => {
         await commit({ type: 'habitDelete', id: h.id });
         planPage.value = Math.min(planPage.value, planPages.value);
-        notify('培养计划已删除');
+        notify('习惯已删除');
       }),
   );
 }
@@ -2101,9 +2311,10 @@ async function saveHabit() {
       });
       goalQuery.value = '';
       goalPage.value = goalPages.value;
-      nav('goalLibrary');
+      nav('habits');
+      habitTab.value = 'plans';
       habitSubmitted.value = false;
-      notify('已保存到目标列表');
+      notify('已保存到习惯列表');
       return;
     }
     if (v.remind && isNative && !status.value.notifications) {
@@ -2111,9 +2322,10 @@ async function saveHabit() {
       status.value = await native('status');
     }
     await commit({ type: 'habit', value: v });
-    nav(habitEditReturn.value === 'goalLibrary' ? 'goalLibrary' : 'habits');
+    nav('habits');
+    habitTab.value = 'plans';
     habitSubmitted.value = false;
-    notify('培养计划已保存');
+    notify('习惯已保存');
   });
 }
 async function setHabitStatus(h: any, status: string) {
@@ -2397,6 +2609,7 @@ onMounted(async () => {
   };
   window.appBack = back;
   document.addEventListener('visibilitychange', visible);
+  bindGoalLayoutObservers();
   clockTimer = setInterval(() => {
     if (!document.hidden) {
       refreshClock.value = Date.now();
@@ -2415,6 +2628,7 @@ onBeforeUnmount(() => {
   clearTimeout(shakeTimer);
   clearInterval(clockTimer);
   clearInterval(recordTimer);
+  unbindGoalLayoutObservers();
   document.removeEventListener('visibilitychange', visible);
 });
 </script>
@@ -2767,18 +2981,18 @@ onBeforeUnmount(() => {
                       "
                       ><img v-if="dockIcon3d('pet')" :src="dockIcon3d('pet')" alt="" /><Icon v-else name="pet" /><span class="dock-label">伙伴</span></button
                     ></div
-                  ><div v-if="current" class="dock-group" aria-label="今日计划"
+                  ><div v-if="current" class="dock-group" aria-label="今日习惯"
                     ><button
                       class="dock-item"
                       :class="[{ active: todayOpen }, dockHue('today')]"
                       :style="{ '--dock-i': 8 }"
                       :aria-pressed="todayOpen"
-                      :aria-label="todayGoals.length ? '今日计划，还有 ' + todayGoals.length + ' 个未完成' : '今日计划'"
-                      title="今日计划"
+                      :aria-label="todayGoals.length ? '今日习惯，还有 ' + todayGoals.length + ' 个未完成' : '今日习惯'"
+                      title="今日习惯"
                       @click="
                         toggleToday();
                       "
-                      ><img v-if="dockIcon3d('today')" :src="dockIcon3d('today')" alt="" /><Icon v-else name="habit" /><span class="dock-label">计划</span><span v-if="todayGoals.length" class="dock-badge num" aria-hidden="true">{{ cap(todayGoals.length) }}</span></button
+                      ><img v-if="dockIcon3d('today')" :src="dockIcon3d('today')" alt="" /><Icon v-else name="habit" /><span class="dock-label">习惯</span><span v-if="todayGoals.length" class="dock-badge num" aria-hidden="true">{{ cap(todayGoals.length) }}</span></button
                     ></div
                 ></div
                 ></aside
@@ -2899,11 +3113,11 @@ onBeforeUnmount(() => {
                   ></div
                 ><div v-else-if="todayOpen" class="zone-card today-card"
                   ><div class="zone-head"
-                    ><b>今日计划</b
+                    ><b>今日习惯</b
                     ><small v-if="tasks.length" class="num"
                       >{{ done }}/{{ tasks.length }}</small
-                    ><button class="icon-button" aria-label="关闭今日计划" @click="todayOpen = false"><Icon name="close" /></button></div
-                  ><div v-if="todayGoals.length" class="today-stack" role="list" aria-label="今日未完成计划"
+                    ><button class="icon-button" aria-label="关闭今日习惯" @click="todayOpen = false"><Icon name="close" /></button></div
+                  ><div v-if="todayGoals.length" class="today-stack" role="list" aria-label="今日未完成习惯"
                     ><article
                       v-for="(h, i) in todayGoals"
                       :key="h.id"
@@ -2928,9 +3142,9 @@ onBeforeUnmount(() => {
                     v-else-if="!tasks.length"
                     class="today-empty"
                     @click="nav('goalLibrary')"
-                    ><Icon name="plus" /><span>挑一个今天想完成的计划</span></button
+                    ><Icon name="plus" /><span>挑一个今天想完成的习惯</span></button
                   ><p v-else class="today-empty done"
-                    ><Icon name="check" /><span>今日计划都完成啦</span></p
+                    ><Icon name="check" /><span>今日习惯都完成啦</span></p
                   ></div
                 ></div
               ></div
@@ -3017,6 +3231,23 @@ onBeforeUnmount(() => {
         <h2>{{ selectedMemory.name || nameOf(selectedMemory.petId) }}</h2>
         <p
           v-if="
+            (selectedMemory.kind !== 'photo' ||
+              selectedMemory.id.startsWith('demo-') ||
+              selectedMemory.source === 'adoption') &&
+            memoryWish(selectedMemory)
+          "
+          class="gallery-note meeting-wish"
+          ><span class="meeting-wish-line"
+            ><strong>{{ memoryWish(selectedMemory).title }}</strong
+            ><span class="meeting-wish-dot"> · </span
+            >{{ memoryWish(selectedMemory).line1 }}</span
+          ><span
+            v-if="memoryWish(selectedMemory).line2"
+            class="meeting-wish-line"
+            >{{ memoryWish(selectedMemory).line2 }}</span
+          ></p
+        ><p
+          v-else-if="
             selectedMemory.kind !== 'photo' ||
             selectedMemory.id.startsWith('demo-') ||
             selectedMemory.source === 'adoption'
@@ -3211,8 +3442,8 @@ onBeforeUnmount(() => {
               icon="history"
               :icon3d="icon3d('footprints-paw.png')"
               title="第一步，正等着被记下"
-              hint="完成培养计划或记录日常表现后，成长会在这里留下足迹"
-              action="去完成今日计划"
+              hint="完成习惯或记录日常表现后，成长会在这里留下足迹"
+              action="去完成今日习惯"
               @action="goFootprintPlans" /></div
           ></Pager></section
           ><section
@@ -3304,6 +3535,16 @@ onBeforeUnmount(() => {
                   aria-label="查看文字回忆"
                   ><img class="list-link-3d" :src="memoryNoteIcon3d(m)" alt="" /><span>文字纪念</span
                   ><Icon name="chevron" /></button
+                ><div
+                  v-else-if="m.kind === 'note' && memoryWish(m)"
+                  class="memory-note-inline meeting-wish"
+                  ><span class="meeting-wish-line"
+                    ><strong>{{ memoryWish(m).title }}</strong
+                    ><span class="meeting-wish-dot"> · </span
+                    >{{ memoryWish(m).line1 }}</span
+                  ><span v-if="memoryWish(m).line2" class="meeting-wish-line">{{
+                    memoryWish(m).line2
+                  }}</span></div
                 ><div v-else-if="m.kind === 'note'" class="memory-note-inline"><img class="memory-note-mark" :src="memoryNoteIcon3d(m)" alt="" /><span>{{
                   memoryDisplayText(m)
                 }}</span></div
@@ -3334,6 +3575,21 @@ onBeforeUnmount(() => {
                     ></div
                   ><p
                     v-if="
+                      m.text &&
+                      !(m.kind === 'note' && m.text.trim().length <= 80) &&
+                      !(m.source === 'exploration' && !m.diary) &&
+                      memoryWish(m)
+                    "
+                    class="gallery-note meeting-wish"
+                    ><span class="meeting-wish-line"
+                      ><strong>{{ memoryWish(m).title }}</strong
+                      ><span class="meeting-wish-dot"> · </span
+                      >{{ memoryWish(m).line1 }}</span
+                    ><span v-if="memoryWish(m).line2" class="meeting-wish-line">{{
+                      memoryWish(m).line2
+                    }}</span></p
+                  ><p
+                    v-else-if="
                       m.text && !(m.kind === 'note' && m.text.trim().length <= 80)
                     "
                     class="gallery-note"
@@ -3397,13 +3653,12 @@ onBeforeUnmount(() => {
           @action="petQuery = ''"
         /><Pager
           v-else
+          class="pets-pager"
           label="伙伴图鉴翻页"
           :page="petPage"
           :pages="petPages"
-          @change="
-            petPage = $event;
-            keepInView('pet-grid');
-          "
+          :peek-hint="false"
+          @change="petPage = $event"
         ><div id="pet-grid" class="tile-grid pet-grid"
           ><article
             v-for="p in visiblePets"
@@ -3431,8 +3686,7 @@ onBeforeUnmount(() => {
               :pet="p"
               :level="previewAll ? 10 : 1"
               :show-rank="false"
-            /><h3>{{ previewAll ? p.adult : p.name }}</h3
-            ><small class="pet-card-sub">{{ p.description }}</small></article
+            /><h3>{{ previewAll ? p.adult : p.name }}</h3></article
           ><span
             v-for="n in fill(visiblePets, 6, petPage, petPages)"
             :key="'pet-gap' + n"
@@ -3473,10 +3727,8 @@ onBeforeUnmount(() => {
               @click="
                 previewSwiped ? (previewSwiped = false) : animate('happy')
               " /></div
-          ><p class="detail-swipe-hint">← 左右滑，看不同等级的样子 →</p
           ><h2>{{ owned?.name || detail.name }}</h2
           ><div class="detail-stage-copy"
-            ><p>{{ detail.description }}</p
             ><dl v-if="owned" class="meta-list three"
               ><div
                 ><dt>相遇</dt
@@ -3506,42 +3758,51 @@ onBeforeUnmount(() => {
                 ></div
               ></dl
             ></div
-          ><div
-            class="stage-stepper"
-            role="group"
-            aria-label="左右滑动选择伙伴成长形态"
-            @pointerdown="stageDown"
-            @pointermove="stageMove"
-            @pointerup="stageUp"
-            @pointercancel="stageUp"
-            ><button
-              v-for="n in 10"
-              :key="n"
-              type="button"
-              :style="{ '--step-i': n - 1 }"
-              :class="{
-                active: detailLevel === n,
-                unlocked: owned && n <= levelOf(owned),
-              }"
-              :aria-label="'查看第 ' + n + ' 级形态'"
-              :aria-pressed="detailLevel === n"
-              @click="stageSelect(n)"
-              ><span></span></button
+          ><div class="detail-stage-nav"
+            ><p class="detail-swipe-hint">← 左右滑，看不同等级的样子 →</p
+            ><div
+              class="stage-stepper"
+              role="group"
+              aria-label="左右滑动选择伙伴成长形态"
+              @pointerdown="stageDown"
+              @pointermove="stageMove"
+              @pointerup="stageUp"
+              @pointercancel="stageUp"
+              ><button
+                v-for="n in 10"
+                :key="n"
+                type="button"
+                :style="{ '--step-i': n - 1 }"
+                :class="{
+                  active: detailLevel === n,
+                  unlocked: owned && n <= levelOf(owned),
+                }"
+                :aria-label="'查看第 ' + n + ' 级形态'"
+                :aria-pressed="detailLevel === n"
+                @click="stageSelect(n)"
+                ><span></span></button
+            ></div
           ></div>
           <details class="detail-story" :key="detail.id"
             ><summary
-              ><span>认识{{ detail.name }}</span
+              ><span>伙伴小故事</span
               ><Icon name="chevron" /></summary
-            ><p>{{ detail.introduction || detail.description }}</p
-            ><span class="story-label">伙伴小故事</span
-            ><h3>{{ detail.name }}的星光来信</h3
-            ><p
-              v-for="(paragraph, index) in detail.story || [
-                '它的故事，正从与你相遇的这一天开始。',
-              ]"
-              :key="index"
-              >{{ paragraph }}</p
-            ><small>星星宠物原创幻想故事</small></details
+            ><div class="detail-story-body"
+              ><p class="detail-story-lead">{{ detail.description }}</p
+              ><p
+                v-if="
+                  detail.introduction &&
+                  detail.introduction !== detail.description
+                "
+                >{{ detail.introduction }}</p
+              ><p
+                v-for="(paragraph, index) in detail.story || [
+                  '它的故事，正从与你相遇的这一天开始。',
+                ]"
+                :key="index"
+                >{{ paragraph }}</p
+              ></div
+            ></details
           ></section
         >
         <div class="page-actions"
@@ -3566,7 +3827,7 @@ onBeforeUnmount(() => {
             :aria-selected="habitTab === 'plans'"
             :class="{ active: habitTab === 'plans' }"
             @click="selectHabitTab('plans')"
-            >培养计划</button
+            >习惯培养</button
           ><button
             role="tab"
             :aria-selected="habitTab === 'score'"
@@ -3574,29 +3835,10 @@ onBeforeUnmount(() => {
             @click="selectHabitTab('score')"
             >日常表现</button
           ></div
-        ><SearchField
-          v-if="habitMode === 'list' && habitTab === 'plans'"
-          v-model="planQuery"
-          placeholder="搜索培养计划"
-          label="搜索培养计划"
-          @input="planPage = 1"
-          @clear="planPage = 1"
-        /><SearchField
-          v-if="habitMode === 'list' && habitTab === 'score'"
-          id="habit-search-anchor"
-          ref="scoreSearch"
-          v-model="scoreReason"
-          placeholder="搜索日常表现"
-          label="搜索日常表现"
-        /><SearchField
-          v-if="habitMode === 'goalLibrary'"
-          v-model="goalQuery"
-          placeholder="搜索培养计划"
-          label="搜索培养计划"
-        /><section
+        ><section
           v-show="habitTab === 'score' && habitMode === 'list'"
           id="habit-score"
-          class="card score-card"
+          class="card habit-catalog score-card"
           ><QuickScore
             ref="quickScore"
             v-model:reason="scoreReason"
@@ -3612,159 +3854,13 @@ onBeforeUnmount(() => {
             @remove="removeRule" /></section
         ><section
           v-if="habitTab === 'plans' && habitMode === 'list'"
-          id="habit-plans"
-          class="card plans-card"
-          ><div class="section-head"
-            ><div class="section-title"><h2>今天的计划</h2></div
-            ><span v-if="tasks.length" class="section-stat"
-              ><b class="num">{{ done }}/{{ tasks.length }}</b></span
-            ><button
-              class="icon-button"
-              @click="nav('goalLibrary')"
-              aria-label="添加培养计划"
-              title="添加培养计划"
-              ><Icon name="plus" /></button></div
-          ><EmptyState
-            v-if="planQuery.trim() && !filteredPlans.length"
-            icon="search"
-            :icon3d="icon3d('pick-search.png')"
-            :title="'没有找到「' + planQuery.trim() + '」'"
-            hint="试试别的关键词，或新增一个计划"
-            action="清除搜索"
-            @action="
-              planQuery = '';
-              planPage = 1;
-            " /><EmptyState
-            v-else-if="!filteredPlans.length"
-            icon="sparkles"
-            :icon3d="icon3d('pick-seedling.png')"
-            title="从第一个小目标开始"
-            hint="挑一件愿意每天练习的小事，和伙伴一起慢慢做到。"
-            action="挑选培养计划"
-            @action="nav('goalLibrary')" /><Pager
-            v-else
-            label="培养计划翻页"
-            :page="planPage"
-            :pages="planPages"
-            @change="
-              planPage = $event;
-              keepInView('habit-plans');
-            "
-          ><div class="tile-grid plan-grid"
-            ><article
-              v-for="h in visiblePlans"
-              :key="h.id"
-              class="plan-card"
-              :class="{
-                paused: h.status !== 'active',
-                done: habitCount(state, h, dayKey()) >= h.target,
-                'plan-pop': planPop?.id === h.id,
-              }"
-              ><header class="plan-head"
-                ><span class="tile-icon plan-icon" :class="categoryHue(h.category)"
-                  ><img v-if="planIcon3d(h)" :src="planIcon3d(h)" :alt="h.name + '图标'" /><Icon v-else :name="planIcon(h)" /></span
-                ><h3>{{ h.name }}</h3
-                ><button
-                  class="plan-toggle"
-                  type="button"
-                  :class="{ off: h.status !== 'active' }"
-                  :disabled="busy"
-                  :aria-label="(h.status === 'active' ? '暂停计划：' : '继续计划：') + h.name"
-                  :aria-pressed="h.status === 'active'"
-                  @click="setHabitStatus(h, h.status === 'active' ? 'paused' : 'active')"
-                  ><Icon name="power" /></button
-                ><button
-                  class="icon-button plan-more card-corner-action"
-                  type="button"
-                  :aria-label="'更多操作：' + h.name"
-                  aria-haspopup="menu"
-                  :aria-expanded="planMenu === h.id"
-                  @click="planMenu = planMenu === h.id ? '' : h.id"
-                  ><Icon name="more" /></button
-                ><div v-if="planMenu === h.id" class="plan-menu" role="menu"
-                  ><button
-                    role="menuitem"
-                    type="button"
-                    @click="
-                      planMenu = '';
-                      habitEdit(h);
-                    "
-                    ><Icon name="edit" />编辑设置</button
-                  ><button
-                    role="menuitem"
-                    type="button"
-                    @click="
-                      planMenu = '';
-                      setHabitStatus(
-                        h,
-                        h.status === 'active' ? 'paused' : 'active',
-                      );
-                    "
-                    ><Icon :name="h.status === 'active' ? 'pause' : 'play'" />{{
-                      h.status === 'active' ? '暂停计划' : '继续计划'
-                    }}</button
-                  ><button
-                    role="menuitem"
-                    type="button"
-                    class="danger"
-                    @click="
-                      planMenu = '';
-                      confirmDeleteHabit(h);
-                    "
-                    ><Icon name="trash" />删除计划</button
-                  ></div
-                ></header
-              ><p class="plan-meta"
-                ><span class="plan-category" :class="categoryHue(h.category)">{{ h.category }}</span
-                ><span class="plan-count" :aria-label="'已完成 ' + habitCount(state, h, dayKey()) + ' 次，目标 ' + h.target + ' 次'"
-                  >{{ habitCount(state, h, dayKey()) }}/{{ h.target }}</span
-                ></p
-              ><div class="plan-detail-row"
-                ><p class="plan-criteria">{{ planCriteria(h) }}</p
-                ><span class="plan-time"
-                  >{{ h.times.join('、') || '全天' }}</span
-                ></div
-              ><button
-                class="primary small wide"
-                :disabled="
-                  busy ||
-                  h.status !== 'active' ||
-                  habitCount(state, h, dayKey()) >= h.target
-                "
-                @click="planComplete(h)"
-                ><Icon
-                  :name="
-                    habitCount(state, h, dayKey()) >= h.target ? 'check' : 'star'
-                  " />{{
-                  h.status !== 'active'
-                    ? '已暂停'
-                    : habitCount(state, h, dayKey()) >= h.target
-                      ? '今日已完成'
-                      : '完成 +' + h.points
-                }}</button
-              ><span
-                v-if="planPop?.id === h.id"
-                :key="planPop?.key ?? h.id"
-                class="plan-burst num"
-                aria-hidden="true"
-                ><Icon name="star" />+{{ h.points }}</span
-              ></article
-            ><span
-              v-for="n in fill(visiblePlans, 4, planPage, planPages)"
-              :key="'plan-gap' + n"
-              class="tile-gap"
-              aria-hidden="true"
-            ></span
-          ></div
-          ></Pager></section
-        ><section
-          v-if="habitMode === 'goalLibrary'"
           id="goal-library"
-          class="card goals-card"
-          ><div class="section-head"
+          class="card habit-catalog goals-card"
+          ><div class="habit-panel"
+            ><div class="section-head"
             ><div class="section-title"
-            ><h2>挑选培养计划</h2
-              ><small>点按卡片启用或停用；已添加的计划可单独编辑</small></div
+            ><h2>习惯培养</h2
+              ><small>单击启停，双击编辑，长按删除</small></div
             ><button
               class="icon-button"
               type="button"
@@ -3772,7 +3868,14 @@ onBeforeUnmount(() => {
               title="自定义习惯"
               @click="editGoalTemplate()"
               ><Icon name="plus" /></button></div
-          ><EmptyState
+          ><CatalogToolbar
+            :options="goalFilterOptions"
+            v-model:filter="goalFilter"
+            v-model:query="goalQuery"
+            filter-label="习惯筛选"
+            search-label="搜索习惯"
+            search-placeholder="搜索习惯"
+          /><EmptyState
             v-if="!filteredGoals.length"
             icon="search"
             :icon3d="icon3d('pick-search.png')"
@@ -3782,58 +3885,66 @@ onBeforeUnmount(() => {
             @action="editGoalTemplate()"
           /><Pager
             v-else
-            label="目标翻页"
+            class="goals-pager"
+            label="习惯翻页"
             :page="goalPage"
             :pages="goalPages"
-            @change="
-              goalPage = $event;
-              keepInView('goal-library');
-            "
-          ><div class="tile-grid goal-grid"
+            :peek-hint="false"
+            @change="goalPage = $event"
+          ><div
+            ref="goalGridRef"
+            class="tile-grid goal-grid"
+            :style="goalGridStyle"
             ><article
               v-for="goal in visibleGoals"
               :key="goal.id"
               class="goal-card"
-              :class="{
-                active: addedHabitForGoal(goal)?.status === 'active',
-              }"
+              ><span
+                v-if="addedHabitForGoal(goal)?.status === 'active'"
+                class="goal-enabled-badge"
+                >已启用</span
               ><button
                 class="goal-card-main"
                 type="button"
                 :disabled="busy"
-                :aria-label="'启用或停用' + goalDisplayName(goal)"
-                @click="activateGoal(goal)"
-                ><span
-                  v-if="addedHabitForGoal(goal)?.status === 'active'"
-                  class="tag enabled-tag"
-                  >已启用 ✓</span
-                ><span class="tile-icon" :class="categoryHue(goal.category || '')"><img v-if="goalIcon3d(goal)" :src="goalIcon3d(goal)" :alt="goalDisplayName(goal) + '图标'" /><Icon v-else :name="goal.icon" /></span
-                ><b>{{ goalDisplayName(goal) }}</b
-                ><small>{{
-                  addedHabitForGoal(goal)?.status === 'active'
-                  ? '已启用 · 点按停用'
-                  : addedHabitForGoal(goal)
-                    ? '已停用 · 点按启用'
-                  : goal.hint
-                }}</small><span class="goal-points num">+{{ goalPoints(goal) }}</span></button
-              ><button
-                v-if="addedHabitForGoal(goal)"
-                class="goal-card-edit"
-                type="button"
-                :disabled="busy"
-                :aria-label="'编辑' + goalDisplayName(goal) + '培养计划'"
-                :title="'编辑' + goalDisplayName(goal)"
-                @click="editAddedGoal(goal)"
-                ><Icon name="edit" /></button
+                :aria-label="
+                  goalDisplayName(goal) +
+                  (addedHabitForGoal(goal)?.status === 'active'
+                    ? '，已启用，单击暂停，双击编辑，长按删除'
+                    : addedHabitForGoal(goal)
+                      ? '，已暂停，单击启用，双击编辑，长按删除'
+                      : '，单击启用，双击编辑')
+                "
+                :aria-pressed="addedHabitForGoal(goal)?.status === 'active'"
+                @pointerdown="startGoalHold(goal, $event)"
+                @pointermove="moveGoalHold"
+                @pointerup="cancelGoalHold"
+                @pointercancel="cancelGoalHold"
+                @pointerleave="cancelGoalHold"
+                @contextmenu.prevent="onGoalCardDelete(goal)"
+                @click="onGoalCardActivate(goal)"
+                @dblclick.prevent="onGoalCardDblClick(goal)"
+                ><span class="goal-card-icon"
+                  ><span class="tile-icon" :class="categoryHue(goal.category || '')"><img v-if="goalIcon3d(goal)" :src="goalIcon3d(goal)" :alt="goalDisplayName(goal) + '图标'" /><Icon v-else :name="goal.icon" /></span
+                  ><span
+                    class="goal-points num"
+                    :aria-label="'分值 +' + goalPoints(goal)"
+                    >+{{ goalPoints(goal) }}</span
+                  ></span
+                ><span class="goal-card-text"
+                  ><b>{{ goalDisplayName(goal) }}</b
+                  ><small>{{ goal.hint }}</small></span
+                ></button
             ></article
             ><span
-              v-for="n in fill(visibleGoals, 6, goalPage, goalPages)"
+              v-for="n in fill(visibleGoals, goalPageSize, goalPage, goalPages)"
               :key="'goal-gap' + n"
               class="tile-gap"
               aria-hidden="true"
             ></span
           ></div
-          ></Pager></section
+          ></Pager></div
+          ></section
       ></template>
       <SettingsPage
         v-if="view === 'settings'"
@@ -3964,7 +4075,7 @@ onBeforeUnmount(() => {
       />
       <section v-if="view === 'habits' && habitMode === 'habitEdit'" class="card habit-editor"
         ><label class="field"
-          ><span>培养计划名称</span
+          ><span>习惯名称</span
           ><input v-model="form.name" maxlength="40" /></label
         ><label class="field"
           ><span>完成标准</span
@@ -4071,14 +4182,14 @@ onBeforeUnmount(() => {
           :disabled="busy"
           @click="saveHabit"
           >{{
-          goalDraftOnly ? '保存到目标列表' : '保存计划'
+          goalDraftOnly ? '保存到习惯列表' : '保存习惯'
         }}</button
         ><button
           v-if="form.id && !goalDraftOnly"
           class="ghost wide danger"
           :disabled="busy"
           @click="deleteHabit"
-          >删除培养计划</button
+          >删除习惯</button
         ></section
       >
     </div>
@@ -4116,7 +4227,7 @@ onBeforeUnmount(() => {
             {
               confirmAction: '请确认这项操作',
               adopt: '领养这个伙伴',
-              habitComplete: '快速完成培养计划',
+              habitComplete: '快速完成习惯',
               ruleAdd: '添加日常表现',
               restore: '恢复备份预览',
               importPet: '导入伙伴预览',

@@ -1,20 +1,12 @@
-export const DEFAULT_THEME_ID = 'milo';
+export const DEFAULT_THEME_ID = 'azure';
 
 export const themes = Object.freeze([
   Object.freeze({
-    id: 'dayflower',
+    id: 'azure',
     name: '露草蓝',
-    description: '明快、温和，适合日常陪伴',
-    colors: Object.freeze(['#0079FF', '#64ADFF', '#AED3FF']),
-    background: '#FFFFFF',
-    darkSurface: false,
-  }),
-  Object.freeze({
-    id: 'starry',
-    name: '星夜黑',
-    description: '纯净、沉稳，搭配偏蓝灰层次',
-    colors: Object.freeze(['#000000', '#BFCBD9', '#E4E8EF']),
-    background: '#FFFFFF',
+    description: '清爽、温和，适合日常陪伴',
+    colors: Object.freeze(['#2B6CF6', '#FF8A3D', '#F2F6FC']),
+    background: '#F2F6FC',
     darkSurface: false,
   }),
   Object.freeze({
@@ -33,26 +25,21 @@ export const themes = Object.freeze([
     background: '#F7EDE3',
     darkSurface: false,
   }),
-  Object.freeze({
-    id: 'azure',
-    name: '蔚蓝',
-    description: '清爽、现代，智能家居风的蓝色',
-    colors: Object.freeze(['#2B6CF6', '#FF8A3D', '#F2F6FC']),
-    background: '#F2F6FC',
-    darkSurface: false,
-  }),
 ]);
 
 export const THEME_IDS = Object.freeze(themes.map(({ id }) => id));
 
 const legacyThemes = Object.freeze({
-  ocean: 'dayflower',
-  light: 'starry',
-  dark: 'starry',
+  // Removed catalog entries collapse onto the new 露草蓝 (azure).
+  dayflower: 'azure',
+  starry: 'azure',
+  ocean: 'azure',
+  light: 'azure',
+  dark: 'azure',
+  mint: 'azure',
+  lemon: 'azure',
+  sunny: 'azure',
   grape: 'lavender',
-  mint: 'dayflower',
-  lemon: 'dayflower',
-  sunny: 'dayflower',
   berry: 'lavender',
 });
 
@@ -72,6 +59,21 @@ export function migrateThemeState(state) {
     }
   };
   migrateSettings(state?.settings);
-  for (const profile of state?.profiles || []) migrateSettings(profile?.data?.settings);
+  for (const profile of state?.profiles || [])
+    migrateSettings(profile?.data?.settings);
+  // Theme is household-wide: keep every child profile on the active theme.
+  const canonical = normalizeThemeId(state?.settings?.theme);
+  if (state?.settings && state.settings.theme !== canonical) {
+    state.settings.theme = canonical;
+    changed = true;
+  }
+  for (const profile of state?.profiles || []) {
+    const settings = profile?.data?.settings;
+    if (!settings || typeof settings !== 'object') continue;
+    if (settings.theme !== canonical) {
+      settings.theme = canonical;
+      changed = true;
+    }
+  }
   return changed;
 }
