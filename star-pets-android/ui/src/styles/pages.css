@@ -1341,6 +1341,34 @@ canvas.pet {
   text-indent: 0;
 }
 
+/* 习惯页顶栏与下方卡片同一列宽、同一圆角和同一卡片材质。
+   只作用于习惯列表，编辑子页和其他页面的页头保持原样。 */
+.shell.habit-shell .app-header,
+.preview-badge ~ .shell.habit-shell .app-header {
+  margin: 0;
+  height: auto;
+  min-height: 0;
+  padding: calc(var(--safe-top) + 10px) var(--card-pad) 10px;
+  border: 1px solid var(--glass-edge);
+  border-radius: var(--r-xl);
+  background:
+    linear-gradient(145deg, var(--panel-glint), transparent 38%),
+    var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.preview-badge ~ .shell.habit-shell .app-header {
+  padding-top: calc(max(var(--safe-top), 16px) + 10px);
+}
+.shell.habit-shell .segmented.page-tabs {
+  --segment-radius: var(--r-xl);
+  margin-top: 0;
+  border-color: var(--glass-edge);
+  background:
+    linear-gradient(145deg, var(--panel-glint), transparent 38%),
+    var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
 /* ---------- 习惯：日常表现 / 习惯培养 共用面板 ---------- */
 .habit-catalog,
 .habit-panel,

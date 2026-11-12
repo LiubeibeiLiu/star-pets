@@ -2691,7 +2691,11 @@ onBeforeUnmount(() => {
     <div
       v-else
       class="shell"
-      :class="{ 'home-shell': view === 'home', 'sub-shell': subScreen }"
+      :class="{
+        'home-shell': view === 'home',
+        'sub-shell': subScreen,
+        'habit-shell': view === 'habits' && !subScreen,
+      }"
       ><header v-if="view !== 'home'" class="app-header"
         ><span class="app-header-side"
           ><button

@@ -62,7 +62,10 @@ defineExpose({ openSearch, focus });
   <div
     class="catalog-toolbar"
     :class="{ searching: expanded }"
-    :style="{ '--filter-cols': String(filterCols) }"
+    :style="{
+      '--filter-cols': String(filterCols),
+      '--toolbar-cols': String(filterCols + 1),
+    }"
   >
     <div class="catalog-toolbar-row" :aria-hidden="expanded">
       <div
@@ -88,7 +91,7 @@ defineExpose({ openSearch, focus });
         </button>
       </div>
       <button
-        class="icon-button catalog-search-toggle"
+        class="catalog-search-toggle"
         type="button"
         :aria-label="searchLabel"
         :title="searchLabel"
@@ -96,6 +99,7 @@ defineExpose({ openSearch, focus });
         @click="openSearch"
       >
         <Icon name="search" />
+        <span class="catalog-search-label">搜索</span>
       </button>
     </div>
     <label

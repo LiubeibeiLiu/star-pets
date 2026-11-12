@@ -667,6 +667,7 @@ input[type='range'] {
   width: 100%;
   min-height: var(--control);
   min-width: 0;
+  container-type: inline-size;
 }
 .catalog-toolbar-row,
 .catalog-search-expanded {
@@ -675,22 +676,56 @@ input[type='range'] {
 }
 .catalog-toolbar-row {
   z-index: 1;
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(var(--toolbar-cols, 4), minmax(0, 1fr));
+  align-items: stretch;
   gap: var(--space-2);
   transition:
     opacity var(--t-fast) var(--ease),
     visibility var(--t-fast) var(--ease);
 }
+/* 筛选占前 N 列，搜索独占最后一列，列宽与行内间隙相同，所以每格等宽。 */
 .catalog-toolbar .catalog-filter {
-  flex: 1 1 auto;
+  grid-column: 1 / -2;
   min-width: 0;
 }
 .catalog-toolbar .catalog-search-toggle {
+  grid-column: -2 / -1;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: var(--control-sm);
+  padding: 0 var(--space-2);
+  border: 2px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.catalog-toolbar .catalog-search-toggle svg {
   flex: none;
-  width: var(--icon-btn);
-  height: var(--icon-btn);
-  min-height: var(--icon-btn);
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.catalog-search-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@container (max-width: 420px) {
+  .catalog-search-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .catalog-toolbar .catalog-search-toggle {
+    padding: 0;
+  }
 }
 .catalog-search-expanded {
   z-index: 0;
