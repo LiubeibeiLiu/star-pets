@@ -2,6 +2,7 @@
 import UiDate from './UiDate.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import Icon from './Icon.vue';
+import EmptyState from './EmptyState.vue';
 import Pager from './Pager.vue';
 import CatalogToolbar from './CatalogToolbar.vue';
 import { rulePage } from './companion.js';
@@ -378,7 +379,31 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
       search-placeholder="搜索日常表现"
       :sticky-query="false"
     />
+    <EmptyState
+      v-if="!pageRules.items.length"
+      :icon="reason.trim() ? 'search' : 'star'"
+      :icon3d="
+        reason.trim()
+          ? icon3d('pick-search.png')
+          : icon3d(points < 0 ? 'minus-warning.png' : 'record-star.png')
+      "
+      :title="
+        reason.trim()
+          ? '没有匹配的表现'
+          : points < 0
+            ? '还没有减分的常用表现'
+            : '还没有加分的常用表现'
+      "
+      :hint="
+        reason.trim()
+          ? '换个关键词，或记下这次输入'
+          : '先加一条，之后点一下就能记下'
+      "
+      :action="reason.trim() ? '' : '自定义添加'"
+      @action="emit('add', sign)"
+    />
     <Pager
+      v-else
       label="常用表现分页"
       previous-label="常用表现上一页"
       next-label="常用表现下一页"
@@ -409,14 +434,6 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
           ><img v-if="ruleIcon3d(r)" :src="ruleIcon3d(r)" alt="" /><Icon v-else name="star" /></span
         ><span>{{ r.name }}</span
         ><b class="num">{{ r.points > 0 ? '+' : '' }}{{ r.points }}</b></button
-      ><p v-if="!pageRules.items.length" class="rule-chips-empty"
-        ><Icon name="information" />{{
-          reason.trim()
-            ? '没有匹配项，将按你输入的内容记录'
-            : points < 0
-              ? '还没有减分的常用表现'
-              : '还没有加分的常用表现'
-        }}</p
       ></div
     ></Pager>
     <button

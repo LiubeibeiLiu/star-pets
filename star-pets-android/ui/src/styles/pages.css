@@ -1461,38 +1461,23 @@ canvas.pet {
   border-color: var(--primary);
   background: var(--primary-soft);
 }
-.rule-chips-empty {
-  display: grid;
-  place-items: center;
-  min-height: 200px;
-  border: 2px dashed var(--line);
-  border-radius: var(--r-md);
-  color: var(--ink-3);
-  font-size: var(--fs-sm);
-}
-/* 日常表现卡控高：卡内边距 18→12、间距 12→8，Pager 的 96px 底留白只对
-   本卡取消——本卡接近一屏、圆点在流内排在列表下方；
-   其余分页（计划/目标库/回忆/足迹/图鉴）仍保留 96px。
-   实测：页头 121 + 双 tab 58 + 搜索 48 占去卡片上方 287px，8 行 × 44px
-   是硬底线，卡片仍比可视区高约 100px（需轻滚一小段才见末行），
-   再压就要动共享页眉或减每页条数，两者都不在本轮范围。 */
-.score-card {
-  --card-pad: 12px;
-  --card-gap: 8px;
-}
-.score-card .pager {
+/* 习惯培养与日常表现共用同一张目录卡：内边距、间距、圆点都走默认卡片，
+   不再把日常表现单独压扁。圆点回到文档流，贴在列表下方。 */
+.score-card .pager,
+.pager.goals-pager {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding-bottom: 0;
 }
-/* 圆点脱离悬浮：回到文档流，紧贴列表正下方水平居中，不再压住行名。
-   position: static 让 components.css 的 sticky/bottom/z-index 全部失效；
-   pill 底 + 阴影本是为压在卡片上保可读性，流内不再需要，去掉后只剩
-   圆点本身（大小、颜色、当前页实心+放大、可点按、无障碍 label 不变）。
-   作用域只限本卡，其他五处分页的悬浮圆点原样不动。 */
-.score-card .pagination-dots {
+.score-card .pagination-dots,
+.pager.goals-pager .pagination-dots {
   position: static;
+  flex: none;
   background: transparent;
   box-shadow: none;
-  margin-top: var(--space-1);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 /* 伙伴图鉴：圆点回到网格正下方，不再悬浮压在卡片上；
@@ -1511,20 +1496,6 @@ canvas.pet {
   overflow: hidden;
 }
 /* 目标库：圆点沉到网格下方；网格高度由 JS 按视口倒推并等高铺满。 */
-.pager.goals-pager {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  padding-bottom: 0;
-}
-.pager.goals-pager .pagination-dots {
-  position: static;
-  flex: none;
-  background: transparent;
-  box-shadow: none;
-  margin-top: var(--space-2);
-  margin-bottom: var(--space-2);
-}
 .pager.goals-pager .pager-viewport {
   flex: none;
   overflow: hidden;
