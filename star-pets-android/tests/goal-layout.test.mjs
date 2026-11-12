@@ -8,7 +8,7 @@ import {
 } from '../ui/src/goal-layout.js';
 
 test('goal rows keep room for title and subtitle', () => {
-  // 可用 727-280-56=391：floor((391+12)/(132+12))=2 → 至少 2 行 × 2 列。
+  // 可用 391：按内容行高 156 约 2 行，行高不再拉满剩余空间。
   const a = computeGoalLayout({
     chipsTop: 280,
     safeBottom: 727,
@@ -16,9 +16,8 @@ test('goal rows keep room for title and subtitle', () => {
   });
   assert.equal(a.rows, 2);
   assert.equal(a.pageSize, 2 * GOAL_COLS);
-  assert.ok(a.rowHeight >= GOAL_ROW_MIN);
+  assert.equal(a.rowHeight, GOAL_ROW_MIN);
 
-  // 更高视口：升到行数上限。
   const b = computeGoalLayout({
     chipsTop: 120,
     safeBottom: 860,
@@ -26,7 +25,7 @@ test('goal rows keep room for title and subtitle', () => {
   });
   assert.equal(b.rows, 4);
   assert.equal(b.pageSize, 4 * GOAL_COLS);
-  assert.ok(b.rowHeight >= GOAL_ROW_MIN);
+  assert.equal(b.rowHeight, GOAL_ROW_MIN);
 });
 
 test('short viewport clamps to min rows without shrinking below min height', () => {

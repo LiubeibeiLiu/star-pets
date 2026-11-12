@@ -3769,10 +3769,6 @@ onBeforeUnmount(() => {
               v-for="goal in visibleGoals"
               :key="goal.id"
               class="goal-card"
-              ><span
-                v-if="addedHabitForGoal(goal)?.status === 'active'"
-                class="goal-enabled-badge"
-                >已启用</span
               ><button
                 class="goal-card-main"
                 type="button"
@@ -3794,12 +3790,18 @@ onBeforeUnmount(() => {
                 @contextmenu.prevent="onGoalCardDelete(goal)"
                 @click="onGoalCardActivate(goal)"
                 @dblclick.prevent="onGoalCardDblClick(goal)"
-                ><span class="goal-card-icon"
-                  ><span class="tile-icon" :class="categoryHue(goal.category || '')"><img v-if="goalIcon3d(goal)" :src="goalIcon3d(goal)" :alt="goalDisplayName(goal) + '图标'" /><Icon v-else :name="goal.icon" /></span
+                ><span class="goal-card-top"
+                  ><span class="goal-card-icon"
+                    ><span class="tile-icon" :class="categoryHue(goal.category || '')"><img v-if="goalIcon3d(goal)" :src="goalIcon3d(goal)" :alt="goalDisplayName(goal) + '图标'" /><Icon v-else :name="goal.icon" /></span
+                    ><span
+                      class="goal-points num"
+                      :aria-label="'分值 +' + goalPoints(goal)"
+                      >+{{ goalPoints(goal) }}</span
+                    ></span
                   ><span
-                    class="goal-points num"
-                    :aria-label="'分值 +' + goalPoints(goal)"
-                    >+{{ goalPoints(goal) }}</span
+                    v-if="addedHabitForGoal(goal)?.status === 'active'"
+                    class="goal-enabled-badge"
+                    >已启用</span
                   ></span
                 ><span class="goal-card-text"
                   ><b>{{ goalDisplayName(goal) }}</b
