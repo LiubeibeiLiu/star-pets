@@ -7,9 +7,9 @@ import SwipeRow from './SwipeRow.vue';
 import UiSelect from './UiSelect.vue';
 
 const kindOptions = [
-  { value: 'all', label: '全部' },
-  { value: 'plus', label: '加分' },
-  { value: 'minus', label: '减分' },
+  { value: 'all', label: '全部', glyph: 'grid' },
+  { value: 'plus', label: '加分', glyph: 'plus' },
+  { value: 'minus', label: '减分', glyph: 'minus' },
 ];
 const rangeOptions = [
   { value: 'day', label: '最近一天' },

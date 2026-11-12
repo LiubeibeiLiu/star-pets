@@ -5,7 +5,10 @@ import Icon from './Icon.vue';
 export type CatalogFilterOption = {
   value: string;
   label: string;
+  /** 3D 图片图标，窄屏只留图。 */
   icon?: string;
+  /** 线形图标名，窄屏只留图，桌面仍显示文字。 */
+  glyph?: string;
 };
 
 const props = withDefaults(
@@ -106,6 +109,11 @@ defineExpose({ openSearch, focus });
             class="chip-3d"
             :src="option.icon"
             alt=""
+          />
+          <Icon
+            v-else-if="option.glyph"
+            class="chip-glyph"
+            :name="option.glyph"
           />
           <span class="chip-label">{{ option.label }}</span>
         </button>
