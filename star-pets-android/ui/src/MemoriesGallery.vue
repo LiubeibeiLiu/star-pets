@@ -7,7 +7,12 @@ import Icon from './Icon.vue';
 import Pager from './Pager.vue';
 import { memoryDisplayText, meetingWishParts } from './model.js';
 
-export type MemoryFilterOption = { value: string; label: string; icon?: string };
+export type MemoryFilterOption = {
+  value: string;
+  label: string;
+  icon?: string;
+  glyph?: string;
+};
 
 defineProps<{
   query: string;

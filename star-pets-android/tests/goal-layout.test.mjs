@@ -8,7 +8,7 @@ import {
 } from '../ui/src/goal-layout.js';
 
 test('goal rows keep room for title and subtitle', () => {
-  // 可用 391：按内容行高 156 约 2 行，行高不再拉满剩余空间。
+  // 可用 391：按估算行高约 2 行。卡片本身按内容增高，不使用这个像素值。
   const a = computeGoalLayout({
     chipsTop: 280,
     safeBottom: 727,

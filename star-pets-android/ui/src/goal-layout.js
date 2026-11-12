@@ -1,9 +1,9 @@
 // 目标库每页卡片数动态计算（纯函数，可单测）。
-// 行高固定为内容高度，只按剩余空间决定能放几行，避免卡片被拉出大块空白。
+// 这里的行高只用来估算一屏能放几行；卡片实际高度由内容决定，同一行取较高的那张。
 
 export const GOAL_COLS = 2;
-// 图标 40 + 内边距 16 + 标题一行或两行 + 说明 + 底部进度，按内容高度，不再把行拉满视口。
-export const GOAL_ROW_MIN = 156;
+// 图标行 44 + 内边距 + 标题、说明和一行进度，用来估算分页，不写进卡片高度。
+export const GOAL_ROW_MIN = 128;
 export const GOAL_ROWS_MIN = 2;
 export const GOAL_ROWS_MAX = 5;
 export const GOAL_ROW_GAP = 12; // = --space-3
@@ -11,7 +11,7 @@ export const GOAL_ROW_GAP = 12; // = --space-3
 /** @type {{ rows: number, rowHeight: number, pageSize: number }} */
 export const GOAL_FALLBACK = Object.freeze({
   rows: 3,
-  rowHeight: 156,
+  rowHeight: 128,
   pageSize: 6,
 });
 

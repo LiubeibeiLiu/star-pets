@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import Icon from './Icon.vue';
-type Item = { value: string | number; label: string };
+type Item = { value: string | number; label: string; short?: string };
 const props = defineProps<{
   modelValue: string | number;
   options: Item[];
@@ -26,12 +26,15 @@ function toggle() {
     height = window.visualViewport?.height || window.innerHeight;
   target.value = host.value?.closest('dialog') || 'body';
   const below = height - rect.bottom - 12;
+  const menuWidth = Math.max(rect.width, 168);
+  const left = Math.max(
+    8,
+    Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8),
+  );
   position.value = {
     position: 'fixed',
-    left:
-      Math.max(8, Math.min(rect.left, window.innerWidth - rect.width - 8)) +
-      'px',
-    width: rect.width + 'px',
+    left: left + 'px',
+    width: menuWidth + 'px',
     maxHeight:
       Math.max(100, Math.min(280, below < 180 ? rect.top - 12 : below)) + 'px',
     top: below < 180 ? 'auto' : rect.bottom + 6 + 'px',
@@ -45,10 +48,13 @@ function onScroll(e: Event) {
 function dismiss() {
   open.value = false;
 }
-const selected = computed(
-  () =>
-    props.options.find((x) => x.value === props.modelValue)?.label || '请选择',
+const current = computed(() =>
+  props.options.find((x) => x.value === props.modelValue),
 );
+const selected = computed(
+  () => current.value?.short || current.value?.label || '请选择',
+);
+const selectedFull = computed(() => current.value?.label || '请选择');
 function choose(item: Item) {
   emit('update:modelValue', item.value);
   emit('change', item.value);
@@ -98,7 +104,7 @@ onBeforeUnmount(() => {
       type="button"
       class="ui-select-trigger"
       role="combobox"
-      :aria-label="label"
+      :aria-label="label + '，' + selectedFull"
       :aria-controls="id"
       :aria-expanded="open"
       aria-haspopup="listbox"

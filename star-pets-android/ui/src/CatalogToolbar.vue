@@ -50,10 +50,6 @@ const toolbarCols = computed(
     1 +
     (props.addLabel ? 1 : 0),
 );
-const iconSearch = computed(
-  () => toolbarCols.value - (props.addLabel ? 1 : 0) >= 5,
-);
-
 watch(expanded, (open) => emit('toggle', open));
 
 async function openSearch() {
@@ -88,7 +84,6 @@ defineExpose({ openSearch, focus });
       searching: expanded,
       'has-extra': extraCount > 0,
       'has-add': !!addLabel,
-      'icon-search': iconSearch,
     }"
     :style="{
       '--filter-cols': String(filterCols),
@@ -111,6 +106,7 @@ defineExpose({ openSearch, focus });
             { active: filter === option.value },
             'chip-kind-' + option.value,
           ]"
+          :aria-label="option.label"
           :aria-checked="filter === option.value"
           :tabindex="expanded ? -1 : 0"
           @click="emit('update:filter', option.value)"

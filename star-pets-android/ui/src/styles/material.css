@@ -178,6 +178,7 @@ button.danger {
 .stage-stepper button,
 .calendar-grid button,
 .plan-menu button,
+.goal-more-menu button,
 .dock-menu button,
 .ui-select-menu button,
 .summary-progress,
@@ -194,14 +195,17 @@ button.danger {
   color: var(--on-danger);
 }
 .plan-menu button,
+.goal-more-menu button,
 .dock-menu button,
 .ui-select-menu button {
   color: var(--ink);
 }
-.plan-menu button.danger {
+.plan-menu button.danger,
+.goal-more-menu button.danger {
   color: var(--danger);
 }
 .plan-menu button:active,
+.goal-more-menu button:active,
 .dock-menu button:active,
 .ui-select-menu button:active {
   background: var(--well-strong);
@@ -1019,9 +1023,12 @@ button.danger {
 .media-frame img {
   width: 100%;
 }
+.gallery-image .media-frame,
 .gallery-image .media-frame img,
 .gallery-image .media-broken {
-  aspect-ratio: 4 / 3;
+  height: 180px;
+  max-height: 180px;
+  aspect-ratio: auto;
   object-fit: cover;
 }
 .memory-detail-photo img {
@@ -1159,7 +1166,8 @@ dialog,
     var(--glass-strong);
 }
 /* 操作菜单用实色底：玻璃底会透出菜单下方的计数/时间文字。 */
-.plan-menu {
+.plan-menu,
+.goal-more-menu {
   border: 1px solid var(--glass-edge);
   background: var(--surface);
   color: var(--ink);
@@ -1686,6 +1694,7 @@ button.secondary {
 .no-glass dialog,
 .no-glass .ui-select-menu,
 .no-glass .plan-menu,
+.no-glass .goal-more-menu,
 .no-glass .dock-menu {
   background-color: var(--surface-solid);
 }
@@ -1701,6 +1710,7 @@ button.secondary {
   dialog,
   .ui-select-menu,
   .plan-menu,
+  .goal-more-menu,
   .dock-menu {
     background-color: var(--surface-solid);
   }

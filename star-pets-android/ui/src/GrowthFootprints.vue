@@ -12,11 +12,11 @@ const kindOptions = [
   { value: 'minus', label: '减分', glyph: 'minus' },
 ];
 const rangeOptions = [
-  { value: 'day', label: '最近一天' },
-  { value: 'week', label: '最近一周' },
-  { value: 'month', label: '最近一月' },
-  { value: 'quarter', label: '最近季度' },
-  { value: 'year', label: '最近一年' },
+  { value: 'day', short: '今天', label: '最近一天' },
+  { value: 'week', short: '本周', label: '最近一周' },
+  { value: 'month', short: '本月', label: '最近一月' },
+  { value: 'quarter', short: '本季', label: '最近季度' },
+  { value: 'year', short: '今年', label: '最近一年' },
 ];
 
 defineProps<{

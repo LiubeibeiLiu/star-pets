@@ -38,11 +38,7 @@ import { preferences } from './companion.js';
 import { NAV_TABS, TITLES, TOP_VIEWS } from './navigation';
 import { usePreviewView } from './preview-view';
 import { findHabitForGoal, goalDisplayName as displayGoalName } from './goal-library.js';
-import {
-  computeGoalLayout,
-  GOAL_FALLBACK,
-  GOAL_ROW_GAP,
-} from './goal-layout.js';
+import { computeGoalLayout, GOAL_FALLBACK } from './goal-layout.js';
 import { ruleIconFile } from './rule-icons.js';
 const Pet = defineAsyncComponent(() => import('./Pet.vue'));
 const PhotoEditor = defineAsyncComponent(() => import('./PhotoEditor.vue'));
@@ -785,7 +781,7 @@ function memoryKind3d(kind: string): string {
   return icon3d(MEMORY_KIND_3D[kind] || '');
 }
 const memoryFilterOptions = computed(() => [
-  { value: 'all', label: '全部' },
+  { value: 'all', label: '全部', glyph: 'grid' },
   { value: 'photo', label: '照片', icon: memoryKind3d('photo') },
   { value: 'audio', label: '声音', icon: memoryKind3d('audio') },
   { value: 'note', label: '文字', icon: memoryKind3d('note') },
@@ -826,9 +822,8 @@ const goalPage = ref(1),
   goalTemplateId = ref(''),
   // 每页卡片数按可用高度动态倒推（见 goal-layout.js），量不到时回退 3×2。
   goalPageSize = ref(GOAL_FALLBACK.pageSize),
-  goalRows = ref(GOAL_FALLBACK.rows),
-  goalRowHeight = ref(GOAL_FALLBACK.rowHeight),
   goalGridRef = ref<HTMLElement | null>(null),
+  goalMenu = ref(''),
   goalList = computed<any[]>(() => [
     ...builtInGoals,
     ...(state.value.goalTemplates || []).map((g: any) => ({
@@ -857,15 +852,7 @@ const goalPage = ref(1),
       (goalPage.value - 1) * goalPageSize.value,
       goalPage.value * goalPageSize.value,
     ),
-  ),
-  goalGridStyle = computed(() => ({
-    '--goal-rows': String(goalRows.value),
-    '--goal-row-height': `${goalRowHeight.value}px`,
-    height: `${
-      goalRows.value * goalRowHeight.value +
-      Math.max(0, goalRows.value - 1) * GOAL_ROW_GAP
-    }px`,
-  }));
+  );
 let goalLayoutTimer: ReturnType<typeof setTimeout> | undefined,
   goalShellObserver: ResizeObserver | null = null,
   goalThemeObserver: MutationObserver | null = null;
@@ -902,12 +889,12 @@ function measureGoalLayout() {
   const dotsEl = document.querySelector<HTMLElement>(
     '.goals-card .pagination-dots',
   );
-  const dotsH = dotsEl?.offsetHeight || 28;
+  const dotsH = dotsEl?.offsetHeight || 52;
   const dotsStyle = dotsEl ? getComputedStyle(dotsEl) : null;
   const dotsGap =
     (dotsStyle ? Number.parseFloat(dotsStyle.marginTop) || 0 : 8) +
     (dotsStyle ? Number.parseFloat(dotsStyle.marginBottom) || 0 : 8);
-  const { rows, rowHeight, pageSize } = computeGoalLayout({
+  const { pageSize } = computeGoalLayout({
     chipsTop: gridTop,
     safeBottom,
     dotsReserve: dotsH + dotsGap + 4,
@@ -916,9 +903,6 @@ function measureGoalLayout() {
     goalPageSize.value = pageSize;
     goalPage.value = Math.min(goalPage.value, Math.max(1, Math.ceil(filteredGoals.value.length / pageSize)));
   }
-  if (rows !== goalRows.value) goalRows.value = rows;
-  if (Math.abs(rowHeight - goalRowHeight.value) > 0.5)
-    goalRowHeight.value = rowHeight;
 }
 function scheduleGoalLayout() {
   clearTimeout(goalLayoutTimer);
@@ -1504,6 +1488,12 @@ const titles = TITLES;
 const pageTitle = computed(() => {
   if (view.value === 'photos')
     return memoryTab.value === 'footprints' ? '成长足迹' : '精彩回忆';
+  if (
+    view.value === 'habits' &&
+    habitMode.value === 'list' &&
+    habitTab.value === 'score'
+  )
+    return '日常表现';
   return titles[screen.value] || '星星宠物';
 });
 const topViews = TOP_VIEWS;
@@ -1560,8 +1550,8 @@ function closePlanMenu(event?: Event) {
   const target = event?.target as HTMLElement | undefined;
   if (target?.closest?.('.pet-dock')) scheduleDockCollapse();
   else dockOpen.value = false;
-  if (target?.closest?.('.plan-menu, .plan-more')) return;
-  planMenu.value = '';
+  if (!target?.closest?.('.plan-menu, .plan-more')) planMenu.value = '';
+  if (!target?.closest?.('.goal-more, .goal-more-menu')) goalMenu.value = '';
 }
 const todayGoals = computed(() =>
   tasks.value
@@ -1658,6 +1648,7 @@ let completeFrom = 'habits';
 function planMenuKey(event: KeyboardEvent) {
   if (event.key !== 'Escape') return;
   planMenu.value = '';
+  goalMenu.value = '';
   dockOpen.value = false;
 }
 onMounted(() => {
@@ -2305,6 +2296,17 @@ function onGoalCardDblClick(goal: any) {
   const existing = addedHabitForGoal(goal);
   if (existing) editAddedGoal(goal);
   else editGoalTemplate(goal);
+}
+function toggleGoalMenu(id: string) {
+  goalMenu.value = goalMenu.value === id ? '' : id;
+}
+function editFromGoalMenu(goal: any) {
+  goalMenu.value = '';
+  onGoalCardDblClick(goal);
+}
+function deleteFromGoalMenu(goal: any) {
+  goalMenu.value = '';
+  onGoalCardDelete(goal);
 }
 function editGoalTemplate(goal?: any) {
   habitEdit();
@@ -3764,11 +3766,11 @@ onBeforeUnmount(() => {
           ><div
             ref="goalGridRef"
             class="tile-grid goal-grid"
-            :style="goalGridStyle"
             ><article
               v-for="goal in visibleGoals"
               :key="goal.id"
               class="goal-card"
+              :class="{ 'menu-open': goalMenu === goal.id }"
               ><button
                 class="goal-card-main"
                 type="button"
@@ -3815,6 +3817,30 @@ onBeforeUnmount(() => {
                     ></template
                   ><span v-else>未开始</span></span
                 ></button
+              ><button
+                class="goal-more"
+                type="button"
+                aria-label="更多"
+                aria-haspopup="menu"
+                :aria-expanded="goalMenu === goal.id"
+                :disabled="busy"
+                @click.stop="toggleGoalMenu(goal.id)"
+                ><Icon name="more" /></button
+              ><div
+                v-if="goalMenu === goal.id"
+                class="goal-more-menu"
+                role="menu"
+                aria-label="习惯操作"
+                ><button type="button" role="menuitem" @click.stop="editFromGoalMenu(goal)"
+                  ><Icon name="edit" />编辑</button
+                ><button
+                  v-if="addedHabitForGoal(goal)"
+                  class="danger"
+                  type="button"
+                  role="menuitem"
+                  @click.stop="deleteFromGoalMenu(goal)"
+                  ><Icon name="trash" />删除</button
+                ></div
             ></article
             ><span
               v-for="n in fill(visibleGoals, goalPageSize, goalPage, goalPages)"
