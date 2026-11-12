@@ -1073,7 +1073,6 @@ button.danger {
 .today-name,
 .gallery-caption b,
 .child-pick b,
-.goal-card b,
 .detail-hero h2,
 .travel-empty h3,
 .summary-child-name,
@@ -1083,6 +1082,9 @@ button.danger {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+.goal-card b {
+  white-space: normal;
 }
 .head-bubble:not(.ration-bubble) {
   display: -webkit-box;

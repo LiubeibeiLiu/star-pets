@@ -5,7 +5,7 @@ import { computeScoreLayout } from './score-layout.js';
 
 export const GOAL_COLS = 2;
 // 图标 40 + 内边距 16 + 间距 6 + 标题/副文案两行，保证第二行不被裁切。
-export const GOAL_ROW_MIN = 112;
+export const GOAL_ROW_MIN = 132;
 export const GOAL_ROWS_MIN = 2;
 export const GOAL_ROWS_MAX = 5;
 export const GOAL_ROW_GAP = 12; // = --space-3
@@ -13,7 +13,7 @@ export const GOAL_ROW_GAP = 12; // = --space-3
 /** @type {{ rows: number, rowHeight: number, pageSize: number }} */
 export const GOAL_FALLBACK = Object.freeze({
   rows: 3,
-  rowHeight: 120,
+  rowHeight: 132,
   pageSize: 6,
 });
 

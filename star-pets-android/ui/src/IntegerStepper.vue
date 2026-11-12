@@ -34,7 +34,7 @@ function input(event: Event) {
     >
       <Icon name="minus" />
     </button>
-    <input
+    <input name="input"
       class="num"
       type="number"
       inputmode="numeric"

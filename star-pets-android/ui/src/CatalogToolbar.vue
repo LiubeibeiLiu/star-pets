@@ -2,7 +2,11 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import Icon from './Icon.vue';
 
-export type CatalogFilterOption = { value: string; label: string };
+export type CatalogFilterOption = {
+  value: string;
+  label: string;
+  icon?: string;
+};
 
 const props = withDefaults(
   defineProps<{
@@ -14,8 +18,10 @@ const props = withDefaults(
     searchPlaceholder?: string;
     /** 有关键词时是否保持展开（习惯目录需要；日常表现选中条目后不强制展开）。 */
     stickyQuery?: boolean;
+    /** 搜索前面再占几列（例如成长足迹的时间范围）。 */
+    extraCount?: number;
   }>(),
-  { searchPlaceholder: '', stickyQuery: true },
+  { searchPlaceholder: '', stickyQuery: true, extraCount: 0 },
 );
 
 const emit = defineEmits<{
@@ -26,10 +32,14 @@ const emit = defineEmits<{
 
 const searchOpen = ref(false);
 const inputRef = ref<HTMLInputElement | null>(null);
+const searchId = `catalog-search-${Math.random().toString(36).slice(2, 8)}`;
 const expanded = computed(
   () => searchOpen.value || (props.stickyQuery && !!props.query.trim()),
 );
-const filterCols = computed(() => Math.max(2, props.options.length));
+const filterCols = computed(() => Math.max(1, props.options.length));
+const toolbarCols = computed(
+  () => filterCols.value + Math.max(0, props.extraCount) + 1,
+);
 
 watch(expanded, (open) => emit('toggle', open));
 
@@ -61,10 +71,14 @@ defineExpose({ openSearch, focus });
 <template>
   <div
     class="catalog-toolbar"
-    :class="{ searching: expanded }"
+    :class="{
+      searching: expanded,
+      'has-extra': extraCount > 0,
+      'icon-search': toolbarCols >= 5,
+    }"
     :style="{
       '--filter-cols': String(filterCols),
-      '--toolbar-cols': String(filterCols + 1),
+      '--toolbar-cols': String(toolbarCols),
     }"
   >
     <div class="catalog-toolbar-row" :aria-hidden="expanded">
@@ -87,8 +101,17 @@ defineExpose({ openSearch, focus });
           :tabindex="expanded ? -1 : 0"
           @click="emit('update:filter', option.value)"
         >
-          {{ option.label }}
+          <img
+            v-if="option.icon"
+            class="chip-3d"
+            :src="option.icon"
+            alt=""
+          />
+          <span class="chip-label">{{ option.label }}</span>
         </button>
+      </div>
+      <div v-if="extraCount > 0" class="catalog-extra">
+        <slot name="extra" />
       </div>
       <button
         class="catalog-search-toggle"
@@ -106,9 +129,12 @@ defineExpose({ openSearch, focus });
       class="search-field catalog-search-expanded"
       :aria-label="searchLabel"
       :aria-hidden="!expanded"
+      :for="searchId"
     >
       <Icon class="search-leading-icon" name="search" />
       <input
+        :id="searchId"
+        :name="searchId"
         ref="inputRef"
         :value="query"
         :placeholder="searchPlaceholder || searchLabel"

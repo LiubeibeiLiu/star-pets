@@ -1341,14 +1341,19 @@ canvas.pet {
   text-indent: 0;
 }
 
-/* 习惯页顶栏与下方卡片同一列宽、同一圆角和同一卡片材质。
-   只作用于习惯列表，编辑子页和其他页面的页头保持原样。 */
-.shell.habit-shell .app-header,
-.preview-badge ~ .shell.habit-shell .app-header {
+/* 习惯 / 回忆目录页：页头、页签与内容同宽同圆角。
+   安全区留在卡片外面，标题卡不再把刘海留白包进圆角里。
+   编辑子页和其他页面的页头保持原样。 */
+.shell.catalog-shell {
+  padding-top: calc(var(--safe-top) + var(--space-2));
+}
+.shell.catalog-shell .app-header,
+.preview-badge ~ .shell.catalog-shell .app-header {
   margin: 0;
+  top: 0;
   height: auto;
   min-height: 0;
-  padding: calc(var(--safe-top) + 10px) var(--card-pad) 10px;
+  padding: 12px var(--card-pad);
   border: 1px solid var(--glass-edge);
   border-radius: var(--r-xl);
   background:
@@ -1356,10 +1361,7 @@ canvas.pet {
     var(--surface);
   box-shadow: var(--shadow-card);
 }
-.preview-badge ~ .shell.habit-shell .app-header {
-  padding-top: calc(max(var(--safe-top), 16px) + 10px);
-}
-.shell.habit-shell .segmented.page-tabs {
+.shell.catalog-shell .segmented.page-tabs {
   --segment-radius: var(--r-xl);
   margin-top: 0;
   border-color: var(--glass-edge);
@@ -1367,6 +1369,15 @@ canvas.pet {
     linear-gradient(145deg, var(--panel-glint), transparent 38%),
     var(--surface);
   box-shadow: var(--shadow-card);
+}
+.catalog-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.catalog-strip {
+  gap: var(--space-3);
 }
 
 /* ---------- 习惯：日常表现 / 习惯培养 共用面板 ---------- */
@@ -1393,7 +1404,7 @@ canvas.pet {
 .habit-catalog .section-title small,
 .habit-panel .section-title small,
 .quick-score .section-title small {
-  margin-top: 6px;
+  margin-top: 0;
   line-height: 1.4;
 }
 .habit-catalog > .section-head .icon-button,
@@ -1681,10 +1692,11 @@ canvas.pet {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 36px;
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--r-md);
-  background: var(--surface-2);
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background: var(--surface);
   font-size: var(--fs-sm);
 }
 .score-history-row time {
@@ -1995,17 +2007,30 @@ canvas.pet {
   gap: 2px;
   width: 100%;
   min-width: 0;
-  /* 标题 + 副文案各一行，禁止被行高压缩裁掉第二行。 */
-  min-height: calc(var(--fs-md) * 1.35 + var(--fs-sm, var(--fs-md)) * 1.35 + 2px);
+  /* 标题最多两行 + 副文案一行。 */
+  min-height: calc(var(--fs-md) * 1.35 * 2 + var(--fs-sm, var(--fs-md)) * 1.35 + 2px);
 }
 .goal-card b {
+  display: -webkit-box;
   flex: none;
   max-width: 100%;
   overflow: hidden;
   font-size: var(--fs-md);
   line-height: 1.35;
-  white-space: nowrap;
+  white-space: normal;
   text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.goal-edit {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 3;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
 }
 .goal-card small {
   display: -webkit-box;

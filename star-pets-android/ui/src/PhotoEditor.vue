@@ -132,7 +132,7 @@ onMounted(init);
   ><p class="subtext">拖动画面调整伙伴位置；保存后会生成新照片，不会覆盖原图。</p
   ><label class="field"
     ><span>伙伴大小</span
-    ><input
+    ><input name="scale"
       type="range"
       min="0.15"
       max="0.9"
@@ -188,7 +188,7 @@ onMounted(init);
       ><Icon name="power" /></button
   ></div
   ><label class="field"
-    ><span>合照标题</span><input v-model="caption" maxlength="30" placeholder="写下这一刻" /></label
+    ><span>合照标题</span><input name="caption" v-model="caption" maxlength="30" placeholder="写下这一刻" /></label
   ><footer
     ><button @click="emit('cancel')">取消</button
     ><button

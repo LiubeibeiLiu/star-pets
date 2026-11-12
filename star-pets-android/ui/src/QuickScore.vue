@@ -359,7 +359,7 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
     @submit.prevent="submit"
   >
     <div class="section-head"
-      ><div class="section-title"><h2>日常表现</h2><small>单击记录，长按删除；可自定义添加</small></div
+      ><div class="section-title"><small>单击记录，长按删除；可自定义添加</small></div
       ><button
         type="button"
         class="icon-button"
@@ -474,6 +474,7 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
             ><Icon name="minus" /></button
           ><input
             id="quick-points"
+            name="points"
             v-model.number="points"
             class="num"
             type="number"
@@ -498,7 +499,7 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
             class="score-history-row"
             ><span
               class="tile-icon rule-icon score-history-icon"
-              :class="points > 0 ? 'rule-plus' : 'rule-minus'"
+              :class="e.kind === 'minus' ? 'rule-minus' : 'rule-plus'"
               aria-hidden="true"
               ><img v-if="sheetIcon" :src="sheetIcon" alt="" /><Icon v-else name="star" /></span
             ><time>{{ fmtDay(e.day) + (fmtTime(e) ? ' · ' + fmtTime(e) : '') }}</time
@@ -512,6 +513,7 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
         ><span>补充一句（选填）</span
         ><textarea
           id="quick-note"
+          name="note"
           v-model="note"
           maxlength="300"
           rows="2"
