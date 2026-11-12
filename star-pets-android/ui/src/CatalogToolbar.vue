@@ -23,14 +23,17 @@ const props = withDefaults(
     stickyQuery?: boolean;
     /** 搜索前面再占几列（例如成长足迹的时间范围）。 */
     extraCount?: number;
+    /** 有文案时，在搜索右侧加一格等宽的添加按钮。 */
+    addLabel?: string;
   }>(),
-  { searchPlaceholder: '', stickyQuery: true, extraCount: 0 },
+  { searchPlaceholder: '', stickyQuery: true, extraCount: 0, addLabel: '' },
 );
 
 const emit = defineEmits<{
   'update:filter': [value: string];
   'update:query': [value: string];
   toggle: [open: boolean];
+  add: [];
 }>();
 
 const searchOpen = ref(false);
@@ -41,7 +44,14 @@ const expanded = computed(
 );
 const filterCols = computed(() => Math.max(1, props.options.length));
 const toolbarCols = computed(
-  () => filterCols.value + Math.max(0, props.extraCount) + 1,
+  () =>
+    filterCols.value +
+    Math.max(0, props.extraCount) +
+    1 +
+    (props.addLabel ? 1 : 0),
+);
+const iconSearch = computed(
+  () => toolbarCols.value - (props.addLabel ? 1 : 0) >= 5,
 );
 
 watch(expanded, (open) => emit('toggle', open));
@@ -77,7 +87,8 @@ defineExpose({ openSearch, focus });
     :class="{
       searching: expanded,
       'has-extra': extraCount > 0,
-      'icon-search': toolbarCols >= 5,
+      'has-add': !!addLabel,
+      'icon-search': iconSearch,
     }"
     :style="{
       '--filter-cols': String(filterCols),
@@ -131,6 +142,16 @@ defineExpose({ openSearch, focus });
       >
         <Icon name="search" />
         <span class="catalog-search-label">搜索</span>
+      </button>
+      <button
+        v-if="addLabel"
+        class="catalog-add"
+        type="button"
+        :aria-label="addLabel"
+        :title="addLabel"
+        @click="emit('add')"
+      >
+        <Icon name="plus" />
       </button>
     </div>
     <label

@@ -359,16 +359,6 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
     :class="{ deduction: points < 0 }"
     @submit.prevent="submit"
   >
-    <div class="section-head"
-      ><div class="section-title"><small>单击记录，长按删除；可自定义添加</small></div
-      ><button
-        type="button"
-        class="icon-button"
-        aria-label="自定义日常表现"
-        title="自定义日常表现"
-        @click="emit('add', sign)"
-        ><Icon name="plus" /></button
-    ></div>
     <CatalogToolbar
       ref="toolbarRef"
       :options="[...SCORE_FILTERS]"
@@ -377,7 +367,9 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
       filter-label="记录类型"
       search-label="搜索日常表现"
       search-placeholder="搜索日常表现"
+      add-label="自定义日常表现"
       :sticky-query="false"
+      @add="emit('add', sign)"
     />
     <EmptyState
       v-if="!pageRules.items.length"

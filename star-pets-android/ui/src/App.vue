@@ -3682,16 +3682,6 @@ onBeforeUnmount(() => {
           id="goal-library"
           class="card habit-catalog goals-card"
           ><div class="habit-panel"
-            ><div class="section-head"
-            ><div class="section-title"
-            ><small>单击启停，点右下角编辑，长按删除</small></div
-            ><button
-              class="icon-button"
-              type="button"
-              aria-label="自定义习惯"
-              title="自定义习惯"
-              @click="editGoalTemplate()"
-              ><Icon name="plus" /></button></div
           ><CatalogToolbar
             :options="goalFilterOptions"
             v-model:filter="goalFilter"
@@ -3699,6 +3689,8 @@ onBeforeUnmount(() => {
             filter-label="习惯筛选"
             search-label="搜索习惯"
             search-placeholder="搜索习惯"
+            add-label="自定义习惯"
+            @add="editGoalTemplate()"
           /><EmptyState
             v-if="!filteredGoals.length"
             icon="search"
