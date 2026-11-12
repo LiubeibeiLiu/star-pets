@@ -2152,6 +2152,60 @@ function goalDisplayName(goal: any) {
 function goalPoints(goal: any): number {
   return addedHabitForGoal(goal)?.points || goal.points || 3;
 }
+function goalSchedule(habit: any): string {
+  const freq =
+    habit.frequency === 'weekly'
+      ? '每周'
+      : habit.frequency === 'interval'
+        ? `每${habit.interval || 1}天`
+        : habit.frequency === 'days'
+          ? '指定日'
+          : '每天';
+  const time = (habit.times || [])[0] || '';
+  return time ? `${freq} ${time}` : freq;
+}
+function goalCardMeta(goal: any) {
+  const habit = addedHabitForGoal(goal);
+  if (!habit) return null;
+  const today = dayKey();
+  const count = habitCount(state.value, habit, today);
+  const done = state.value.events.filter(
+    (event: any) =>
+      event.kind === 'plus' &&
+      event.habitId === habit.id &&
+      !isReversed(state.value, event.id),
+  );
+  const weekStart = new Date();
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
+  const atOf = (event: any) =>
+    event.occurredAt ?? event.at ?? Date.parse(event.day + 'T12:00:00');
+  const week = done.filter((event: any) => atOf(event) >= weekStart.getTime()).length;
+  const last = done.reduce((best: any, event: any) => {
+    const at = atOf(event);
+    return !best || at > best.at ? { at, event } : best;
+  }, null);
+  const clock = (habit.times || [])[0] || goalSchedule(habit);
+  const lastClock = last
+    ? `${String(new Date(last.at).getHours()).padStart(2, '0')}:${String(new Date(last.at).getMinutes()).padStart(2, '0')}`
+    : '';
+  const parts = [
+    {
+      icon: 'check',
+      text:
+        (habit.frequency === 'weekly' ? '本周 ' : '今日 ') +
+        count +
+        '/' +
+        habit.target +
+        (habit.frequency === 'weekly' ? '' : ' · 本周 ' + week),
+    },
+    {
+      icon: 'time',
+      text: lastClock ? clock + ' · ' + lastClock : clock,
+    },
+  ];
+  return { parts };
+}
 // B4 计划卡副文案兜底：习惯自带 criteria → 目标库里该计划的描述
 // （内置目标取 hint；自定义模板的 hint 本身就是 criteria || category）
 // → 都没有时用已有字段拼“每天一次 · 19:00”。
@@ -3750,13 +3804,15 @@ onBeforeUnmount(() => {
                 ><span class="goal-card-text"
                   ><b>{{ goalDisplayName(goal) }}</b
                   ><small>{{ goal.hint }}</small></span
+                ><span class="goal-card-meta"
+                  ><template v-if="goalCardMeta(goal)"
+                    ><span
+                      v-for="part in goalCardMeta(goal)?.parts || []"
+                      :key="part.icon + part.text"
+                      ><Icon :name="part.icon" />{{ part.text }}</span
+                    ></template
+                  ><span v-else>未开始</span></span
                 ></button
-              ><button
-                class="goal-edit secondary"
-                type="button"
-                :aria-label="'编辑' + goalDisplayName(goal)"
-                @click="onGoalCardDblClick(goal)"
-                >编辑</button
             ></article
             ><span
               v-for="n in fill(visibleGoals, goalPageSize, goalPage, goalPages)"
