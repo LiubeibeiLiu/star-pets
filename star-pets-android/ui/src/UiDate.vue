@@ -91,7 +91,7 @@ function save() {
     ><div class="two-col"
       ><label class="date-select"
         ><span>年份</span
-        ><select
+        ><select name="year"
           v-model.number="year"
           aria-label="年份"
           @change="day = Math.min(day, days)"
@@ -104,7 +104,7 @@ function save() {
         ></label
       ><label class="date-select"
         ><span>月份</span
-        ><select
+        ><select name="month"
           v-model.number="month"
           aria-label="月份"
           @change="day = Math.min(day, days)"
@@ -132,14 +132,14 @@ function save() {
     ><div v-if="datetime" class="two-col"
       ><label class="date-select"
         ><span>小时</span
-        ><select v-model.number="hour" aria-label="小时"
+        ><select name="hour" v-model.number="hour" aria-label="小时"
           ><option v-for="n in 24" :key="n" :value="n - 1"
             >{{ pad(n - 1) }}时</option
           ></select
         ></label
       ><label class="date-select"
         ><span>分钟</span
-        ><select v-model.number="minute" aria-label="分钟"
+        ><select name="minute" v-model.number="minute" aria-label="分钟"
           ><option v-for="n in 60" :key="n" :value="n - 1"
             >{{ pad(n - 1) }}分</option
           ></select

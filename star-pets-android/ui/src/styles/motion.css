@@ -62,11 +62,13 @@ button.primary:active:not(:disabled),
 
 /* 出现：从触发点放大展开 */
 .plan-menu,
+.goal-more-menu,
 .ui-select-menu,
 .dock-menu {
   animation: grow-in var(--t-base) var(--spring);
 }
-.plan-menu {
+.plan-menu,
+.goal-more-menu {
   transform-origin: calc(100% - 20px) 0;
 }
 dialog[open] {

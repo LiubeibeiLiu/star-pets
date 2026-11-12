@@ -275,7 +275,7 @@ onBeforeUnmount(() => {
       </div>
     </div>
     <div class="field">
-      <textarea
+      <textarea name="draft"
         ref="draftArea"
         v-model="draft"
         :aria-label="

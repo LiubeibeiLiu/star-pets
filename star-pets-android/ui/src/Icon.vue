@@ -15,6 +15,7 @@ import Back from '@mingcute/icons/core-regular/arrow-left';
 import Forward from '@mingcute/icons/core-regular/arrow-right';
 import Plus from '@mingcute/icons/core-regular/add';
 import Minus from '@mingcute/icons/core-regular/minus-circle';
+import Grid from '@mingcute/icons/core-regular/grid';
 import Close from '@mingcute/icons/core-regular/close';
 import Check from '@mingcute/icons/core-regular/check';
 import Mic from '@mingcute/icons/core-regular/mic';
@@ -72,6 +73,7 @@ const icons: Record<string, IconDefinition> = {
   forward: Forward,
   plus: Plus,
   minus: Minus,
+  grid: Grid,
   close: Close,
   check: Check,
   mic: Mic,

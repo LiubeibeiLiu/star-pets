@@ -1,11 +1,9 @@
 // 目标库每页卡片数动态计算（纯函数，可单测）。
-// 思路与日常表现 score-layout 一致：先保证底部滑点完整可见，
-// 剩余高度按行等分给 2 列卡片网格；行高不得低于内容触控下限。
-import { computeScoreLayout } from './score-layout.js';
+// 这里的行高只用来估算一屏能放几行；卡片实际高度由内容决定，同一行取较高的那张。
 
 export const GOAL_COLS = 2;
-// 图标 40 + 内边距 16 + 间距 6 + 标题/副文案两行，保证第二行不被裁切。
-export const GOAL_ROW_MIN = 112;
+// 图标行 44 + 内边距 + 标题、说明和一行进度，用来估算分页，不写进卡片高度。
+export const GOAL_ROW_MIN = 128;
 export const GOAL_ROWS_MIN = 2;
 export const GOAL_ROWS_MAX = 5;
 export const GOAL_ROW_GAP = 12; // = --space-3
@@ -13,7 +11,7 @@ export const GOAL_ROW_GAP = 12; // = --space-3
 /** @type {{ rows: number, rowHeight: number, pageSize: number }} */
 export const GOAL_FALLBACK = Object.freeze({
   rows: 3,
-  rowHeight: 120,
+  rowHeight: 128,
   pageSize: 6,
 });
 
@@ -35,18 +33,17 @@ export function computeGoalLayout({
 } = {}) {
   if (!Number.isFinite(chipsTop) || !Number.isFinite(safeBottom))
     return { ...GOAL_FALLBACK };
-  const { rows, rowHeight } = computeScoreLayout({
-    chipsTop,
-    safeBottom,
-    dotsReserve,
-    rowGap,
-    minRow,
+  const columns = Math.max(1, cols | 0 || GOAL_COLS);
+  const available = safeBottom - chipsTop - dotsReserve;
+  if (!(available > 0))
+    return {
+      rows: minRows,
+      rowHeight: minRow,
+      pageSize: minRows * columns,
+    };
+  const rows = Math.max(
     minRows,
-    maxRows,
-  });
-  return {
-    rows,
-    rowHeight,
-    pageSize: rows * Math.max(1, cols | 0 || GOAL_COLS),
-  };
+    Math.min(maxRows, Math.floor((available + rowGap) / (minRow + rowGap))),
+  );
+  return { rows, rowHeight: minRow, pageSize: rows * columns };
 }

@@ -17,6 +17,7 @@ const emit = defineEmits<{
   clear: [];
 }>();
 const input = ref<HTMLInputElement>();
+const fieldId = `search-field-${Math.random().toString(36).slice(2, 8)}`;
 function update(event: Event) {
   emit('update:modelValue', (event.target as HTMLInputElement).value);
   emit('input');
@@ -33,7 +34,7 @@ defineExpose({ focus });
 </script>
 
 <template>
-  <label class="search-field" :aria-label="label || placeholder">
+  <label class="search-field" :aria-label="label || placeholder" :for="fieldId">
     <button
       v-if="props.modelValue"
       type="button"
@@ -46,6 +47,8 @@ defineExpose({ focus });
     <Icon v-else class="search-leading-icon" name="search" />
     <input
       ref="input"
+      :id="fieldId"
+      :name="fieldId"
       :value="props.modelValue"
       :placeholder="placeholder"
       :aria-label="label || placeholder"

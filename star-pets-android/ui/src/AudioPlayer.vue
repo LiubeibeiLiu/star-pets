@@ -86,7 +86,7 @@ onBeforeUnmount(() => audio.value?.pause());
             :class="{ heard: duration > 0 && n / 36 <= current / duration }"
             :style="{ '--wave-index': n }"
           ></i></span
-        ><input
+        ><input name="input"
           class="audio-seek"
           type="range"
           min="0"

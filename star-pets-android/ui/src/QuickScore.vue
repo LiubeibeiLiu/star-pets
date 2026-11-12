@@ -2,6 +2,7 @@
 import UiDate from './UiDate.vue';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import Icon from './Icon.vue';
+import EmptyState from './EmptyState.vue';
 import Pager from './Pager.vue';
 import CatalogToolbar from './CatalogToolbar.vue';
 import { rulePage } from './companion.js';
@@ -358,16 +359,6 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
     :class="{ deduction: points < 0 }"
     @submit.prevent="submit"
   >
-    <div class="section-head"
-      ><div class="section-title"><h2>日常表现</h2><small>单击记录，长按删除；可自定义添加</small></div
-      ><button
-        type="button"
-        class="icon-button"
-        aria-label="自定义日常表现"
-        title="自定义日常表现"
-        @click="emit('add', sign)"
-        ><Icon name="plus" /></button
-    ></div>
     <CatalogToolbar
       ref="toolbarRef"
       :options="[...SCORE_FILTERS]"
@@ -376,9 +367,35 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
       filter-label="记录类型"
       search-label="搜索日常表现"
       search-placeholder="搜索日常表现"
+      add-label="自定义日常表现"
       :sticky-query="false"
+      @add="emit('add', sign)"
+    />
+    <EmptyState
+      v-if="!pageRules.items.length"
+      :icon="reason.trim() ? 'search' : 'star'"
+      :icon3d="
+        reason.trim()
+          ? icon3d('pick-search.png')
+          : icon3d(points < 0 ? 'minus-warning.png' : 'record-star.png')
+      "
+      :title="
+        reason.trim()
+          ? '没有匹配的表现'
+          : points < 0
+            ? '还没有减分的常用表现'
+            : '还没有加分的常用表现'
+      "
+      :hint="
+        reason.trim()
+          ? '换个关键词，或记下这次输入'
+          : '先加一条，之后点一下就能记下'
+      "
+      :action="reason.trim() ? '' : '自定义添加'"
+      @action="emit('add', sign)"
     />
     <Pager
+      v-else
       label="常用表现分页"
       previous-label="常用表现上一页"
       next-label="常用表现下一页"
@@ -409,14 +426,6 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
           ><img v-if="ruleIcon3d(r)" :src="ruleIcon3d(r)" alt="" /><Icon v-else name="star" /></span
         ><span>{{ r.name }}</span
         ><b class="num">{{ r.points > 0 ? '+' : '' }}{{ r.points }}</b></button
-      ><p v-if="!pageRules.items.length" class="rule-chips-empty"
-        ><Icon name="information" />{{
-          reason.trim()
-            ? '没有匹配项，将按你输入的内容记录'
-            : points < 0
-              ? '还没有减分的常用表现'
-              : '还没有加分的常用表现'
-        }}</p
       ></div
     ></Pager>
     <button
@@ -474,6 +483,7 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
             ><Icon name="minus" /></button
           ><input
             id="quick-points"
+            name="points"
             v-model.number="points"
             class="num"
             type="number"
@@ -498,7 +508,7 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
             class="score-history-row"
             ><span
               class="tile-icon rule-icon score-history-icon"
-              :class="points > 0 ? 'rule-plus' : 'rule-minus'"
+              :class="e.kind === 'minus' ? 'rule-minus' : 'rule-plus'"
               aria-hidden="true"
               ><img v-if="sheetIcon" :src="sheetIcon" alt="" /><Icon v-else name="star" /></span
             ><time>{{ fmtDay(e.day) + (fmtTime(e) ? ' · ' + fmtTime(e) : '') }}</time
@@ -512,6 +522,7 @@ defineExpose({ reset, showRule, openSearch, focus: openSearch });
         ><span>补充一句（选填）</span
         ><textarea
           id="quick-note"
+          name="note"
           v-model="note"
           maxlength="300"
           rows="2"
